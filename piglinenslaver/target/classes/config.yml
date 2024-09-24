@@ -1,0 +1,4 @@
+# Configuración de curación para Piglins zombificados
+minCures: 4
+maxCures: 8
+piglins:

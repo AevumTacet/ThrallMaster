@@ -1,0 +1,6 @@
+name: PiglinEnslaver
+version: 1.0.0
+description: Bring back a Piglin and he will serve you till death.
+author: Telwa
+main: com.piglinenslaver.Main
+api-version: 1.21.1
