@@ -1,14 +1,13 @@
 package com.piglinenslaver;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
 
    public static Main plugin; // Mantener referencia estática al plugin
    public static FileConfiguration config; // Mantener referencia estática a la configuración
-   public static PiglinFollow piglinFollow; // Instancia de PiglinFollow
+   public static PiglinManager manager; // Instancia de PiglinFollow
 
    @Override
    public void onEnable() {
@@ -17,11 +16,11 @@ public class Main extends JavaPlugin {
        config = getConfig(); // Referencia estática al archivo de configuración
 
        // Instanciar PiglinFollow
-       piglinFollow = new PiglinFollow();
+       manager = new PiglinManager();
 
        // Registrar eventos, solo una vez
        this.getServer().getPluginManager().registerEvents(new Events(), this);
-       this.getServer().getPluginManager().registerEvents(piglinFollow, this); // Registrar PiglinFollow también
+       this.getServer().getPluginManager().registerEvents(manager, this); // Registrar PiglinFollow también
 
        // Mensaje en consola cuando se habilita el plugin
        getLogger().info("Piglin Enslaver plugin enabled.");
@@ -36,9 +35,7 @@ public class Main extends JavaPlugin {
 
   // Método estático para recargar la configuración del plugin
   public static void reload() {
-     // Recarga la configuración
      plugin.reloadConfig();
-     // Actualiza la variable de configuración con la nueva configuración
      config = plugin.getConfig();
   }
 }

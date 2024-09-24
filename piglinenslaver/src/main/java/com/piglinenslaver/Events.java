@@ -1,15 +1,10 @@
 package com.piglinenslaver;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.UUID;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Particle;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Piglin; // Cambiado de PigZombie a Piglin
 import org.bukkit.entity.Player;
@@ -37,28 +32,6 @@ public class Events implements Listener {
     // Método para obtener el UUID del dueño de un Piglin
     public UUID getOwnerUUID(UUID piglinUUID) {
         return piglinOwners.get(piglinUUID);
-    }
-
-    // Método para obtener una entidad por su UUID
-    private Entity getEntityByUniqueId(UUID uniqueId) {
-        Iterator<World> var2 = Bukkit.getWorlds().iterator();
-        while (var2.hasNext()) {
-            World world = var2.next();
-            Chunk[] var4 = world.getLoadedChunks();
-            int var5 = var4.length;
-            for (int var6 = 0; var6 < var5; ++var6) {
-                Chunk chunk = var4[var6];
-                Entity[] var8 = chunk.getEntities();
-                int var9 = var8.length;
-                for (int var10 = 0; var10 < var9; ++var10) {
-                    Entity entity = var8[var10];
-                    if (entity.getUniqueId().toString().equals(uniqueId.toString())) {
-                        return entity;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     // Evento que se activa al lanzar una poción a un PigZombie
@@ -96,9 +69,8 @@ public class Events implements Listener {
                         Main.config.set(piglinPath + ".owner", thrower.getUniqueId().toString());
                         Main.plugin.saveConfig(); // Guarda en la configuración
 
-                        // Hacer que el Piglin siga al jugador
-                        Main.piglinFollow.followPiglin(tamedPiglin, thrower); // Invoca el método followPiglin correctamente
-
+                        // Registrar al piglin como domesticado
+                        Main.manager.setOwner(tamedPiglin, thrower);
                         thrower.sendMessage("Your Piglin has been tamed!");
                         
                         // Remueve al PigZombie del mapa de curaciones
@@ -124,11 +96,5 @@ public class Events implements Listener {
                 Main.plugin.saveConfig(); // Guarda la configuración actualizada
             }
         }
-    }
-
-    // Método que comprueba si el jugador es el dueño del Piglin
-    private boolean isOwner(Player player, Mob piglin) {
-        UUID ownerUUID = getOwnerUUID(piglin.getUniqueId()); // Obtener el UUID del dueño del Piglin
-        return player.getUniqueId().equals(ownerUUID);
     }
 }
