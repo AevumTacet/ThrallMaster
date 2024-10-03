@@ -6,42 +6,42 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
-import org.bukkit.entity.Piglin;
+import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.entity.Player;
 
-public class PiglinUtils {
+public class ThrallUtils {
     public static double searchRadius = 10.0;
 
-    public static <T extends LivingEntity> LivingEntity findNearestEntity(Piglin piglin) 
+    public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity entity) 
     {
-        return findNearestEntity(piglin, Monster.class);
+        return findNearestEntity(entity, Monster.class);
     }
 
-    public static <T extends LivingEntity> LivingEntity findNearestEntity(Piglin piglin, Class<T> filterClass) 
+    public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity entity, Class<T> filterClass) 
     {
-        PiglinState state = Main.manager.getPiglin(piglin.getUniqueId());
+        ThrallState state = Main.manager.getThrall(entity.getUniqueId());
         Player owner = state.owner;
-        Location location = piglin.getLocation();
+        Location location = entity.getLocation();
 
         LivingEntity closestEntity = null;
         double closestDistanceSquared = Double.MAX_VALUE;
 
-        Collection<Entity> nearbyEntities = piglin.getWorld().getNearbyEntities(location, searchRadius, searchRadius, searchRadius);
-        for (Entity entity : nearbyEntities) {
-            if (!(entity instanceof LivingEntity))
+        Collection<Entity> nearbyEntities = entity.getWorld().getNearbyEntities(location, searchRadius, searchRadius, searchRadius);
+        for (Entity candidate : nearbyEntities) {
+            if (!(candidate instanceof LivingEntity))
                 continue;
-            var livingEntity = (LivingEntity) entity;
+            var livingEntity = (LivingEntity) candidate;
 
-            // No atacar al dueño del Piglin
+            // No atacar al dueño del WitherSkeleton
             // Evitar que ataque a otros Piglins domesticados del mismo dueño
             if ((livingEntity instanceof Player) && (livingEntity.equals(owner))) 
             {
                 continue;
             }
 
-            if ((livingEntity instanceof Piglin))
+            if ((livingEntity instanceof WitherSkeleton))
             {
-                PiglinState otherState = Main.manager.getPiglin(livingEntity.getUniqueId());
+                ThrallState otherState = Main.manager.getThrall(livingEntity.getUniqueId());
                 if (state.isSameOwner(otherState))
                 {
                     continue;
@@ -50,7 +50,7 @@ public class PiglinUtils {
 
             // Verificar si es una entidad hostil (puedes personalizar esto con las condiciones que prefieras)
             if ((filterClass.isAssignableFrom(livingEntity.getClass())) || livingEntity instanceof Player) {
-                // Calcular la distancia entre el Piglin y la entidad actual
+                // Calcular la distancia entre el WitherSkeleton y la entidad actual
                 double distanceSquared = location.distanceSquared(livingEntity.getLocation());
                 
                 // Si esta entidad es la más cercana, actualizar la referencia

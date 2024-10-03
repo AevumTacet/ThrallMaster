@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 import com.piglinenslaver.Behavior.Behavior;
 
-public class PiglinState
+public class ThrallState
 {
     public Player owner;
     public long lastToggleTime;
@@ -15,7 +15,7 @@ public class PiglinState
     
     public LivingEntity target;
     
-    public PiglinState(Player owner) {
+    public ThrallState(Player owner) {
         this.owner = owner;
         this.lastToggleTime = 0;
         this.m_AggressionState = AggressionState.DEFENSIVE;
@@ -52,7 +52,7 @@ public class PiglinState
         }
     }
 
-    public boolean isSameOwner(PiglinState state) {
+    public boolean isSameOwner(ThrallState state) {
         if (state == null)
         {
             return false;

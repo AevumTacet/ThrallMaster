@@ -5,16 +5,16 @@ import org.bukkit.Material;
 import org.bukkit.entity.*;
 
 import com.piglinenslaver.AggressionState;
-import com.piglinenslaver.PiglinState;
-import com.piglinenslaver.PiglinUtils;
+import com.piglinenslaver.ThrallState;
+import com.piglinenslaver.ThrallUtils;
 
 public class IdleBehavior extends Behavior {
     
     public Location startLocation;
 
-    public IdleBehavior(Piglin piglin, PiglinState state) {
-        super(piglin, state);
-        this.startLocation = piglin.getLocation();
+    public IdleBehavior(WitherSkeleton entity, ThrallState state) {
+        super(entity, state);
+        this.startLocation = entity.getLocation();
     }
 
     @Override
@@ -25,24 +25,24 @@ public class IdleBehavior extends Behavior {
     
     @Override
     public void onBehaviorStart() {
-        piglin.setAI(true);
+        entity.setAI(true);
     }
 
     @Override
     public void onBehaviorTick() {
-        double distance = piglin.getLocation().distance(startLocation);
+        double distance = entity.getLocation().distance(startLocation);
 
         if (distance > 4)
         {
-            piglin.getPathfinder().moveTo(startLocation, 0.7);
+            entity.getPathfinder().moveTo(startLocation, 0.7);
         }
 
         if (state.getAggressionState() == AggressionState.HOSTILE)
         {
-            LivingEntity nearestEntity = PiglinUtils.findNearestEntity(piglin);
+            LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
             {
-                state.setBehavior(new HostileBehavior(piglin, state, this));
+                state.setBehavior(new HostileBehavior(entity, state, this));
             } 
         }
     }
@@ -51,7 +51,7 @@ public class IdleBehavior extends Behavior {
     public void onBehaviorInteract(Material material) {
         if (material == Material.AIR)
         {
-            state.setBehavior(new FollowBehavior(piglin, state));
+            state.setBehavior(new FollowBehavior(entity, state));
         }
 
         if (material.toString().endsWith("_SWORD"))
@@ -68,7 +68,7 @@ public class IdleBehavior extends Behavior {
                         break;
                 }
                 
-                state.owner.sendMessage("El Piglin está en estado: " + state.getAggressionState());
+                state.owner.sendMessage("El WitherSkeleton está en estado: " + state.getAggressionState());
         }
     }
     

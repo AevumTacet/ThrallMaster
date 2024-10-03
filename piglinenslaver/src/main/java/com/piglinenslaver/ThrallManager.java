@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Piglin;
+import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,41 +21,41 @@ import com.piglinenslaver.Behavior.IdleBehavior;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class PiglinManager implements Listener {
+public class ThrallManager implements Listener {
 
-    private HashMap<UUID, PiglinState> trackedPiglins = new HashMap<>();
+    private HashMap<UUID, ThrallState> trackedEntities = new HashMap<>();
 
-    public PiglinManager() {
+    public ThrallManager() {
         entityBehaviorTask();
     }
 
-    public void register(Piglin piglin, Player owner) {
-        PiglinState state = new PiglinState(owner);
-        state.setBehavior(new FollowBehavior(piglin, state));
-        trackedPiglins.put(piglin.getUniqueId(), state);
+    public void register(WitherSkeleton entity, Player owner) {
+        ThrallState state = new ThrallState(owner);
+        state.setBehavior(new FollowBehavior(entity, state));
+        trackedEntities.put(entity.getUniqueId(), state);
     }
 
-    public void unregister(UUID piglinID) {
-        System.out.println("Unregistering piglin entity with UUID: " + piglinID);
-        trackedPiglins.remove(piglinID);
+    public void unregister(UUID entityID) {
+        System.out.println("Unregistering entity entity with UUID: " + entityID);
+        trackedEntities.remove(entityID);
     }
 
-    public PiglinState getPiglin(UUID piglinID)
+    public ThrallState getThrall(UUID entityID)
     {
-        return this.trackedPiglins.getOrDefault(piglinID, null);
+        return this.trackedEntities.getOrDefault(entityID, null);
     }
     // Tarea recurrente que actualiza el seguimiento de Piglins y el estado de ataque cada 10 ticks
     private void entityBehaviorTask() {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (UUID piglinId : trackedPiglins.keySet()) {
-                    Piglin piglin = (Piglin) getEntityByUniqueId(piglinId);
-                    PiglinState state = trackedPiglins.get(piglinId);
+                for (UUID entityID : trackedEntities.keySet()) {
+                    WitherSkeleton entity = (WitherSkeleton) getEntityByUniqueId(entityID);
+                    ThrallState state = trackedEntities.get(entityID);
 
-                    if (piglin == null || state == null || state.owner == null)
+                    if (entity == null || state == null || state.owner == null)
                     {
-                        unregister(piglinId);
+                        unregister(entityID);
                         continue;
                     }
 
@@ -69,18 +69,18 @@ public class PiglinManager implements Listener {
         }.runTaskTimer(Main.plugin, 0, 10); // Se ejecuta cada 10 ticks
     }
 
-    // Evento que maneja la interacción con un Piglin para alternar entre estados FOLLOW e IDLE
+    // Evento que maneja la interacción con un WitherSkeleton para alternar entre estados FOLLOW e IDLE
     @EventHandler
     public void onPiglinInteract(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked() instanceof Piglin) {
-            Piglin piglin = (Piglin) event.getRightClicked();
+        if (event.getRightClicked() instanceof WitherSkeleton) {
+            WitherSkeleton entity = (WitherSkeleton) event.getRightClicked();
             Player player = event.getPlayer();
             Material itemType = player.getInventory().getItemInMainHand().getType();
             
-            UUID piglinId = piglin.getUniqueId();
-            if (!trackedPiglins.containsKey(piglinId))
+            UUID entityID = entity.getUniqueId();
+            if (!trackedEntities.containsKey(entityID))
                 return;
-            PiglinState state = trackedPiglins.get(piglinId);
+            ThrallState state = trackedEntities.get(entityID);
             
             // Prevenir cambios rápidos con un cooldown de medio segundo
             long currentTime = System.currentTimeMillis();
@@ -97,33 +97,33 @@ public class PiglinManager implements Listener {
         Entity damaged = event.getEntity();
         Entity attacker = event.getDamager();
 
-        // Si el dañado es un Piglin domesticado
-        if (damaged instanceof Piglin && trackedPiglins.containsKey(damaged.getUniqueId())) {
-            Piglin piglin = (Piglin) damaged;
-            PiglinState state = trackedPiglins.get(piglin.getUniqueId());
+        // Si el dañado es un WitherSkeleton domesticado
+        if (damaged instanceof WitherSkeleton && trackedEntities.containsKey(damaged.getUniqueId())) {
+            WitherSkeleton entity = (WitherSkeleton) damaged;
+            ThrallState state = trackedEntities.get(entity.getUniqueId());
             Player owner = state.owner;
 
-            // Verificar que el Piglin tiene un dueño y que el atacante no es el dueño
+            // Verificar que el WitherSkeleton tiene un dueño y que el atacante no es el dueño
             if (attacker != owner) {
-                // Si el atacante es otro Piglin domesticado con el mismo dueño, no hacer nada
-                if (attacker instanceof Piglin && isSameOwner((Piglin) attacker, owner)) {
+                // Si el atacante es otro WitherSkeleton domesticado con el mismo dueño, no hacer nada
+                if (attacker instanceof WitherSkeleton && isSameOwner((WitherSkeleton) attacker, owner)) {
                     return;
                 }
                 state.setAttackMode(attacker);
             }
         }
 
-        // Si el dañado es el dueño del Piglin
+        // Si el dañado es el dueño del WitherSkeleton
         if (damaged instanceof Player) {
             Player player = (Player) damaged;
 
-            for (UUID piglinId : trackedPiglins.keySet()) {
-                if (trackedPiglins.get(piglinId).owner.equals(player)) {
+            for (UUID entityID : trackedEntities.keySet()) {
+                if (trackedEntities.get(entityID).owner.equals(player)) {
                     
-                    Piglin piglin = (Piglin) getEntityByUniqueId(piglinId);
-                    PiglinState state = trackedPiglins.get(piglinId);
+                    WitherSkeleton entity = (WitherSkeleton) getEntityByUniqueId(entityID);
+                    ThrallState state = trackedEntities.get(entityID);
 
-                    if (piglin != null && attacker != piglin) 
+                    if (entity != null && attacker != entity) 
                     {
                         state.setAttackMode(attacker);
                     }
@@ -132,15 +132,15 @@ public class PiglinManager implements Listener {
         }
     }
 
-    // Evento que se activa cuando un Piglin muere U otras entidades a manos del piglin
+    // Evento que se activa cuando un WitherSkeleton muere U otras entidades a manos del entity
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
 
-        if (entity instanceof Piglin) 
+        if (entity instanceof WitherSkeleton) 
         {
-            UUID piglinId = entity.getUniqueId();
-            String pstr = "piglins." + piglinId.toString();
+            UUID entityID = entity.getUniqueId();
+            String pstr = "piglins." + entityID.toString();
 
             if (Main.config.contains(pstr)) {
                 Player owner = Bukkit.getPlayer(UUID.fromString(Main.config.getString(pstr + ".owner")));
@@ -150,25 +150,25 @@ public class PiglinManager implements Listener {
                 Main.config.set(pstr, null);
                 Main.plugin.saveConfig();
 
-                unregister(piglinId);
+                unregister(entityID);
             }
         }
         // Make it forget
         else
         {
             Entity source = event.getDamageSource().getDirectEntity();
-            if (!(source instanceof Piglin))
+            if (!(source instanceof WitherSkeleton))
                 return;
           
-            UUID piglinId = source.getUniqueId();
-            if (trackedPiglins.containsKey(piglinId))
+            UUID entityID = source.getUniqueId();
+            if (trackedEntities.containsKey(entityID))
             {
-                PiglinState state = trackedPiglins.get(piglinId);
+                ThrallState state = trackedEntities.get(entityID);
                 if (state.target.equals(entity))
                 {
                     state.setAttackMode(null);
                     state.target = null;
-                    state.setBehavior(new IdleBehavior((Piglin) source, state));
+                    state.setBehavior(new IdleBehavior((WitherSkeleton) source, state));
                 }
             }
 
@@ -184,12 +184,12 @@ public class PiglinManager implements Listener {
         if (target == null)
             return;
         
-        if (caller instanceof Piglin)
+        if (caller instanceof WitherSkeleton)
         {
-            Piglin piglin = (Piglin)caller;
-            UUID piglinId = piglin.getUniqueId();
+            WitherSkeleton entity = (WitherSkeleton)caller;
+            UUID entityID = entity.getUniqueId();
             
-            if (trackedPiglins.get(piglinId).owner.equals(target)) {
+            if (trackedEntities.get(entityID).owner.equals(target)) {
                 event.setCancelled(true);
             }
         }
@@ -208,8 +208,8 @@ public class PiglinManager implements Listener {
     }
 
     // Verificar si dos Piglins tienen el mismo dueño
-    public boolean isSameOwner(Piglin piglin, Player owner) {
-        PiglinState state = trackedPiglins.get(piglin.getUniqueId());
+    public boolean isSameOwner(WitherSkeleton entity, Player owner) {
+        ThrallState state = trackedEntities.get(entity.getUniqueId());
         return state != null && state.owner.equals(owner);
     }
 }

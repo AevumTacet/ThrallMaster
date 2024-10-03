@@ -1,16 +1,16 @@
 package com.piglinenslaver.Behavior;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Piglin;
+import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.entity.Player;
 
 import com.piglinenslaver.Main;
-import com.piglinenslaver.PiglinState;
+import com.piglinenslaver.ThrallState;
 
 public class FollowBehavior extends Behavior {
 
-    public FollowBehavior(Piglin piglin, PiglinState state) {
-        super(piglin, state);
+    public FollowBehavior(WitherSkeleton entity, ThrallState state) {
+        super(entity, state);
     }
 
     @Override
@@ -23,22 +23,22 @@ public class FollowBehavior extends Behavior {
         double maxDistance = Main.config.getDouble("maxFollowDistance", 20.0);
         Player owner = state.owner;
         
-        double distance = piglin.getLocation().distance(owner.getLocation());
+        double distance = entity.getLocation().distance(owner.getLocation());
         double speed = distance < maxDistance / 3 ? 0.7 : 1.0;
         
         if (distance < minDistance / 2) 
         {
-            piglin.setAI(true);
+            entity.setAI(true);
             return;
         } 
         else if (distance > maxDistance) 
         {
-            piglin.teleport(owner.getLocation());
+            entity.teleport(owner.getLocation());
         } 
         else 
         {
-            piglin.lookAt(owner);
-            piglin.getPathfinder().moveTo(owner.getLocation(), speed);
+            entity.lookAt(owner);
+            entity.getPathfinder().moveTo(owner.getLocation(), speed);
         }
     }
 
@@ -51,7 +51,7 @@ public class FollowBehavior extends Behavior {
     public void onBehaviorInteract(Material material) {
         if (material == Material.AIR)
         {
-            state.setBehavior(new IdleBehavior(piglin, state));
+            state.setBehavior(new IdleBehavior(entity, state));
         }
     }
     
