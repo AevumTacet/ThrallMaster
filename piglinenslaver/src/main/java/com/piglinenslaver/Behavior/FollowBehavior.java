@@ -1,7 +1,7 @@
 package com.piglinenslaver.Behavior;
 
 import org.bukkit.Material;
-import org.bukkit.entity.WitherSkeleton;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Player;
 
 import com.piglinenslaver.Main;
@@ -9,7 +9,7 @@ import com.piglinenslaver.ThrallState;
 
 public class FollowBehavior extends Behavior {
 
-    public FollowBehavior(WitherSkeleton entity, ThrallState state) {
+    public FollowBehavior(Skeleton entity, ThrallState state) {
         super(entity, state);
     }
 

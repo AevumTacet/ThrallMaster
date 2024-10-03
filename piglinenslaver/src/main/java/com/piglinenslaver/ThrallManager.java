@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.WitherSkeleton;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +29,7 @@ public class ThrallManager implements Listener {
         entityBehaviorTask();
     }
 
-    public void register(WitherSkeleton entity, Player owner) {
+    public void register(Skeleton entity, Player owner) {
         ThrallState state = new ThrallState(owner);
         state.setBehavior(new FollowBehavior(entity, state));
         trackedEntities.put(entity.getUniqueId(), state);
@@ -50,7 +50,7 @@ public class ThrallManager implements Listener {
             @Override
             public void run() {
                 for (UUID entityID : trackedEntities.keySet()) {
-                    WitherSkeleton entity = (WitherSkeleton) getEntityByUniqueId(entityID);
+                    Skeleton entity = (Skeleton) getEntityByUniqueId(entityID);
                     ThrallState state = trackedEntities.get(entityID);
 
                     if (entity == null || state == null || state.owner == null)
@@ -69,11 +69,11 @@ public class ThrallManager implements Listener {
         }.runTaskTimer(Main.plugin, 0, 10); // Se ejecuta cada 10 ticks
     }
 
-    // Evento que maneja la interacción con un WitherSkeleton para alternar entre estados FOLLOW e IDLE
+    // Evento que maneja la interacción con un Skeleton para alternar entre estados FOLLOW e IDLE
     @EventHandler
     public void onPiglinInteract(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked() instanceof WitherSkeleton) {
-            WitherSkeleton entity = (WitherSkeleton) event.getRightClicked();
+        if (event.getRightClicked() instanceof Skeleton) {
+            Skeleton entity = (Skeleton) event.getRightClicked();
             Player player = event.getPlayer();
             Material itemType = player.getInventory().getItemInMainHand().getType();
             
@@ -97,30 +97,30 @@ public class ThrallManager implements Listener {
         Entity damaged = event.getEntity();
         Entity attacker = event.getDamager();
 
-        // Si el dañado es un WitherSkeleton domesticado
-        if (damaged instanceof WitherSkeleton && trackedEntities.containsKey(damaged.getUniqueId())) {
-            WitherSkeleton entity = (WitherSkeleton) damaged;
+        // Si el dañado es un Skeleton domesticado
+        if (damaged instanceof Skeleton && trackedEntities.containsKey(damaged.getUniqueId())) {
+            Skeleton entity = (Skeleton) damaged;
             ThrallState state = trackedEntities.get(entity.getUniqueId());
             Player owner = state.owner;
 
-            // Verificar que el WitherSkeleton tiene un dueño y que el atacante no es el dueño
+            // Verificar que el Skeleton tiene un dueño y que el atacante no es el dueño
             if (attacker != owner) {
-                // Si el atacante es otro WitherSkeleton domesticado con el mismo dueño, no hacer nada
-                if (attacker instanceof WitherSkeleton && isSameOwner((WitherSkeleton) attacker, owner)) {
+                // Si el atacante es otro Skeleton domesticado con el mismo dueño, no hacer nada
+                if (attacker instanceof Skeleton && isSameOwner((Skeleton) attacker, owner)) {
                     return;
                 }
                 state.setAttackMode(attacker);
             }
         }
 
-        // Si el dañado es el dueño del WitherSkeleton
+        // Si el dañado es el dueño del Skeleton
         if (damaged instanceof Player) {
             Player player = (Player) damaged;
 
             for (UUID entityID : trackedEntities.keySet()) {
                 if (trackedEntities.get(entityID).owner.equals(player)) {
                     
-                    WitherSkeleton entity = (WitherSkeleton) getEntityByUniqueId(entityID);
+                    Skeleton entity = (Skeleton) getEntityByUniqueId(entityID);
                     ThrallState state = trackedEntities.get(entityID);
 
                     if (entity != null && attacker != entity) 
@@ -132,12 +132,12 @@ public class ThrallManager implements Listener {
         }
     }
 
-    // Evento que se activa cuando un WitherSkeleton muere U otras entidades a manos del entity
+    // Evento que se activa cuando un Skeleton muere U otras entidades a manos del entity
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
 
-        if (entity instanceof WitherSkeleton) 
+        if (entity instanceof Skeleton) 
         {
             UUID entityID = entity.getUniqueId();
             String pstr = "piglins." + entityID.toString();
@@ -157,7 +157,7 @@ public class ThrallManager implements Listener {
         else
         {
             Entity source = event.getDamageSource().getDirectEntity();
-            if (!(source instanceof WitherSkeleton))
+            if (!(source instanceof Skeleton))
                 return;
           
             UUID entityID = source.getUniqueId();
@@ -168,7 +168,7 @@ public class ThrallManager implements Listener {
                 {
                     state.setAttackMode(null);
                     state.target = null;
-                    state.setBehavior(new IdleBehavior((WitherSkeleton) source, state));
+                    state.setBehavior(new IdleBehavior((Skeleton) source, state));
                 }
             }
 
@@ -184,9 +184,9 @@ public class ThrallManager implements Listener {
         if (target == null)
             return;
         
-        if (caller instanceof WitherSkeleton)
+        if (caller instanceof Skeleton)
         {
-            WitherSkeleton entity = (WitherSkeleton)caller;
+            Skeleton entity = (Skeleton)caller;
             UUID entityID = entity.getUniqueId();
             
             if (trackedEntities.get(entityID).owner.equals(target)) {
@@ -208,7 +208,7 @@ public class ThrallManager implements Listener {
     }
 
     // Verificar si dos Piglins tienen el mismo dueño
-    public boolean isSameOwner(WitherSkeleton entity, Player owner) {
+    public boolean isSameOwner(Skeleton entity, Player owner) {
         ThrallState state = trackedEntities.get(entity.getUniqueId());
         return state != null && state.owner.equals(owner);
     }

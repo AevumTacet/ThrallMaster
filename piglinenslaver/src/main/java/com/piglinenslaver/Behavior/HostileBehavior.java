@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.WitherSkeleton;
+import org.bukkit.entity.Skeleton;
 import com.piglinenslaver.ThrallState;
 import com.piglinenslaver.ThrallUtils;
 
@@ -12,7 +12,7 @@ public class HostileBehavior extends Behavior {
 
     private long startTime;
     private Behavior prevBehavior;
-    public HostileBehavior(WitherSkeleton entity, ThrallState state, Behavior prevBehavior) {
+    public HostileBehavior(Skeleton entity, ThrallState state, Behavior prevBehavior) {
         super(entity, state);
         this.prevBehavior = prevBehavior;
     }
@@ -44,7 +44,7 @@ public class HostileBehavior extends Behavior {
         long currentTime = System.currentTimeMillis();
         if ((state.target == null || !state.target.isValid()) || (currentTime - startTime < 12 * 1000) )
         {
-            System.out.println("WitherSkeleton target is " + state.target + ". Forgetting and returning to previous state.");
+            System.out.println("Skeleton target is " + state.target + ". Forgetting and returning to previous state.");
             state.setBehavior(prevBehavior);
             state.target = null;
             this.startTime = currentTime;

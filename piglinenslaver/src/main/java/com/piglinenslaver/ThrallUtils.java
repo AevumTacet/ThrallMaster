@@ -6,7 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
-import org.bukkit.entity.WitherSkeleton;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Player;
 
 public class ThrallUtils {
@@ -32,14 +32,14 @@ public class ThrallUtils {
                 continue;
             var livingEntity = (LivingEntity) candidate;
 
-            // No atacar al dueño del WitherSkeleton
+            // No atacar al dueño del Skeleton
             // Evitar que ataque a otros Piglins domesticados del mismo dueño
             if ((livingEntity instanceof Player) && (livingEntity.equals(owner))) 
             {
                 continue;
             }
 
-            if ((livingEntity instanceof WitherSkeleton))
+            if ((livingEntity instanceof Skeleton))
             {
                 ThrallState otherState = Main.manager.getThrall(livingEntity.getUniqueId());
                 if (state.isSameOwner(otherState))
@@ -50,7 +50,7 @@ public class ThrallUtils {
 
             // Verificar si es una entidad hostil (puedes personalizar esto con las condiciones que prefieras)
             if ((filterClass.isAssignableFrom(livingEntity.getClass())) || livingEntity instanceof Player) {
-                // Calcular la distancia entre el WitherSkeleton y la entidad actual
+                // Calcular la distancia entre el Skeleton y la entidad actual
                 double distanceSquared = location.distanceSquared(livingEntity.getLocation());
                 
                 // Si esta entidad es la más cercana, actualizar la referencia

@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.bukkit.Particle;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
-import org.bukkit.entity.WitherSkeleton; // Cambiado de PigZombie a WitherSkeleton
+import org.bukkit.entity.Skeleton; // Cambiado de PigZombie a Skeleton
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,7 +18,7 @@ public class Events implements Listener {
 
     // Constructor
     public Events() {
-        // No se necesita la tarea de seguimiento si se elimina el seguimiento del WitherSkeleton
+        // No se necesita la tarea de seguimiento si se elimina el seguimiento del Skeleton
     }
 
     // Evento que se activa al lanzar una poción a un PigZombie
@@ -38,13 +38,13 @@ public class Events implements Listener {
                     
                     // Verifica si se alcanzó el número necesario de curaciones
                     if (currentCures >= Main.config.getInt("minCures") && currentCures <= Main.config.getInt("maxCures")) {
-                        // Transformar al PigZombie en WitherSkeleton adulto y domesticado
+                        // Transformar al PigZombie en Skeleton adulto y domesticado
                         pigZombie.remove();
-                        WitherSkeleton thrall = pigZombie.getWorld().spawn(pigZombie.getLocation(), WitherSkeleton.class); // Spawnea a un WitherSkeleton curado
+                        Skeleton thrall = pigZombie.getWorld().spawn(pigZombie.getLocation(), Skeleton.class); // Spawnea a un Skeleton curado
 
                         thrall.getWorld().spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 20);
 
-                        // Asigna el WitherSkeleton al jugador que lanzó las pociones
+                        // Asigna el Skeleton al jugador que lanzó las pociones
                         String piglinPath = "piglins." + thrall.getUniqueId().toString();
                         Main.config.set(piglinPath + ".owner", thrower.getUniqueId().toString());
                         Main.plugin.saveConfig(); // Guarda en la configuración

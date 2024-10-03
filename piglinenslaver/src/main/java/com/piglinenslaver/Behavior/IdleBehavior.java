@@ -12,7 +12,7 @@ public class IdleBehavior extends Behavior {
     
     public Location startLocation;
 
-    public IdleBehavior(WitherSkeleton entity, ThrallState state) {
+    public IdleBehavior(Skeleton entity, ThrallState state) {
         super(entity, state);
         this.startLocation = entity.getLocation();
     }
@@ -68,7 +68,7 @@ public class IdleBehavior extends Behavior {
                         break;
                 }
                 
-                state.owner.sendMessage("El WitherSkeleton está en estado: " + state.getAggressionState());
+                state.owner.sendMessage("El Skeleton está en estado: " + state.getAggressionState());
         }
     }
     

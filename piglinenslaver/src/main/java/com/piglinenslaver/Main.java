@@ -23,7 +23,7 @@ public class Main extends JavaPlugin {
        this.getServer().getPluginManager().registerEvents(manager, this); // Registrar PiglinFollow también
 
        // Mensaje en consola cuando se habilita el plugin
-       getLogger().info("WitherSkeleton Enslaver plugin enabled.");
+       getLogger().info("Skeleton Enslaver plugin enabled.");
    }
 
    @Override
