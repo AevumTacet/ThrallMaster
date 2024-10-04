@@ -18,12 +18,8 @@ public class Main extends JavaPlugin {
        // Instanciar PiglinFollow
        manager = new ThrallManager();
 
-       // Registrar eventos, solo una vez
-       this.getServer().getPluginManager().registerEvents(new Events(), this);
-       this.getServer().getPluginManager().registerEvents(manager, this); // Registrar PiglinFollow también
-
-       // Mensaje en consola cuando se habilita el plugin
-       getLogger().info("Skeleton Enslaver plugin enabled.");
+       this.getServer().getPluginManager().registerEvents(manager, this);
+       getLogger().info("Thrall Master plugin enabled.");
    }
 
    @Override

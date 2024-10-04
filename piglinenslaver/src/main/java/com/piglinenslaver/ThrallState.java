@@ -9,17 +9,15 @@ import com.piglinenslaver.Behavior.Behavior;
 public class ThrallState
 {
     public Player owner;
-    public long lastToggleTime;
-    private AggressionState m_AggressionState;
     private Behavior m_Behavior;
-    
+    private AggressionState m_AggressionState;
     public LivingEntity target;
+    public long lastToggleTime;
     
     public ThrallState(Player owner) {
         this.owner = owner;
         this.lastToggleTime = 0;
         this.m_AggressionState = AggressionState.DEFENSIVE;
-        
         this.target = null;
     }
     
@@ -30,6 +28,7 @@ public class ThrallState
     public void setBehavior(Behavior m_Behavior) {
         this.m_Behavior = m_Behavior;
         this.m_Behavior.onBehaviorStart();
+        this.m_Behavior.setEntityName();
     }
     
     public AggressionState getAggressionState() 

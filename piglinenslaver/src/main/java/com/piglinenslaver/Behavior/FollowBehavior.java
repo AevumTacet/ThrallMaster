@@ -15,6 +15,7 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public void onBehaviorStart() {
+        entity.setTarget(null);
     }
 
     @Override
@@ -24,7 +25,7 @@ public class FollowBehavior extends Behavior {
         Player owner = state.owner;
         
         double distance = entity.getLocation().distance(owner.getLocation());
-        double speed = distance < maxDistance / 3 ? 0.7 : 1.0;
+        double speed = distance < maxDistance / 3 ? 1.0 : 2.0;
         
         if (distance < minDistance / 2) 
         {

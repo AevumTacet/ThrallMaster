@@ -13,8 +13,12 @@ public class IdleBehavior extends Behavior {
     public Location startLocation;
 
     public IdleBehavior(Skeleton entity, ThrallState state) {
+        this(entity, state, entity.getLocation());
+    }
+
+    public IdleBehavior(Skeleton entity, ThrallState state, Location startLocation) {
         super(entity, state);
-        this.startLocation = entity.getLocation();
+        this.startLocation = startLocation;
     }
 
     @Override
@@ -26,6 +30,7 @@ public class IdleBehavior extends Behavior {
     @Override
     public void onBehaviorStart() {
         entity.setAI(true);
+        entity.setTarget(null);
     }
 
     @Override
@@ -34,7 +39,7 @@ public class IdleBehavior extends Behavior {
 
         if (distance > 4)
         {
-            entity.getPathfinder().moveTo(startLocation, 0.7);
+            entity.getPathfinder().moveTo(startLocation, 1.0);
         }
 
         if (state.getAggressionState() == AggressionState.HOSTILE)

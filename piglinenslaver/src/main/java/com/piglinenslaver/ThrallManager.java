@@ -2,27 +2,34 @@ package com.piglinenslaver;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityCombustByBlockEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import com.piglinenslaver.Behavior.Behavior;
 import com.piglinenslaver.Behavior.FollowBehavior;
-import com.piglinenslaver.Behavior.IdleBehavior;
-
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 public class ThrallManager implements Listener {
 
+    private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
     private HashMap<UUID, ThrallState> trackedEntities = new HashMap<>();
 
     public ThrallManager() {
@@ -140,56 +147,107 @@ public class ThrallManager implements Listener {
         if (entity instanceof Skeleton) 
         {
             UUID entityID = entity.getUniqueId();
-            String pstr = "piglins." + entityID.toString();
 
-            if (Main.config.contains(pstr)) {
-                Player owner = Bukkit.getPlayer(UUID.fromString(Main.config.getString(pstr + ".owner")));
-                if (owner != null) {
-                    owner.sendMessage(entity.getName() + " has died");
-                }
-                Main.config.set(pstr, null);
-                Main.plugin.saveConfig();
-
+            if (trackedEntities.containsKey(entityID)) {
+                Player owner = trackedEntities.get(entityID).owner;
+                owner.sendMessage("Your Thrall has fallen.");
                 unregister(entityID);
             }
-        }
-        // Make it forget
-        else
-        {
-            Entity source = event.getDamageSource().getDirectEntity();
-            if (!(source instanceof Skeleton))
-                return;
-          
-            UUID entityID = source.getUniqueId();
-            if (trackedEntities.containsKey(entityID))
-            {
-                ThrallState state = trackedEntities.get(entityID);
-                if (state.target.equals(entity))
-                {
-                    state.setAttackMode(null);
-                    state.target = null;
-                    state.setBehavior(new IdleBehavior((Skeleton) source, state));
-                }
-            }
-
         }
     }
 
     @EventHandler
-    public void onPiglinTarget(EntityTargetEvent event)
+    public void onEntityTarget(EntityTargetEvent event)
     {
         var caller = event.getEntity();
         var target = event.getTarget();
         
         if (target == null)
             return;
-        
+            
+        if (caller instanceof Skeleton)
+        {
+            if (!trackedEntities.containsKey(caller.getUniqueId()))
+                return;
+
+            var callerState = trackedEntities.get(caller.getUniqueId());
+            if (callerState.owner.equals(target)) 
+            {
+                event.setCancelled(true);
+            }
+
+            if (trackedEntities.containsKey(target.getUniqueId()))
+            {
+                var targetState = trackedEntities.get(target.getUniqueId());
+                if (callerState.owner.equals(targetState.owner))
+                {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+     @EventHandler
+    public void onPotionSplash(PotionSplashEvent event) {
+        var potion = event.getPotion();  
+        var effects = potion.getEffects().stream();  
+
+        if (effects.anyMatch(effect -> effect.getType().equals(PotionEffectType.WEAKNESS))) {
+            for (LivingEntity entity : event.getAffectedEntities()) {
+
+                if (entity instanceof PigZombie) {
+                    Player thrower = (Player) event.getPotion().getShooter();
+                    UUID targetID = entity.getUniqueId();
+                    
+                    int currentCures = trackedTamingLevel.getOrDefault(targetID, 0) + 1;
+                    trackedTamingLevel.put(targetID, currentCures);
+                    
+                    var world = entity.getWorld();
+                    world.spawnParticle(Particle.FLAME, entity.getLocation().add(0, 1, 0), 20, 0.1, 0.2, 0.1, 0.01);
+                    world.playSound(entity.getLocation(), entity.getHurtSound(), 1, 1);;
+                    
+                    // Verifica si se alcanzó el número necesario de curaciones
+                    if (currentCures >= Main.config.getInt("minCures") && currentCures <= Main.config.getInt("maxCures")) {
+                        
+                        Random random = new Random();
+                        Skeleton thrall = world.spawn(entity.getLocation(), Skeleton.class);
+
+                        if (random.nextDouble() > 0.5)
+                        {
+                            var ironSword = new ItemStack(Material.IRON_SWORD);
+                            thrall.getEquipment().setItemInMainHand(ironSword);
+                        }
+
+                        world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
+                        world.spawnParticle(Particle.SMOKE, thrall.getEyeLocation(), 40, 0.1, 0.2, 0.1, 0.01);
+                        world.playSound(entity.getLocation(), entity.getDeathSound(), 1, 1);;
+                        entity.remove();
+
+                        Main.manager.register(thrall, thrower);
+                        thrower.sendMessage("Your Thrall has risen!");
+                        
+                        trackedTamingLevel.remove(targetID);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityBurn(EntityCombustEvent event)
+    {
+        if ((event instanceof EntityCombustByBlockEvent))
+        {
+            return;
+        }
+
+        var caller = event.getEntity();
         if (caller instanceof Skeleton)
         {
             Skeleton entity = (Skeleton)caller;
             UUID entityID = entity.getUniqueId();
             
-            if (trackedEntities.get(entityID).owner.equals(target)) {
+            if (trackedEntities.containsKey(entityID)) {
                 event.setCancelled(true);
             }
         }
