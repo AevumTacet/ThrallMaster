@@ -104,7 +104,7 @@ public class ThrallManager implements Listener {
     }
 
     public void unregister(UUID entityID) {
-        System.out.println("Unregistering entity entity with UUID: " + entityID);
+        System.out.println("Unregistering entity with UUID: " + entityID);
         trackedEntities.remove(entityID);
     }
 
@@ -119,7 +119,9 @@ public class ThrallManager implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (UUID entityID : trackedEntities.keySet()) {
+                for (var iterator = trackedEntities.keySet().iterator(); iterator.hasNext();)
+                {
+                    UUID entityID = iterator.next();
                     Skeleton entity = (Skeleton) getEntityByUniqueId(entityID);
                     ThrallState state = trackedEntities.get(entityID);
 
