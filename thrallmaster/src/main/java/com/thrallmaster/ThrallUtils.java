@@ -19,6 +19,11 @@ public class ThrallUtils {
 
     public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity entity, Class<T> filterClass) 
     {
+        if (entity == null)
+        {
+            return null;
+        }
+        
         ThrallState state = Main.manager.getThrall(entity.getUniqueId());
         Player owner = state.getOwner();
         Location location = entity.getLocation();

@@ -1,10 +1,14 @@
 package com.thrallmaster.Behavior;
 
+import java.util.UUID;
+
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
+
+import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
 
@@ -12,8 +16,9 @@ public class HostileBehavior extends Behavior {
 
     private long startTime;
     private Behavior prevBehavior;
-    public HostileBehavior(Skeleton entity, ThrallState state, Behavior prevBehavior) {
-        super(entity, state);
+
+    public HostileBehavior(UUID entityID, ThrallState state, Behavior prevBehavior) {
+        super(entityID, state);
         this.prevBehavior = prevBehavior;
     }
 
@@ -25,6 +30,11 @@ public class HostileBehavior extends Behavior {
 
     @Override
     public void onBehaviorTick() {
+        Skeleton entity = this.getEntity();
+        if (entity == null)
+        {
+            return;
+        }
         if (state.target == null || !state.target.isValid())
         {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
@@ -42,7 +52,6 @@ public class HostileBehavior extends Behavior {
         long currentTime = System.currentTimeMillis();
         if ((state.target == null || !state.target.isValid()) || (currentTime - startTime > 12 * 1000) )
         {
-            System.out.println("Skeleton target is " + state.target + ". Forgetting and returning to previous state.");
             returnToPreviousState();
             this.startTime = currentTime;
         }
@@ -55,8 +64,11 @@ public class HostileBehavior extends Behavior {
 
     @Override
     public void onBehaviorInteract(Material material) {
+        Skeleton entity = this.getEntity();
+
         if (material == Material.AIR)
         {
+            state.setAggressionState(AggressionState.DEFENSIVE);
             returnToPreviousState();
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_GUITAR, 1, 0.6f);
         }
@@ -66,7 +78,7 @@ public class HostileBehavior extends Behavior {
     {
         state.setBehavior(prevBehavior);
         state.target = null;
-        entity.setTarget(null);
+        this.getEntity().setTarget(null);
     }
     
 }

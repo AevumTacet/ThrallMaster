@@ -1,9 +1,13 @@
 package com.thrallmaster.Behavior;
 
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
+import org.jetbrains.annotations.NotNull;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallState;
@@ -15,12 +19,12 @@ public class IdleBehavior extends Behavior {
     
     public Location startLocation;
 
-    public IdleBehavior(Skeleton entity, ThrallState state) {
-        this(entity, state, entity.getLocation());
+    public IdleBehavior(UUID entityID, ThrallState state) {
+        this(entityID, state, Bukkit.getEntity(entityID).getLocation());
     }
 
-    public IdleBehavior(Skeleton entity, ThrallState state, Location startLocation) {
-        super(entity, state);
+    public IdleBehavior(UUID entityID, ThrallState state, Location startLocation) {
+        super(entityID, state);
         this.startLocation = startLocation;
     }
 
@@ -31,15 +35,26 @@ public class IdleBehavior extends Behavior {
     }
     
     @Override
-    public void onBehaviorStart() {
-        entity.setAI(true);
-        entity.setTarget(null);
+    public void onBehaviorStart() 
+    {
+        Skeleton entity = this.getEntity();
+        if (entity != null)
+        {
+            entity.setAI(true);
+            entity.setTarget(null);
+        }
     }
 
     @Override
     public void onBehaviorTick() {
-        double distance = entity.getLocation().distance(startLocation);
+        Skeleton entity = this.getEntity();
 
+        if (entity == null)
+        {
+            return;
+        }
+
+        double distance = entity.getLocation().distance(startLocation);
         if (distance > 4)
         {
             entity.getPathfinder().moveTo(startLocation, 1.0);
@@ -50,16 +65,18 @@ public class IdleBehavior extends Behavior {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
             {
-                state.setBehavior(new HostileBehavior(entity, state, this));
+                state.setBehavior(new HostileBehavior(entityID, state, this));
             } 
         }
     }
 
     @Override
     public void onBehaviorInteract(Material material) {
+        Skeleton entity = this.getEntity();
+
         if (material == Material.AIR)
         {
-            state.setBehavior(new FollowBehavior(entity, state));
+            state.setBehavior(new FollowBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
         }
 

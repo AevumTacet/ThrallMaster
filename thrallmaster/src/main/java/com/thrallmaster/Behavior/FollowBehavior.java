@@ -1,5 +1,7 @@
 package com.thrallmaster.Behavior;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -12,22 +14,36 @@ import com.thrallmaster.Main;
 import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
 
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+
 public class FollowBehavior extends Behavior {
 
-    public FollowBehavior(Skeleton entity, ThrallState state) {
-        super(entity, state);
+    public FollowBehavior(UUID entityID, ThrallState state) {
+        super(entityID, state);
     }
 
     @Override
     public void onBehaviorStart() {
-        entity.setTarget(null);
+        var entity = this.getEntity();
+        
+        if (entity != null)
+        {
+            entity.setTarget(null);
+        }
     }
 
     @Override
     public void onBehaviorTick() {
         double minDistance = Main.config.getDouble("minFollowDistance", 5.0);
         double maxDistance = Main.config.getDouble("maxFollowDistance", 20.0);
+
         Player owner = Bukkit.getPlayer(state.ownerID);
+        Skeleton entity = this.getEntity();
+
+        if (owner == null || entity == null)
+        {
+            return;
+        }
         
         double distance = entity.getLocation().distance(owner.getLocation());
         double speed = distance < maxDistance / 3 ? 1.0 : 1.5;
@@ -52,7 +68,7 @@ public class FollowBehavior extends Behavior {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
             {
-                state.setBehavior(new HostileBehavior(entity, state, this));
+                state.setBehavior(new HostileBehavior(entityID, state, this));
             } 
         }
     }
@@ -64,9 +80,10 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public void onBehaviorInteract(Material material) {
+        Skeleton entity = this.getEntity();
         if (material == Material.AIR)
         {
-            state.setBehavior(new IdleBehavior(entity, state));
+            state.setBehavior(new IdleBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.5f);
         }
 
@@ -87,6 +104,11 @@ public class FollowBehavior extends Behavior {
                 }
             state.getOwner().sendMessage("El Skeleton está en estado: " + state.getAggressionState());
         }
+    }
+
+    @Override
+    public void onSetPersistenData(ReadWriteNBT nbt) {
+        nbt.setEnum("AgressionState", state.getAggressionState());
     }
     
 }

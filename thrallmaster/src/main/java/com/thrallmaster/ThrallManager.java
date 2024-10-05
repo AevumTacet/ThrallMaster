@@ -29,83 +29,152 @@ import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
 
 import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.nbtapi.NBTCompound;
+import de.tr7zw.nbtapi.NBTCompoundList;
+import de.tr7zw.nbtapi.NBTFile;
+import de.tr7zw.nbtapi.NBTListCompound;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
 public class ThrallManager implements Listener {
 
+    private static NBTFile m_NBTFile;
     private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
     private HashMap<UUID, ThrallState> trackedEntities = new HashMap<>();
 
     public ThrallManager() {
+        File worldDir = Bukkit.getWorlds().get(0).getWorldFolder();
+        try 
+        {
+            m_NBTFile = new NBTFile(new File(worldDir, "thrall.dat"));
+            m_NBTFile.addCompound("Indices");
+            m_NBTFile.getCompoundList("States");
+        } 
+        catch (IOException e) 
+        {
+            System.err.println("Thrall master NBT IO could not be initialized!");
+            e.printStackTrace();
+        }
+
         entityBehaviorTask();
+    }
+
+    public static NBTListCompound getNBTCompound(UUID id)
+    {
+        NBTCompound indices = m_NBTFile.getCompound("Indices");
+        if (indices.hasTag(id.toString()))
+        {
+            var index = indices.getInteger(id.toString());
+            return m_NBTFile.getCompoundList("States").get(index);
+        }
+        
+        return null;
+    }
+    
+    public static void saveNBT()
+    {
+        if (m_NBTFile == null)
+        {
+            return;
+        }
+
+        try 
+        {
+            m_NBTFile.save();
+        } 
+        catch (IOException e) 
+        {
+            System.err.println("Could not save NBT settings!");
+            e.printStackTrace();
+        }
     }
 
     public void registerAllEntities(World world)
     {
+        NBTCompoundList states = m_NBTFile.getCompoundList("States");
+        System.out.println("Found " + states.size() + " entity compounds.");
         trackedEntities.clear();
-        for (Skeleton entity : world.getEntitiesByClass(Skeleton.class))
+        
+        for (var iterator = states.iterator(); iterator.hasNext();)
         {
-            boolean isTamed = NBT.getPersistentData(entity, nbt -> nbt.getBoolean("Tamed"));
-            if (!isTamed)
-            {
-                continue;
-            }
+            ReadWriteNBT nbt = iterator.next();
+            UUID entityID = UUID.fromString(nbt.getString("EntityID"));
+            UUID ownerID =  UUID.fromString(nbt.getString("OwnerID"));
+            String currentBehavior =  nbt.getString("CurrentBehavior");
 
-            UUID ownerID =  NBT.getPersistentData(entity, nbt -> nbt.getUUID("OwnerUUID"));
-            String currentBehavior =  NBT.getPersistentData(entity, nbt -> nbt.getString("CurrentBehavior"));
-           
             ThrallState state = new ThrallState(ownerID);
-            
             switch (currentBehavior) {
                 case "IDLE":
-                    int[] locationArray = NBT.getPersistentData(entity, nbt -> nbt.getIntArray("IdleLocation"));
+                    int[] locationArray = nbt.getIntArray("IdleLocation");
                     if (locationArray != null && locationArray.length == 3)
                     {
                         Location startLocation = new Location(world, locationArray[0], locationArray[1], locationArray[2]);
-                        state.setBehavior(new IdleBehavior(entity, state, startLocation));
+                        state.setBehavior(new IdleBehavior(entityID, state, startLocation));
                         break;
                     }
-                    state.setBehavior(new IdleBehavior(entity, state));
+                    state.setBehavior(new IdleBehavior(entityID, state));
                     break;
                     
                 case "FOLLOW":
-                    state.setBehavior(new FollowBehavior(entity, state));
+                    state.setBehavior(new FollowBehavior(entityID, state));
                     break;
             
                 default:
                     System.err.println("Thrall state is unspecified, defaulting to follow");
-                    state.setBehavior(new FollowBehavior(entity, state));
+                    state.setBehavior(new FollowBehavior(entityID, state));
                     break;
             }
 
-            trackedEntities.put(entity.getUniqueId(), state);
+            trackedEntities.put(entityID, state);
         }
 
-        System.out.println("Loading Thrall entities completed. " + trackedEntities.size() + " entities recovered.");
+        System.out.println("Loading Thrall entities completed. " + trackedEntities.size());
     }
 
     public void register(Skeleton entity, Player owner) {
+        System.out.println("Registering entity entity with UUID: " + entity.getUniqueId());
+        UUID entityID = entity.getUniqueId();
         ThrallState state = new ThrallState(owner);
+        
+        NBTCompound indices = m_NBTFile.getCompound("Indices");
+        NBTCompoundList states = m_NBTFile.getCompoundList("States");
 
-        NBT.modifyPersistentData(entity, nbt ->
-        {
-            nbt.setBoolean("Tamed", true);
-            nbt.setUUID("OwnerUUID", owner.getUniqueId());
-            nbt.setString("CurrentBehavior", "FOLLOW");
-        });
+        indices.setInteger(entityID.toString(), states.size());
+
+        NBTCompound nbt = states.addCompound();
+        nbt.setString("EntityID", entity.getUniqueId().toString());
+        nbt.setString("OwnerID", owner.getUniqueId().toString());
+        nbt.setString("CurrentBehavior", "FOLLOW");
 
         entity.setPersistent(true);
-        state.setBehavior(new FollowBehavior(entity, state));
+        state.setBehavior(new FollowBehavior(entity.getUniqueId(), state));
+        
         trackedEntities.put(entity.getUniqueId(), state);
-        System.out.println("Registering entity entity with UUID: " + entity.getUniqueId());
+        
+        saveNBT();
+
+        System.out.println(m_NBTFile.toString());
     }
 
     public void unregister(UUID entityID) {
-        System.out.println("Unregistering entity with UUID: " + entityID);
-        trackedEntities.remove(entityID);
+        if (trackedEntities.remove(entityID) != null)
+        {
+            System.out.println("Unregistering entity with UUID: " + entityID);
+
+            NBTCompound indices = m_NBTFile.getCompound("Indices");
+            NBTCompoundList states = m_NBTFile.getCompoundList("States");
+            
+            int index = indices.getInteger(entityID.toString());
+            indices.removeKey(entityID.toString());
+            states.remove(index);
+
+            saveNBT();
+        }
     }
 
     public ThrallState getThrall(UUID entityID)
@@ -122,10 +191,9 @@ public class ThrallManager implements Listener {
                 for (var iterator = trackedEntities.keySet().iterator(); iterator.hasNext();)
                 {
                     UUID entityID = iterator.next();
-                    Skeleton entity = (Skeleton) getEntityByUniqueId(entityID);
                     ThrallState state = trackedEntities.get(entityID);
 
-                    if (entity == null || state == null || state.ownerID == null)
+                    if (state == null || state.ownerID == null)
                     {
                         unregister(entityID);
                         continue;
@@ -138,7 +206,7 @@ public class ThrallManager implements Listener {
                     }
                 }
                 }
-        }.runTaskTimer(Main.plugin, 0, 10); // Se ejecuta cada 10 ticks
+        }.runTaskTimer(Main.plugin, 0, 10);
     }
 
     // Evento que maneja la interacción con un Skeleton para alternar entre estados FOLLOW e IDLE
@@ -146,13 +214,20 @@ public class ThrallManager implements Listener {
     public void onPiglinInteract(PlayerInteractEntityEvent event) {
         if (event.getRightClicked() instanceof Skeleton) {
             Skeleton entity = (Skeleton) event.getRightClicked();
+            UUID entityID = entity.getUniqueId();
+            if (!trackedEntities.containsKey(entityID))
+            {
+                return;
+            }
+
             Player player = event.getPlayer();
             Material itemType = player.getInventory().getItemInMainHand().getType();
             
-            UUID entityID = entity.getUniqueId();
-            if (!trackedEntities.containsKey(entityID))
-                return;
             ThrallState state = trackedEntities.get(entityID);
+            if (!state.ownerID.equals(player.getUniqueId()))
+            {
+                return;
+            }
             
             // Prevenir cambios rápidos con un cooldown de medio segundo
             long currentTime = System.currentTimeMillis();

@@ -1,5 +1,6 @@
 package com.thrallmaster;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +17,7 @@ public class Main extends JavaPlugin {
       config = getConfig();
 
       manager = new ThrallManager();
+      manager.registerAllEntities(this.getServer().getWorlds().get(0));
 
       this.getServer().getPluginManager().registerEvents(manager, this);
       getLogger().info("Thrall Master plugin enabled.");
