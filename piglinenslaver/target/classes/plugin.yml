@@ -1,6 +1,0 @@
-name: PiglinMaster
-version: 1.0.0
-description: Bring back a Skeleton and he will serve you till death.
-author: Telwa
-main: com.piglinenslaver.Main
-api-version: 1.21.1
