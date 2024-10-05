@@ -55,13 +55,19 @@ public abstract class Behavior {
     public final void setPersistentData()
     {
         NBTCompound nbt = ThrallManager.getNBTCompound(this.entityID);
-        this.onSetPersistenData(nbt);
-        ThrallManager.saveNBT();
+
+        if (nbt != null)
+        {
+            this.onSetPersistenData(nbt);
+        }
     }
     public final void removePersistentData()
     {
         NBTCompound nbt = ThrallManager.getNBTCompound(this.entityID);
-        this.onRemovePersistentData(nbt);
-        ThrallManager.saveNBT();
+
+        if (nbt != null)
+        {
+            this.onRemovePersistentData(nbt);
+        }
     }
 }

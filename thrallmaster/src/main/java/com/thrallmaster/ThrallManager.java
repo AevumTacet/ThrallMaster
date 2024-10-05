@@ -28,17 +28,15 @@ import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
 
-import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.NBTCompound;
-import de.tr7zw.nbtapi.NBTCompoundList;
 import de.tr7zw.nbtapi.NBTFile;
-import de.tr7zw.nbtapi.NBTListCompound;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 public class ThrallManager implements Listener {
@@ -52,8 +50,7 @@ public class ThrallManager implements Listener {
         try 
         {
             m_NBTFile = new NBTFile(new File(worldDir, "thrall.dat"));
-            m_NBTFile.addCompound("Indices");
-            m_NBTFile.getCompoundList("States");
+            m_NBTFile.addCompound("ThrallStates");
         } 
         catch (IOException e) 
         {
@@ -64,16 +61,10 @@ public class ThrallManager implements Listener {
         entityBehaviorTask();
     }
 
-    public static NBTListCompound getNBTCompound(UUID id)
+    public static NBTCompound getNBTCompound(UUID id)
     {
-        NBTCompound indices = m_NBTFile.getCompound("Indices");
-        if (indices.hasTag(id.toString()))
-        {
-            var index = indices.getInteger(id.toString());
-            return m_NBTFile.getCompoundList("States").get(index);
-        }
-        
-        return null;
+        NBTCompound states = m_NBTFile.getCompound("ThrallStates");
+        return states.getCompound(id.toString());
     }
     
     public static void saveNBT()
@@ -86,6 +77,8 @@ public class ThrallManager implements Listener {
         try 
         {
             m_NBTFile.save();
+            System.out.println("Saving Thrall NBT state.");
+            System.out.println(m_NBTFile.toString());
         } 
         catch (IOException e) 
         {
@@ -96,28 +89,37 @@ public class ThrallManager implements Listener {
 
     public void registerAllEntities(World world)
     {
-        NBTCompoundList states = m_NBTFile.getCompoundList("States");
-        System.out.println("Found " + states.size() + " entity compounds.");
+        NBTCompound states = m_NBTFile.getCompound("ThrallStates");
+        Set<String> dataKeys = states.getKeys();
+
+        System.out.println("Found " + dataKeys.size() + " entity compounds.");
         trackedEntities.clear();
         
-        for (var iterator = states.iterator(); iterator.hasNext();)
+        for (String key : dataKeys)
         {
-            ReadWriteNBT nbt = iterator.next();
-            UUID entityID = UUID.fromString(nbt.getString("EntityID"));
+            ReadWriteNBT nbt = states.getCompound(key);
+
+            UUID entityID = UUID.fromString(key);
             UUID ownerID =  UUID.fromString(nbt.getString("OwnerID"));
             String currentBehavior =  nbt.getString("CurrentBehavior");
 
             ThrallState state = new ThrallState(ownerID);
             switch (currentBehavior) {
                 case "IDLE":
-                    int[] locationArray = nbt.getIntArray("IdleLocation");
-                    if (locationArray != null && locationArray.length == 3)
+                    if (nbt.hasTag("IdleLocationW") && nbt.hasTag("IdleLocationX") && 
+                        nbt.hasTag("IdleLocationY") && nbt.hasTag("IdleLocationZ"))
                     {
-                        Location startLocation = new Location(world, locationArray[0], locationArray[1], locationArray[2]);
+                        String locationW = nbt.getString("IdleLocationW");
+                        double locationX = nbt.getDouble("IdleLocationX");
+                        double locationY = nbt.getDouble("IdleLocationY");
+                        double locationZ = nbt.getDouble("IdleLocationZ");
+
+                        Location startLocation = new Location(Bukkit.getWorld(locationW), locationX, locationY, locationZ);
                         state.setBehavior(new IdleBehavior(entityID, state, startLocation));
                         break;
                     }
-                    state.setBehavior(new IdleBehavior(entityID, state));
+
+                    state.setBehavior(new IdleBehavior(entityID, state, null));
                     break;
                     
                 case "FOLLOW":
@@ -141,24 +143,16 @@ public class ThrallManager implements Listener {
         UUID entityID = entity.getUniqueId();
         ThrallState state = new ThrallState(owner);
         
-        NBTCompound indices = m_NBTFile.getCompound("Indices");
-        NBTCompoundList states = m_NBTFile.getCompoundList("States");
+        NBTCompound states = m_NBTFile.getCompound("ThrallStates");
+        NBTCompound nbt = states.addCompound(entityID.toString());
 
-        indices.setInteger(entityID.toString(), states.size());
-
-        NBTCompound nbt = states.addCompound();
-        nbt.setString("EntityID", entity.getUniqueId().toString());
         nbt.setString("OwnerID", owner.getUniqueId().toString());
         nbt.setString("CurrentBehavior", "FOLLOW");
 
         entity.setPersistent(true);
-        state.setBehavior(new FollowBehavior(entity.getUniqueId(), state));
+        state.setBehavior(new FollowBehavior(entityID, state));
         
-        trackedEntities.put(entity.getUniqueId(), state);
-        
-        saveNBT();
-
-        System.out.println(m_NBTFile.toString());
+        trackedEntities.put(entityID, state);
     }
 
     public void unregister(UUID entityID) {
@@ -166,14 +160,8 @@ public class ThrallManager implements Listener {
         {
             System.out.println("Unregistering entity with UUID: " + entityID);
 
-            NBTCompound indices = m_NBTFile.getCompound("Indices");
-            NBTCompoundList states = m_NBTFile.getCompoundList("States");
-            
-            int index = indices.getInteger(entityID.toString());
-            indices.removeKey(entityID.toString());
-            states.remove(index);
-
-            saveNBT();
+            NBTCompound states = m_NBTFile.getCompound("ThrallStates");
+            states.removeKey(entityID.toString());
         }
     }
 
@@ -183,7 +171,8 @@ public class ThrallManager implements Listener {
     }
 
     
-    // Tarea recurrente que actualiza el seguimiento de Piglins y el estado de ataque cada 10 ticks
+    // Tarea recurrente que actualiza el seguimiento de Skeletons y el estado de ataque cada 10 ticks
+    private long elapsedTicks = 1;
     private void entityBehaviorTask() {
         new BukkitRunnable() {
             @Override
@@ -205,7 +194,14 @@ public class ThrallManager implements Listener {
                         behavior.onBehaviorTick();
                     }
                 }
+
+                if (elapsedTicks % 600 == 0)
+                {
+                    saveNBT();
                 }
+
+                elapsedTicks += 1;
+            }
         }.runTaskTimer(Main.plugin, 0, 10);
     }
 
@@ -345,6 +341,7 @@ public class ThrallManager implements Listener {
                     
                     var world = entity.getWorld();
                     world.spawnParticle(Particle.FLAME, entity.getLocation().add(0, 1, 0), 20, 0.1, 0.2, 0.1, 0.01);
+                    world.spawnParticle(Particle.ENCHANT, entity.getLocation(), 80, 1.5, 1.5, 1.5, 0.02);
                     world.playSound(entity.getLocation(), Sound.ENTITY_ZOMBIFIED_PIGLIN_ANGRY, 1, 1);;
                     
                     // Verifica si se alcanzó el número necesario de curaciones
@@ -359,10 +356,10 @@ public class ThrallManager implements Listener {
                             thrall.getEquipment().setItemInMainHand(ironSword);
                         }
 
-                        world.spawnParticle(Particle.SOUL, thrall.getLocation(), 50, 0.1, 0.1, 0.1, 0.02);
+                        world.spawnParticle(Particle.SOUL, thrall.getLocation(), 100, 1, 1, 1, 0.02);
                         world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
-                        world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 25, 0.01, 0.01, 0.01, 0.06);
-                        world.playSound(entity.getLocation(), Sound.ENTITY_PIG_DEATH, 1, 1);;
+                        world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 80, 0.01, 0.01, 0.01, 0.06);
+                        world.playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_DEATH, 1, 2);;
                         entity.remove();
 
                         Main.manager.register(thrall, thrower);

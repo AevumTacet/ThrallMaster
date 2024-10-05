@@ -54,6 +54,12 @@ public class IdleBehavior extends Behavior {
             return;
         }
 
+        if (startLocation == null)
+        {
+            System.err.println("Thrall start location was null, defaulting to current location.");
+            startLocation = entity.getLocation();
+        }
+
         double distance = entity.getLocation().distance(startLocation);
         if (distance > 4)
         {
@@ -104,13 +110,19 @@ public class IdleBehavior extends Behavior {
     @Override
     public void onSetPersistenData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "IDLE");
-        nbt.setIntArray("IdleLocation", new int[]{startLocation.blockX(), startLocation.blockY(), startLocation.blockZ()});
+        nbt.setString("IdleLocationW", startLocation.getWorld().getName());
+        nbt.setDouble("IdleLocationX", startLocation.getX());
+        nbt.setDouble("IdleLocationY", startLocation.getY());
+        nbt.setDouble("IdleLocationZ", startLocation.getZ());
         nbt.setEnum("AgressionState", state.getAggressionState());
     }
 
     @Override
     public void onRemovePersistentData(ReadWriteNBT nbt) {
-        nbt.removeKey("IdleLocation");
+        nbt.removeKey("IdleLocationW");
+        nbt.removeKey("IdleLocationX");
+        nbt.removeKey("IdleLocationY");
+        nbt.removeKey("IdleLocationZ");
     }
 
 }
