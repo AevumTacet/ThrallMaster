@@ -33,9 +33,9 @@ public class HostileBehavior extends Behavior {
                 // Hotfix: make them attack
                 state.target = nearestEntity;
                 entity.setTarget(nearestEntity);
-                
-                entity.getWorld().spawnParticle(Particle.FLAME, entity.getEyeLocation().add(0, 1, 0), 10, 0.2, 0.2, 0.2, 0.01);
-                entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASEDRUM, 1, 1);
+
+                entity.getWorld().spawnParticle(Particle.SMOKE, entity.getEyeLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1, 0.01);
+                entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.5f);
             }
         }
 
@@ -58,6 +58,7 @@ public class HostileBehavior extends Behavior {
         if (material == Material.AIR)
         {
             returnToPreviousState();
+            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_GUITAR, 1, 0.6f);
         }
     }
 

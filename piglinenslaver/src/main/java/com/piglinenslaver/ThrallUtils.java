@@ -3,9 +3,9 @@ package com.piglinenslaver;
 import java.util.Collection;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Player;
 
@@ -14,7 +14,7 @@ public class ThrallUtils {
 
     public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity entity) 
     {
-        return findNearestEntity(entity, Monster.class);
+        return findNearestEntity(entity, Enemy.class);
     }
 
     public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity entity, Class<T> filterClass) 

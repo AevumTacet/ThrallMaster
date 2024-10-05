@@ -20,15 +20,21 @@ public class ThrallState
         this.m_AggressionState = AggressionState.DEFENSIVE;
         this.target = null;
     }
-    
+
     public Behavior getBehavior() {
         return m_Behavior;
     }
 
     public void setBehavior(Behavior m_Behavior) {
+        if (this.m_Behavior != null)
+        {
+            this.m_Behavior.removePersistentData();
+        }
+
         this.m_Behavior = m_Behavior;
         this.m_Behavior.onBehaviorStart();
         this.m_Behavior.setEntityName();
+        this.m_Behavior.setPersistentData();
     }
     
     public AggressionState getAggressionState() 

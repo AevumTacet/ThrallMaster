@@ -3,6 +3,7 @@ package com.piglinenslaver;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -23,6 +24,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import com.piglinenslaver.Behavior.Behavior;
 import com.piglinenslaver.Behavior.FollowBehavior;
+
+import de.tr7zw.nbtapi.NBT;
+
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
@@ -36,8 +40,33 @@ public class ThrallManager implements Listener {
         entityBehaviorTask();
     }
 
+    public void registerAllEntities(World world)
+    {
+        for (Entity entity : world.getEntitiesByClass(Skeleton.class))
+        {
+            boolean isTamed = NBT.getPersistentData(entity, nbt -> (boolean) nbt.getBoolean("Tamed"));
+            if (!isTamed)
+            {
+                continue;
+            }
+
+            
+            
+            
+        }
+    }
+
     public void register(Skeleton entity, Player owner) {
         ThrallState state = new ThrallState(owner);
+
+        NBT.modifyPersistentData(entity, nbt ->
+        {
+            nbt.setBoolean("Tamed", true);
+            nbt.setUUID("OwnerUUID", owner.getUniqueId());
+            nbt.setString("BehaviorState", "FOLLOW");
+        });
+
+        entity.setPersistent(true);
         state.setBehavior(new FollowBehavior(entity, state));
         trackedEntities.put(entity.getUniqueId(), state);
     }
@@ -95,6 +124,7 @@ public class ThrallManager implements Listener {
                 return;
             state.lastToggleTime = currentTime;
             
+            entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getEyeLocation(), 10, 0.1, 0.1, 0.1, 0.01);
             state.getBehavior().onBehaviorInteract(itemType);
         }
     }
@@ -204,7 +234,7 @@ public class ThrallManager implements Listener {
                     
                     var world = entity.getWorld();
                     world.spawnParticle(Particle.FLAME, entity.getLocation().add(0, 1, 0), 20, 0.1, 0.2, 0.1, 0.01);
-                    world.playSound(entity.getLocation(), entity.getHurtSound(), 1, 1);;
+                    world.playSound(entity.getLocation(), Sound.ENTITY_ZOMBIFIED_PIGLIN_ANGRY, 1, 1);;
                     
                     // Verifica si se alcanzó el número necesario de curaciones
                     if (currentCures >= Main.config.getInt("minCures") && currentCures <= Main.config.getInt("maxCures")) {
@@ -218,9 +248,10 @@ public class ThrallManager implements Listener {
                             thrall.getEquipment().setItemInMainHand(ironSword);
                         }
 
+                        world.spawnParticle(Particle.SOUL, thrall.getLocation(), 50, 0.1, 0.1, 0.1, 0.02);
                         world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
-                        world.spawnParticle(Particle.SMOKE, thrall.getEyeLocation(), 40, 0.1, 0.2, 0.1, 0.01);
-                        world.playSound(entity.getLocation(), entity.getDeathSound(), 1, 1);;
+                        world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 25, 0.01, 0.01, 0.01, 0.06);
+                        world.playSound(entity.getLocation(), Sound.ENTITY_PIG_DEATH, 1, 1);;
                         entity.remove();
 
                         Main.manager.register(thrall, thrower);

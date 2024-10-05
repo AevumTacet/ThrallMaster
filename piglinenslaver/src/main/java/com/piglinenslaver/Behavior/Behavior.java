@@ -4,6 +4,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Skeleton;
 
 import com.piglinenslaver.ThrallState;
+
+import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import net.kyori.adventure.text.Component;
 
 
@@ -21,9 +24,31 @@ public abstract class Behavior {
     public abstract void onBehaviorTick();
     public abstract void onBehaviorInteract(Material material);
 
-    public void setEntityName()
+    protected void onSetPersistenData(ReadWriteNBT nbt)
+    {
+    }
+    protected void onRemovePersistentData(ReadWriteNBT nbt)
+    {
+    }
+
+    public final void setEntityName()
     {
         var textComponent = Component.text("Thrall [" + this.getBehaviorName() + "]");
         entity.customName(textComponent);
+    }
+
+    public final void setPersistentData()
+    {
+        NBT.modifyPersistentData(entity, nbt -> 
+        {
+            this.onSetPersistenData(nbt);
+        });
+    }
+    public final void removePersistentData()
+    {
+        NBT.modifyPersistentData(entity, nbt -> 
+        {
+            this.onRemovePersistentData(nbt);
+        });
     }
 }

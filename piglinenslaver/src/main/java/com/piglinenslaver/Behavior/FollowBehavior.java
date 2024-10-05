@@ -1,11 +1,15 @@
 package com.piglinenslaver.Behavior;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import com.piglinenslaver.AggressionState;
 import com.piglinenslaver.Main;
 import com.piglinenslaver.ThrallState;
+import com.piglinenslaver.ThrallUtils;
 
 public class FollowBehavior extends Behavior {
 
@@ -25,12 +29,11 @@ public class FollowBehavior extends Behavior {
         Player owner = state.owner;
         
         double distance = entity.getLocation().distance(owner.getLocation());
-        double speed = distance < maxDistance / 3 ? 1.0 : 2.0;
+        double speed = distance < maxDistance / 3 ? 1.0 : 1.5;
         
         if (distance < minDistance / 2) 
         {
-            entity.setAI(true);
-            return;
+            entity.getPathfinder().moveTo(owner.getLocation(), 0);
         } 
         else if (distance > maxDistance) 
         {
@@ -40,6 +43,16 @@ public class FollowBehavior extends Behavior {
         {
             entity.lookAt(owner);
             entity.getPathfinder().moveTo(owner.getLocation(), speed);
+        }
+
+
+        if (state.getAggressionState() == AggressionState.HOSTILE)
+        {
+            LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
+            if (nearestEntity != null)
+            {
+                state.setBehavior(new HostileBehavior(entity, state, this));
+            } 
         }
     }
 
@@ -53,6 +66,25 @@ public class FollowBehavior extends Behavior {
         if (material == Material.AIR)
         {
             state.setBehavior(new IdleBehavior(entity, state));
+            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.5f);
+        }
+
+        if (material.toString().endsWith("_SWORD"))
+        {
+            switch (state.getAggressionState())
+                {
+                    case DEFENSIVE:
+                    default:
+                        state.setAggressionState(AggressionState.HOSTILE);
+                        entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.6f);
+                        break;
+                        
+                        case HOSTILE:
+                        state.setAggressionState(AggressionState.DEFENSIVE);
+                        entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
+                        break;
+                }
+            state.owner.sendMessage("El Skeleton está en estado: " + state.getAggressionState());
         }
     }
     
