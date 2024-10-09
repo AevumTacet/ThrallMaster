@@ -37,7 +37,7 @@ public class FollowBehavior extends Behavior {
         double minDistance = Main.config.getDouble("minFollowDistance", 5.0);
         double maxDistance = Main.config.getDouble("maxFollowDistance", 20.0);
 
-        Player owner = Bukkit.getPlayer(state.ownerID);
+        Player owner = Bukkit.getPlayer(state.getOwnerID());
         Skeleton entity = this.getEntity();
 
         if (owner == null || entity == null)
@@ -63,7 +63,7 @@ public class FollowBehavior extends Behavior {
         }
 
 
-        if (state.getAggressionState() == AggressionState.HOSTILE)
+        if (state.aggressionState == AggressionState.HOSTILE)
         {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
@@ -89,26 +89,26 @@ public class FollowBehavior extends Behavior {
 
         if (material.toString().endsWith("_SWORD"))
         {
-            switch (state.getAggressionState())
+            switch (state.aggressionState)
                 {
                     case DEFENSIVE:
                     default:
-                        state.setAggressionState(AggressionState.HOSTILE);
+                        state.aggressionState = AggressionState.HOSTILE;
                         entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.6f);
                         break;
                         
                         case HOSTILE:
-                        state.setAggressionState(AggressionState.DEFENSIVE);
+                        state.aggressionState = AggressionState.DEFENSIVE;
                         entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
                         break;
                 }
-            state.getOwner().sendMessage("El Skeleton está en estado: " + state.getAggressionState());
+            state.getOwner().sendMessage("El Skeleton está en estado: " + state.aggressionState);
         }
     }
 
     @Override
     public void onSetPersistenData(ReadWriteNBT nbt) {
-        nbt.setEnum("AgressionState", state.getAggressionState());
+        nbt.setEnum("AgressionState", state.aggressionState);
     }
     
 }

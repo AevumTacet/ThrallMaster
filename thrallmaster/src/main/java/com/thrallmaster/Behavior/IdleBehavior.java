@@ -7,8 +7,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
-import org.jetbrains.annotations.NotNull;
-
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
@@ -31,7 +29,7 @@ public class IdleBehavior extends Behavior {
     @Override
     public String getBehaviorName()
     {
-        return "Idle";
+        return "Guarding";
     }
     
     @Override
@@ -66,7 +64,7 @@ public class IdleBehavior extends Behavior {
             entity.getPathfinder().moveTo(startLocation, 1.0);
         }
 
-        if (state.getAggressionState() == AggressionState.HOSTILE)
+        if (state.aggressionState == AggressionState.HOSTILE)
         {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
@@ -88,21 +86,21 @@ public class IdleBehavior extends Behavior {
 
         if (material.toString().endsWith("_SWORD"))
         {
-            switch (state.getAggressionState())
+            switch (state.aggressionState)
             {
                 case DEFENSIVE:
                 default:
-                    state.setAggressionState(AggressionState.HOSTILE);
+                    state.aggressionState = AggressionState.HOSTILE;
                     entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.6f);
                     break;
                     
                     case HOSTILE:
-                    state.setAggressionState(AggressionState.DEFENSIVE);
+                    state.aggressionState = AggressionState.DEFENSIVE;
                     entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
                     break;
             }
             
-            state.getOwner().sendMessage("El Skeleton está en estado: " + state.getAggressionState());
+            state.getOwner().sendMessage("El Skeleton está en estado: " + state.aggressionState);
             this.setPersistentData();
         }
     }
@@ -110,11 +108,15 @@ public class IdleBehavior extends Behavior {
     @Override
     public void onSetPersistenData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "IDLE");
-        nbt.setString("IdleLocationW", startLocation.getWorld().getName());
-        nbt.setDouble("IdleLocationX", startLocation.getX());
-        nbt.setDouble("IdleLocationY", startLocation.getY());
-        nbt.setDouble("IdleLocationZ", startLocation.getZ());
-        nbt.setEnum("AgressionState", state.getAggressionState());
+        nbt.setEnum("AgressionState", state.aggressionState);
+
+        if (startLocation != null)
+        {
+            nbt.setString("IdleLocationW", startLocation.getWorld().getName());
+            nbt.setDouble("IdleLocationX", startLocation.getX());
+            nbt.setDouble("IdleLocationY", startLocation.getY());
+            nbt.setDouble("IdleLocationZ", startLocation.getZ());
+        }
     }
 
     @Override

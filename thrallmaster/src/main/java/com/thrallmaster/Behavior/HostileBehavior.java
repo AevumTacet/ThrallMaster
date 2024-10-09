@@ -12,6 +12,8 @@ import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
 
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+
 public class HostileBehavior extends Behavior {
 
     private long startTime;
@@ -35,17 +37,19 @@ public class HostileBehavior extends Behavior {
         {
             return;
         }
-        if (state.target == null || !state.target.isValid())
+        if (state.target != null && state.target.isValid())
         {
+            entity.setTarget(state.target);
+        }
+        else if (state.aggressionState == AggressionState.HOSTILE) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
             {
-                // Hotfix: make them attack
                 state.target = nearestEntity;
                 entity.setTarget(nearestEntity);
 
                 entity.getWorld().spawnParticle(Particle.SMOKE, entity.getEyeLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1, 0.01);
-                entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.5f);
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_STRIDER_AMBIENT, 1, 0.5f);
             }
         }
 
@@ -59,7 +63,7 @@ public class HostileBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
-        return "Hostile";
+        return "Attacking";
     }
 
     @Override
@@ -68,7 +72,7 @@ public class HostileBehavior extends Behavior {
 
         if (material == Material.AIR)
         {
-            state.setAggressionState(AggressionState.DEFENSIVE);
+            state.aggressionState = AggressionState.DEFENSIVE;
             returnToPreviousState();
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_GUITAR, 1, 0.6f);
         }
@@ -80,5 +84,20 @@ public class HostileBehavior extends Behavior {
         state.target = null;
         this.getEntity().setTarget(null);
     }
+
+    @Override
+    protected void onSetPersistenData(ReadWriteNBT nbt) {
+        if (prevBehavior != null)
+        {
+            prevBehavior.onSetPersistenData(nbt);
+        }
+    }
     
+    @Override
+    protected void onRemovePersistentData(ReadWriteNBT nbt) {
+        if (prevBehavior != null)
+        {
+            prevBehavior.onRemovePersistentData(nbt);
+        }
+    }
 }

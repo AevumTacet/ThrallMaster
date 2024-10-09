@@ -6,14 +6,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Skeleton;
 
+import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallManager;
 import com.thrallmaster.ThrallState;
 
-import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.NBTCompound;
-import de.tr7zw.nbtapi.NBTFile;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 
 public abstract class Behavior {
@@ -48,13 +48,22 @@ public abstract class Behavior {
         {
             return;
         }
-        var textComponent = Component.text("Thrall [" + this.getBehaviorName() + "]");
+        
+        var textComponent = Component.text("Thrall [")
+                            .color(state.aggressionState == AggressionState.HOSTILE ? TextColor.color(255, 0, 0) : TextColor.color(0, 255, 0))
+                            .append(Component.text(this.getBehaviorName()))
+                            .color(TextColor.color(255, 255, 255))
+                            .append(Component.text("]"));
+        if (this.state.isSelected())
+        {
+            textComponent = textComponent.append(Component.text(" [S]"));
+        }
         this.getEntity().customName(textComponent);
     }
 
     public final void setPersistentData()
     {
-        NBTCompound nbt = ThrallManager.getNBTCompound(this.entityID);
+        NBTCompound nbt = ThrallManager.getNBTCompound(entityID);
 
         if (nbt != null)
         {
@@ -63,7 +72,7 @@ public abstract class Behavior {
     }
     public final void removePersistentData()
     {
-        NBTCompound nbt = ThrallManager.getNBTCompound(this.entityID);
+        NBTCompound nbt = ThrallManager.getNBTCompound(entityID);
 
         if (nbt != null)
         {
