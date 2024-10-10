@@ -2,8 +2,10 @@ package com.thrallmaster;
 
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
+import org.bukkit.Instrument;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.MusicInstrument;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -28,10 +30,13 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 
+import com.google.common.base.Optional;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.HostileBehavior;
@@ -236,6 +241,12 @@ public class ThrallManager implements Listener {
         return entity.isSameOwner(target);
     }
 
+    public boolean haveSameOwner(ThrallState entity, Entity target)
+    {
+        return getThralls(entity.getOwnerID())
+            .anyMatch(state -> state.getEntityID().equals(target.getUniqueId()));
+    }
+
     public Stream<ThrallState> getThralls()
     {
         return trackedEntities.values().stream().flatMap(HashSet<ThrallState>::stream);
@@ -390,71 +401,34 @@ public class ThrallManager implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event)
     {
         Player player = event.getPlayer();
-        UUID playerID = player.getUniqueId();
-        Material itemType = player.getInventory().getItemInMainHand().getType();
+        Material material = player.getInventory().getItemInMainHand().getType();
+        if (!trackedEntities.containsKey(player.getUniqueId()))
+        {
+            return;
+        }
 
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
         {
-            if (MaterialUtils.isAir(itemType))
+            if (MaterialUtils.isAir(material))
             {
-                RayTraceResult rayTraceResult = player.rayTraceEntities(40);
-                if (rayTraceResult != null)
-                {
-                    Entity entity = rayTraceResult.getHitEntity();
-                    ThrallState state = getThrall(player, entity.getUniqueId());
-    
-                    if (entity != null && state != null)
-                    {
-                        state.setSelected(!state.isSelected());
-                    }
-                }
-                else
-                {
-                    getThralls(playerID).forEach(x ->
-                        {
-                            x.setSelected(false);
-                        });
-                }
+               ThrallCommander.ToggleSelection(player);
             }
-            else if (MaterialUtils.isSword(itemType))
+            else if (MaterialUtils.isSword(material))
             {
-                Location eyeLocation = player.getEyeLocation();
-                RayTraceResult rayTraceResult = player.getWorld()
-                    .rayTrace(eyeLocation, eyeLocation.getDirection(), 100, FluidCollisionMode.ALWAYS, true, 1.0, e -> 
-                    {
-                        return (e instanceof LivingEntity) && (e != player) && !isThrall(e);
-                    });
+                ThrallCommander.CommandSelection(player);
+            }
+            else if (MaterialUtils.isHorn(material))
+            {
+                ThrallCommander.MultiSelect(player);   
+            }
+        }
 
-                if (rayTraceResult != null)
-                {
-                    Block block = rayTraceResult.getHitBlock();
-                    Entity entity = rayTraceResult.getHitEntity();
-                    
-                    if (entity != null)
-                    {
-                        getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).forEach(state -> 
-                        {
-                            Behavior oldBehavior = state.getBehavior();
-                            state.setAttackMode(entity);
-                            state.setBehavior(new HostileBehavior(state.getEntityID(), state, oldBehavior));
-                            player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                            
-                        });
-
-                        player.getWorld().spawnParticle(Particle.CRIT, entity.getLocation(), 20, 0.1, 0.1, 0.1, 0.01);
-                        return;
-                    }
-                    else if (block != null)
-                    {
-                        getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).forEach(state -> 
-                        {
-                            state.setBehavior(new IdleBehavior(state.getEntityID(), state, block.getLocation()));
-                            player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                        });
-
-                        player.getWorld().spawnParticle(Particle.CRIT, block.getLocation(), 20, 0.1, 0.1, 0.1, 0.02);
-                    }
-                }
+        else if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+        {
+            if (MaterialUtils.isHorn(material))
+            {
+                if (player.hasCooldown(Material.GOAT_HORN)) return;
+                ThrallCommander.HornCommand(player);   
             }
         }
 
