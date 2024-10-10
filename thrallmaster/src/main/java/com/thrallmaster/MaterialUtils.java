@@ -132,5 +132,10 @@ public class MaterialUtils
                 material == Material.NETHERITE_BOOTS) ;
     }
 
+    public static boolean isHorn(Material material)
+    {
+        return material == Material.GOAT_HORN;
+    }
+
 
 }
