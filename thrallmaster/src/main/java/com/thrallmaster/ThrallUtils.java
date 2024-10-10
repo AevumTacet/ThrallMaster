@@ -1,6 +1,5 @@
 package com.thrallmaster;
 
-import java.util.Collection;
 import java.util.Comparator;
 import org.bukkit.Location;
 import org.bukkit.Material;
