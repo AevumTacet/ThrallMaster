@@ -1,12 +1,14 @@
 package com.thrallmaster;
 
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
+import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
 
 import de.tr7zw.nbtapi.NBTCompound;
@@ -91,7 +94,7 @@ public class ThrallManager implements Listener {
             logger.info("Saving Thrall NBT state.");
             m_NBTFile.save();
             logger.info(count + " Entitites saved.");
-            logger.info(m_NBTFile.toString());
+            // logger.info(m_NBTFile.toString());
         } 
         catch (IOException e) 
         {
@@ -266,7 +269,7 @@ public class ThrallManager implements Listener {
 
                     if (state.isSelected() && entity != null)
                     {
-                        entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation(), 5, 0.1, 0.1, 0.1, 0.01);
+                        entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation().add(0, 2, 0), 5, 0.1, 0.1, 0.1, 0.01);
                         
                         if (System.currentTimeMillis() - state.getLastSelectionTime() >= 20 * 1000)
                         {
@@ -387,29 +390,75 @@ public class ThrallManager implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event)
     {
         Player player = event.getPlayer();
-        if (event.getAction() == Action.LEFT_CLICK_AIR && player.getInventory().getItemInMainHand().getType() == Material.AIR)
-        {
-            RayTraceResult rayTraceResult = player.rayTraceEntities(20);
-            
-            if (rayTraceResult != null)
-            {
-                Entity entity = rayTraceResult.getHitEntity();
-                ThrallState state = getThrall(player, entity.getUniqueId());
+        UUID playerID = player.getUniqueId();
+        Material itemType = player.getInventory().getItemInMainHand().getType();
 
-                if (entity != null && state != null)
+        if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
+        {
+            if (itemType == Material.AIR)
+            {
+                RayTraceResult rayTraceResult = player.rayTraceEntities(40);
+                if (rayTraceResult != null)
                 {
-                    state.setSelected(!state.isSelected());
-                    return;
+                    Entity entity = rayTraceResult.getHitEntity();
+                    ThrallState state = getThrall(player, entity.getUniqueId());
+    
+                    if (entity != null && state != null)
+                    {
+                        state.setSelected(!state.isSelected());
+                    }
+                }
+                else
+                {
+                    getThralls(playerID).forEach(x ->
+                        {
+                            x.setSelected(false);
+                        });
                 }
             }
 
-            // Otherwise..
-            getThralls(player.getUniqueId()).forEach(x ->
-                {
-                    x.setSelected(false);
-                });
+            else if (itemType.toString().endsWith("_SWORD"))
+            {
+                Location eyeLocation = player.getEyeLocation();
+                RayTraceResult rayTraceResult = player.getWorld()
+                    .rayTrace(eyeLocation, eyeLocation.getDirection(), 100, FluidCollisionMode.ALWAYS, true, 1.0, e -> 
+                    {
+                        return (e instanceof LivingEntity) && (e != player) && !isThrall(e);
+                    });
 
+                if (rayTraceResult != null)
+                {
+                    Block block = rayTraceResult.getHitBlock();
+                    Entity entity = rayTraceResult.getHitEntity();
+                    
+                    if (entity != null)
+                    {
+                        getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).forEach(state -> 
+                        {
+                            Behavior oldBehavior = state.getBehavior();
+                            state.setAttackMode(entity);
+                            state.setBehavior(new HostileBehavior(state.getEntityID(), state, oldBehavior));
+                            player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
+                            
+                        });
+
+                        player.getWorld().spawnParticle(Particle.CRIT, entity.getLocation(), 20, 0.1, 0.1, 0.1, 0.01);
+                        return;
+                    }
+                    else if (block != null)
+                    {
+                        getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).forEach(state -> 
+                        {
+                            state.setBehavior(new IdleBehavior(state.getEntityID(), state, block.getLocation()));
+                            player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
+                        });
+
+                        player.getWorld().spawnParticle(Particle.CRIT, block.getLocation(), 20, 0.1, 0.1, 0.1, 0.02);
+                    }
+                }
+            }
         }
+
     }
 
     // Evento que se activa cuando un Skeleton muere U otras entidades a manos del entity

@@ -13,7 +13,7 @@ import com.thrallmaster.ThrallState;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 
 public abstract class Behavior {
@@ -50,13 +50,13 @@ public abstract class Behavior {
         }
         
         var textComponent = Component.text("Thrall [")
-                            .color(state.aggressionState == AggressionState.HOSTILE ? TextColor.color(255, 0, 0) : TextColor.color(0, 255, 0))
+                            .color(state.aggressionState == AggressionState.HOSTILE ? NamedTextColor.RED : NamedTextColor.GREEN)
                             .append(Component.text(this.getBehaviorName()))
-                            .color(TextColor.color(255, 255, 255))
+                            .color(NamedTextColor.WHITE)
                             .append(Component.text("]"));
         if (this.state.isSelected())
         {
-            textComponent = textComponent.append(Component.text(" [S]"));
+            textComponent = textComponent.append(Component.text("[S]"));
         }
         this.getEntity().customName(textComponent);
     }

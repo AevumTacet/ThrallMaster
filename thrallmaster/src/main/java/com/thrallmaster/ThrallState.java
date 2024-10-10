@@ -33,21 +33,27 @@ public class ThrallState
         return selected;
     }
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-        this.lastSelectionTime = System.currentTimeMillis();
-
+    public void setSelected(boolean selected)
+    {
         if (behavior != null)
         {
             behavior.setEntityName();
         }
 
         Entity entity = getEntity();
-        if (entity != null)
+        if (entity != null && (this.selected != selected))
         {
-            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.75f, 0.5f);
-            entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation().add(0, 0.2, 0), 10, 0.1, 0.1, 0.1, 0.01);
+            if (selected)
+            {
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
+                entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1, 0.05);
+            } else {
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 0.8f);
+            }
         }
+
+        this.selected = selected;
+        this.lastSelectionTime = System.currentTimeMillis();
     }
     
     private long lastSelectionTime;
@@ -137,6 +143,12 @@ public class ThrallState
     public Entity getEntity()
     {
         return Bukkit.getEntity(this.entityID);
+    }
+
+    public boolean isValidEntity()
+    {
+        Entity entity = getEntity();
+        return entity != null && entity.isValid();
     }
 
     public boolean isSameOwner(ThrallState state) {
