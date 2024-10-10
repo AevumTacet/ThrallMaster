@@ -31,7 +31,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
-import org.jetbrains.annotations.NotNull;
 
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
@@ -312,8 +311,9 @@ public class ThrallManager implements Listener {
             player.getInventory().setItemInMainHand(null);
         } 
         else {
-            if (playerItem.getType() == Material.BONE
-                    && entity.getHealth() < entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+            if (MaterialUtils.isBone(playerItem.getType())
+                && entity.getHealth() < entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+
                 playerItem.setAmount(playerItem.getAmount() - 1);
                 player.getInventory().setItemInMainHand(playerItem);
                 world.spawnParticle(Particle.HEART, entity.getEyeLocation(), 1);
@@ -352,7 +352,7 @@ public class ThrallManager implements Listener {
             
             if (attacker == owner)
             {
-                if (owner.getInventory().getItemInMainHand().getType() == Material.AIR)
+                if (MaterialUtils.isAir(owner.getInventory().getItemInMainHand().getType()))
                 {
                     state.setSelected(!state.isSelected());
                     event.setCancelled(true);
@@ -395,7 +395,7 @@ public class ThrallManager implements Listener {
 
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
         {
-            if (itemType == Material.AIR)
+            if (MaterialUtils.isAir(itemType))
             {
                 RayTraceResult rayTraceResult = player.rayTraceEntities(40);
                 if (rayTraceResult != null)
@@ -416,8 +416,7 @@ public class ThrallManager implements Listener {
                         });
                 }
             }
-
-            else if (itemType.toString().endsWith("_SWORD"))
+            else if (MaterialUtils.isSword(itemType))
             {
                 Location eyeLocation = player.getEyeLocation();
                 RayTraceResult rayTraceResult = player.getWorld()

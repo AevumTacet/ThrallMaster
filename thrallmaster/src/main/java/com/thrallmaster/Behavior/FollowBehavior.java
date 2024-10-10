@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
+import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
 
@@ -81,13 +82,14 @@ public class FollowBehavior extends Behavior {
     @Override
     public void onBehaviorInteract(Material material) {
         Skeleton entity = this.getEntity();
-        if (material == Material.AIR)
+        
+        if (MaterialUtils.isAir(material))
         {
             state.setBehavior(new IdleBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.5f);
         }
 
-        if (material.toString().endsWith("_SWORD"))
+        if (MaterialUtils.isSword(material))
         {
             switch (state.aggressionState)
                 {

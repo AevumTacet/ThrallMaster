@@ -6,7 +6,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
 
 import java.util.UUID;
 import com.thrallmaster.Behavior.Behavior;

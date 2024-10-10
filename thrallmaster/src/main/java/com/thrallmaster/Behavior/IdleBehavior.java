@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import com.thrallmaster.AggressionState;
+import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
 
@@ -78,13 +79,13 @@ public class IdleBehavior extends Behavior {
     public void onBehaviorInteract(Material material) {
         Skeleton entity = this.getEntity();
 
-        if (material == Material.AIR)
+        if (MaterialUtils.isAir(material))
         {
             state.setBehavior(new FollowBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
         }
 
-        if (material.toString().endsWith("_SWORD"))
+        if (MaterialUtils.isSword(material))
         {
             switch (state.aggressionState)
             {

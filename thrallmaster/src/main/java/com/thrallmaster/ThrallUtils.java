@@ -34,7 +34,7 @@ public class ThrallUtils {
 
         LivingEntity closestEntity = null;
         double closestDistanceSquared = Double.MAX_VALUE;
-        double multiplier = ((Skeleton) from).getEquipment().getItemInMainHand().getType() == Material.BOW ? 1.5 : 1.0;
+        double multiplier = MaterialUtils.isRanged(((Skeleton) from).getEquipment().getItemInMainHand().getType()) ? 1.5 : 1.0;
 
         Collection<Entity> nearbyEntities = from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier);
         for (Entity candidate : nearbyEntities) {
@@ -78,33 +78,42 @@ public class ThrallUtils {
     public static void equipThrall(LivingEntity entity, ItemStack item)
     {
         World world = entity.getWorld();
-        String itemName = item.getType().toString();
+        Material material = item.getType();
         EntityEquipment equipment = entity.getEquipment();
 
-        if (item.getType() == Material.BOW || itemName.endsWith("_SWORD") || itemName.endsWith("_AXE") || itemName.endsWith("pike"))
+        if (MaterialUtils.isWeapon(material))
         {
             world.dropItemNaturally(entity.getLocation(), equipment.getItemInMainHand());
             equipment.setItemInMainHand(item);
         }
-        else if (itemName.endsWith("_HELMET"))
+        else if (MaterialUtils.isArmor(material))
         {
-            world.dropItemNaturally(entity.getLocation(), equipment.getHelmet());
-            equipment.setHelmet(item);
-        }
-        else if (itemName.endsWith("_CHESTPLATE"))
-        {
-            world.dropItemNaturally(entity.getLocation(), equipment.getChestplate());
-            equipment.setChestplate(item);
-        }
-        else if (itemName.endsWith("_LEGGINGS"))
-        {
-            world.dropItemNaturally(entity.getLocation(), equipment.getLeggings());
-            equipment.setLeggings(item);
-        }
-        else if (itemName.endsWith("_BOOTS"))
-        {
-            world.dropItemNaturally(entity.getLocation(), equipment.getBoots());
-            equipment.setBoots(item);
+            switch (MaterialUtils.getArmorType(material))
+            {
+                case HELMET:
+                world.dropItemNaturally(entity.getLocation(), equipment.getHelmet());
+                equipment.setHelmet(item);
+                break;
+
+                case CHESTPLATE:
+                world.dropItemNaturally(entity.getLocation(), equipment.getChestplate());
+                equipment.setChestplate(item);
+                break;
+
+                case LEGGINGS:
+                world.dropItemNaturally(entity.getLocation(), equipment.getLeggings());
+                equipment.setLeggings(item);
+                break;
+
+                case BOOTS:
+                world.dropItemNaturally(entity.getLocation(), equipment.getBoots());
+                equipment.setBoots(item);
+                break;
+
+                default:
+                    break;
+                
+            }
         }
 
     }
