@@ -33,12 +33,11 @@ public class ThrallUtils {
         Location location = from.getLocation();
         double multiplier = MaterialUtils.isRanged(((Skeleton) from).getEquipment().getItemInMainHand().getType()) ? 1.5 : 1.0;
 
-        return from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier).stream()
+        return (LivingEntity) from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier).stream()
             .filter(x -> x instanceof LivingEntity && !x.equals(owner))
             .filter(x -> !(manager.isThrall(x) && manager.haveSameOwner(state, x)))
             .filter(x -> filterClass.isAssignableFrom(x.getClass()) || x instanceof Player)
             .min(Comparator.comparingDouble(x -> x.getLocation().distance(location)))
-            .map(x -> (LivingEntity) x)
             .orElse(null);
     } 
 

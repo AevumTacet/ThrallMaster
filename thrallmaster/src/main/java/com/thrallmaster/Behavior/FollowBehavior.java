@@ -109,6 +109,19 @@ public class FollowBehavior extends Behavior {
     }
 
     @Override
+    public void onBehaviorStuck() 
+    {
+        Skeleton entity = this.getEntity();
+        Player owner = Bukkit.getPlayer(state.getOwnerID());
+
+        if (entity == null || owner == null)
+        {
+            return;
+        }
+        entity.teleport(owner.getLocation());
+    }
+
+    @Override
     public void onSetPersistenData(ReadWriteNBT nbt) {
         nbt.setEnum("AgressionState", state.aggressionState);
     }

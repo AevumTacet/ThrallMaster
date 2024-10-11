@@ -78,6 +78,13 @@ public class HostileBehavior extends Behavior {
         }
     }
 
+    @Override
+    public void onBehaviorStuck() 
+    {
+        prevBehavior.onBehaviorStuck();
+        returnToPreviousState();
+    }
+
     public void returnToPreviousState()
     {
         state.setBehavior(prevBehavior);

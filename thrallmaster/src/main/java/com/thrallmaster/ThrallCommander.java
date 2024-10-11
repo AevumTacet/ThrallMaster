@@ -1,8 +1,8 @@
 package com.thrallmaster;
 
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
-
+import java.util.stream.Collectors;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.MusicInstrument;
@@ -48,12 +48,23 @@ public class ThrallCommander
     {
         UUID playerID = player.getUniqueId();
         Location eyeLocation = player.getEyeLocation();
+
+        List<ThrallState> selected = manager.getThralls(playerID)
+            .filter(x -> x.isSelected() && x.isValidEntity())
+            .collect(Collectors.toList());
+
+        if (selected.size() == 0)
+        {
+            return;
+        }
+
+        
         RayTraceResult rayTraceResult = player.getWorld()
             .rayTrace(eyeLocation, eyeLocation.getDirection(), 100, FluidCollisionMode.ALWAYS, true, 1.0, e -> 
             {
                 return (e instanceof LivingEntity) && (e != player) && !manager.isThrall(e);
             });
-
+        
         if (rayTraceResult != null)
         {
             Block block = rayTraceResult.getHitBlock();
@@ -61,28 +72,29 @@ public class ThrallCommander
             
             if (entity != null)
             {
-                manager.getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).forEach(state -> 
+                selected.forEach(state -> 
                 {
                     Behavior oldBehavior = state.getBehavior();
                     state.setAttackMode(entity);
                     state.setBehavior(new HostileBehavior(state.getEntityID(), state, oldBehavior));
                     player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                    
+                    state.setSelected(true);
                 });
 
-                player.getWorld().spawnParticle(Particle.CRIT, entity.getLocation(), 20, 0.1, 0.1, 0.1, 0.01);
+                player.getWorld().spawnParticle(Particle.CRIT, entity.getLocation().add(0, 1, 0), 20, 0.1, 0.1, 0.1, 0.05);
                 return;
             }
 
             else if (block != null)
             {
-                manager.getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).forEach(state -> 
+               selected.forEach(state -> 
                 {
                     state.setBehavior(new IdleBehavior(state.getEntityID(), state, block.getLocation()));
                     player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
+                    state.setSelected(true);
                 });
 
-                player.getWorld().spawnParticle(Particle.CRIT, block.getLocation(), 20, 0.1, 0.1, 0.1, 0.02);
+                player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, block.getLocation().add(0, 1, 0), 20, 0.1, 0.1, 0.1, 0.1);
             }
         }
     }
@@ -95,35 +107,41 @@ public class ThrallCommander
         {
             MusicInstrumentMeta instrumentMeta = (MusicInstrumentMeta) meta;
             MusicInstrument instrument = instrumentMeta.getInstrument();
-            Stream<ThrallState> thrallStream = manager.getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity());
+            List<ThrallState> selected = manager.getThralls(playerID).filter(x -> x.isSelected() && x.isValidEntity()).collect(Collectors.toList());
             
-            if (instrument == MusicInstrument.CALL_GOAT_HORN)
+            if (selected.size() == 0)
             {
-                if (thrallStream.allMatch(state -> {
-                    return state.getBehavior() instanceof FollowBehavior;}))
+                return;
+            }
+
+            if (instrument == MusicInstrument.PONDER_GOAT_HORN)
+            {
+                boolean allFollow = selected.stream().allMatch(state -> state.getBehavior() instanceof FollowBehavior);
+                if (allFollow)
                 {
-                    thrallStream.forEach(state -> state.setBehavior(new IdleBehavior(state.getEntityID(), state)) );
+                    player.sendMessage("Changing all " + selected.size() + " Thralls to Guard.");
+                    selected.forEach(state -> state.setBehavior(new IdleBehavior(state.getEntityID(), state)) );
                 }
                 else
                 {
-                    thrallStream.forEach(state -> state.setBehavior(new FollowBehavior(state.getEntityID(), state)) );
+                    player.sendMessage("Changing all " + selected.size() + " Thralls to Follow.");
+                    selected.forEach(state -> state.setBehavior(new FollowBehavior(state.getEntityID(), state)) );
                 }
             }
             else if (instrument == MusicInstrument.SEEK_GOAT_HORN)
             {
-                if (thrallStream.allMatch(state -> state.aggressionState == AggressionState.HOSTILE))
+                boolean allHostile = selected.stream().allMatch(state -> state.aggressionState == AggressionState.HOSTILE);
+                if (allHostile)
                 {
-                    thrallStream.forEach(state -> state.aggressionState = AggressionState.DEFENSIVE);
+                    player.sendMessage("Changing all " + selected.size() + " Thralls to Defensive.");
+                    selected.forEach(state -> state.aggressionState = AggressionState.DEFENSIVE);
                 }
                 else
                 {
-                    thrallStream.forEach(state -> state.aggressionState = AggressionState.HOSTILE);
+                    player.sendMessage("Changing all " + selected.size() + " Thralls to Hostile.");
+                    selected.forEach(state -> state.aggressionState = AggressionState.HOSTILE);
                 }
             }
-        }
-        else
-        {
-            ThrallManager.logger.info("ItemMeta was not MusicIntrumentMeta:(");
         }
     }
 
@@ -137,7 +155,7 @@ public class ThrallCommander
             
             if (block != null)
             {
-                double selectRadius = 10;
+                double selectRadius = 5;
                 player.getWorld().getNearbyEntities(block.getLocation(), selectRadius, selectRadius, selectRadius).stream()
                     .filter(x -> manager.isThrall(x))
                     .map(x -> manager.getThrall(x.getUniqueId()))

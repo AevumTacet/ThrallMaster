@@ -29,13 +29,10 @@ public abstract class Behavior {
     public abstract void onBehaviorStart();
     public abstract void onBehaviorTick();
     public abstract void onBehaviorInteract(Material material);
-
-    protected void onSetPersistenData(ReadWriteNBT nbt)
-    {
-    }
-    protected void onRemovePersistentData(ReadWriteNBT nbt)
-    {
-    }
+    
+    public void onBehaviorStuck() {}
+    protected void onSetPersistenData(ReadWriteNBT nbt) {}
+    protected void onRemovePersistentData(ReadWriteNBT nbt)  {}
 
     public final Skeleton getEntity()
     {

@@ -265,6 +265,11 @@ public class ThrallManager implements Listener {
                     if (behavior != null && entity != null)
                     {
                         behavior.onBehaviorTick();
+
+                        if (entity.isUnderWater())
+                        {
+                            behavior.onBehaviorStuck();
+                        }
                     }
 
                     if (state.isSelected() && entity != null)
@@ -402,24 +407,29 @@ public class ThrallManager implements Listener {
             if (MaterialUtils.isAir(material))
             {
                ThrallCommander.ToggleSelection(player);
+               //event.setCancelled(true);
             }
-            else if (MaterialUtils.isSword(material))
-            {
-                ThrallCommander.CommandSelection(player);
-            }
+            
             else if (MaterialUtils.isHorn(material))
             {
                 ThrallCommander.MultiSelect(player);   
+                event.setCancelled(true);
             }
         }
 
         else if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
         {
-            if (MaterialUtils.isHorn(material))
+            if (MaterialUtils.isSword(material))
+            {
+                ThrallCommander.CommandSelection(player);
+            }
+
+            else if (MaterialUtils.isHorn(material))
             {
                 if (player.hasCooldown(Material.GOAT_HORN)) return;
                 ThrallCommander.HornCommand(player);   
             }
+            
         }
 
     }

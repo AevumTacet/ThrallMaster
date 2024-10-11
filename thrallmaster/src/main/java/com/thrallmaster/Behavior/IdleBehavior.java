@@ -107,6 +107,18 @@ public class IdleBehavior extends Behavior {
     }
 
     @Override
+    public void onBehaviorStuck() 
+    {
+        Skeleton entity = this.getEntity();
+
+        if (entity == null)
+        {
+            return;
+        }
+        entity.teleport(startLocation);
+    }
+
+    @Override
     public void onSetPersistenData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "IDLE");
         nbt.setEnum("AgressionState", state.aggressionState);
