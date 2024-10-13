@@ -39,6 +39,7 @@ import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -51,6 +52,7 @@ public class ThrallManager implements Listener {
     private static NBTFile m_NBTFile;
 
     private HashMap<UUID, PlayerStats> playerData = new HashMap<>();
+    private HashSet<UUID> trackedEntities = new HashSet<>();
     private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
 
 
@@ -148,6 +150,7 @@ public class ThrallManager implements Listener {
             }
 
             playerData.computeIfAbsent(ownerID, PlayerStats::new).addThrall(state);
+            trackedEntities.add(entityID);
             thrallCount ++;
         }
 
@@ -171,6 +174,7 @@ public class ThrallManager implements Listener {
         entity.setRemoveWhenFarAway(false);
         
         playerData.computeIfAbsent(ownerID, PlayerStats::new).addThrall(state);
+        trackedEntities.add(entityID);
     }
 
     public ThrallState unregister(UUID entityID) {
@@ -185,6 +189,7 @@ public class ThrallManager implements Listener {
         if (playerData.get(state.getOwnerID()).removeThrall(state))
         {
             logger.info("Unregistering entity with UUID: " + entityID);
+            trackedEntities.remove(entityID);
 
             NBTCompound states = m_NBTFile.getCompound("ThrallStates");
             states.removeKey(entityID.toString());
@@ -221,6 +226,10 @@ public class ThrallManager implements Listener {
 
     public ThrallState getThrall(UUID entityID)
     {
+        if (!isEntityTracked(entityID))
+        {
+            return null;
+        }
         return  getThralls()
                 .filter(x -> x.getEntityID().equals(entityID)).findFirst()
                 .orElse(null);
@@ -228,11 +237,17 @@ public class ThrallManager implements Listener {
 
     public boolean isEntityTracked(UUID entityID)
     {
-        return getThralls()
-                .anyMatch(x -> x.getEntityID().equals(entityID));
+        return trackedEntities.contains(entityID);
     }
 
-
+    public PlayerStats getOwnerData(UUID playerID)
+    {
+        return playerData.getOrDefault(playerID, null);
+    }
+    public Stream<PlayerStats> getOwners()
+    {
+        return playerData.values().stream();
+    }
     public Stream<ThrallState> getThralls()
     {
         return playerData.values().stream().flatMap(PlayerStats::getThralls);
@@ -364,7 +379,7 @@ public class ThrallManager implements Listener {
                     event.setCancelled(true);
                 }
             }
-            else if (ThrallUtils.isThrall(attacker) && ThrallUtils.belongsTo(attacker, owner))
+            else if (ThrallUtils.isThrall(attacker) && ThrallUtils.isFriendly(attacker, owner))
             {
                 event.setCancelled(true);
             }
@@ -378,7 +393,7 @@ public class ThrallManager implements Listener {
         if (damaged instanceof Player) {
             Player player = (Player) damaged;
 
-            if (ThrallUtils.isThrall(attacker) && ThrallUtils.belongsTo(attacker, player))
+            if (ThrallUtils.isThrall(attacker) && ThrallUtils.isFriendly(attacker, player))
             {
                 event.setCancelled(true);
             }
@@ -463,7 +478,8 @@ public class ThrallManager implements Listener {
         if (ThrallUtils.isThrall(caller))
         {
             ThrallState callerState = getThrall(caller.getUniqueId());
-            if (callerState.belongsTo(target))
+
+            if (callerState.belongsTo(target) || ThrallUtils.isAlly(callerState, target))
             {
                 event.setCancelled(true);
             }
@@ -471,7 +487,7 @@ public class ThrallManager implements Listener {
             if (ThrallUtils.isThrall(target))
             {
                 ThrallState targetState = getThrall(target.getUniqueId());
-                if (callerState.isSameOwner(targetState))
+                if (ThrallUtils.isFriendly(callerState, targetState))
                 {
                     event.setCancelled(true);
                 }

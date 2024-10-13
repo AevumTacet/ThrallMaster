@@ -52,4 +52,8 @@ public class PlayerStats
     {
         return this.allies.stream();
     }
+    public boolean isAlly(UUID playerID)
+    {
+        return allies.contains(playerID);
+    }
 }
