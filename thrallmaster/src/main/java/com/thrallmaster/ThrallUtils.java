@@ -1,6 +1,8 @@
 package com.thrallmaster;
 
 import java.util.Comparator;
+
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -36,7 +38,7 @@ public class ThrallUtils {
         return (LivingEntity) from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier).stream()
             .filter(x -> x instanceof LivingEntity && !x.equals(owner))
             .filter(x -> !(manager.isThrall(x) && manager.haveSameOwner(state, x)))
-            .filter(x -> filterClass.isAssignableFrom(x.getClass()) || x instanceof Player)
+            .filter(x -> filterClass.isAssignableFrom(x.getClass()) || (x instanceof Player && ((Player)x).getGameMode() == GameMode.SURVIVAL) )
             .min(Comparator.comparingDouble(x -> x.getLocation().distance(location)))
             .orElse(null);
     } 
