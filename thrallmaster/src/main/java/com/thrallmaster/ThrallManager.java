@@ -193,6 +193,21 @@ public class ThrallManager implements Listener {
         return state;
     }
 
+
+    public void spawnThrall(Location location, Player owner)
+    {
+        World world = location.getWorld();
+        Skeleton thrall = world.spawn(location, Skeleton.class);
+        thrall.getEquipment().clear();
+
+        world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
+        world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
+        world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 40, 1, 1, 1, 0.2);
+        register(thrall, owner);
+        owner.sendMessage("Your Thrall rises!");
+    }
+
+
     public ThrallState getThrall(Player owner, UUID entityID)
     {
         return trackedEntities.getOrDefault(owner.getUniqueId(), new HashSet<>()).stream()
@@ -509,19 +524,10 @@ public class ThrallManager implements Listener {
             // Verifica si se alcanzó el número necesario de curaciones
             if (currentCures >= Main.config.getInt("minCures") && currentCures <= Main.config.getInt("maxCures")) 
             {
-                Skeleton thrall = world.spawn(entity.getLocation(), Skeleton.class);
-                thrall.getEquipment().clear();
-
-                world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
-                world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
-                world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 40, 1, 1, 1, 0.2);
+                spawnThrall(entity.getLocation(), thrower);
                 world.playSound(entity.getLocation(), Sound.ENTITY_DONKEY_DEATH, 1, 0.5f);;
 
                 entity.remove();
-
-                register(thrall, thrower);
-                thrower.sendMessage("Your Thrall rises!");
-                
                 trackedTamingLevel.remove(targetID);
             }
         }

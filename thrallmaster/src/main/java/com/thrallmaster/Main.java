@@ -3,6 +3,9 @@ package com.thrallmaster;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
+
 public class Main extends JavaPlugin {
 
    public static Main plugin;
@@ -10,14 +13,25 @@ public class Main extends JavaPlugin {
    public static ThrallManager manager;
 
    @Override
+   public void onLoad() {
+      super.onLoad();
+      CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(true));
+   }
+
+
+   @Override
    public void onEnable() {
       plugin = this;
-      saveDefaultConfig();
       config = getConfig();
+      saveDefaultConfig();
+
+      CommandAPI.onEnable();
 
       ThrallManager.logger = getLogger();
       manager = new ThrallManager();
       manager.registerAllEntities(this.getServer().getWorlds().get(0));
+
+      Commands.registerCommands(this);
 
       this.getServer().getPluginManager().registerEvents(manager, this);
       getLogger().info("Thrall Master plugin enabled.");
@@ -28,6 +42,7 @@ public class Main extends JavaPlugin {
    public void onDisable() {
       super.onDisable();
       ThrallManager.saveNBT();
+      CommandAPI.onDisable();
    }
 
    public static void reload() {
