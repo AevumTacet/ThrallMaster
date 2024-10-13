@@ -1,10 +1,17 @@
 package com.thrallmaster;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.plugin.Plugin;
+
+import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LocationArgument;
+import dev.jorel.commandapi.arguments.OfflinePlayerArgument;
 import dev.jorel.commandapi.arguments.PlayerArgument;
 
 
@@ -36,8 +43,60 @@ public class Commands
 
                     manager.spawnThrall(location, owner);
                 })
-            );
-                                
+            )
+            
+            .withSubcommand(new CommandAPICommand("ally")
+                .withSubcommand(new CommandAPICommand("add")
+                    .withArguments(new OfflinePlayerArgument("player"))
+                    .executesPlayer((player, args) ->
+                    {
+                        Player target = (Player) args.get("player");
+                        if (target == null)
+                        {
+                            throw CommandAPI.failWithString("Cannot assign ally because player doesn't exist.");
+                        }
+                        
+                        manager.getOwnerData(player.getUniqueId()).addAlly(target.getUniqueId());;
+                    }))
+                .withSubcommand(new CommandAPICommand("remove")
+                    .withArguments(new PlayerArgument("player"))
+                    .executesPlayer((player, args) ->
+                    {
+                        Player target = (Player) args.get("player");
+                        if (target == null)
+                        {
+                            throw CommandAPI.failWithString("Cannot remove ally because player doesn't exist.");
+                        }
+
+                        manager.getOwnerData(player.getUniqueId()).removeAlly(target.getUniqueId());;
+                    }))
+            )
+
+            .withSubcommand(new CommandAPICommand("transfer")
+                .withArguments(new PlayerArgument("player"))
+                .executesPlayer((player, args) ->
+                {
+                    Player target = (Player) args.get("player");
+                    if (target == null)
+                    {
+                        throw CommandAPI.failWithString("Cannot transfer Thralls because target player doesn't exist.");
+                    }
+
+                    var selected = manager.getThralls(player.getUniqueId())
+                                    .filter(state -> state.isSelected() && state.isValidEntity())
+                                    .collect(Collectors.toList());
+
+                    selected.forEach(state ->
+                        {
+                            manager.unregister(state.getEntityID());
+                            manager.register((Skeleton) state.getEntity(), target);
+                        });
+                        
+                    player.sendMessage("You transferred" + selected.size() + " Thralls to " + target.getName());
+                    target.sendMessage("You recieved" + selected.size() + "Thralls from " + player.getName());
+                })
+                )
+        ;
                                     
         base.register();
     }    

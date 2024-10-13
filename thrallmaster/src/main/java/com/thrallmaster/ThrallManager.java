@@ -242,7 +242,7 @@ public class ThrallManager implements Listener {
 
     public PlayerStats getOwnerData(UUID playerID)
     {
-        return playerData.getOrDefault(playerID, null);
+        return playerData.computeIfAbsent(playerID, PlayerStats::new);
     }
     public Stream<PlayerStats> getOwners()
     {
@@ -256,7 +256,7 @@ public class ThrallManager implements Listener {
     {
         if (!playerData.containsKey(playerID))
         {
-            return null;
+            return Stream.empty();
         }
         return playerData.get(playerID).getThralls();
     }
