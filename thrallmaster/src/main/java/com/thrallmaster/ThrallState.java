@@ -169,4 +169,9 @@ public class ThrallState
         this.lastInteractionTime = currentTime;
         return true;
     }
+
+    public boolean belongsTo(Entity owner) 
+    {
+        return ownerID.equals(owner.getUniqueId());
+    }
 }

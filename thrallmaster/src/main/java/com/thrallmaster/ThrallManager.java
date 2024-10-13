@@ -39,7 +39,6 @@ import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -50,8 +49,10 @@ public class ThrallManager implements Listener {
 
     public static Logger logger;
     private static NBTFile m_NBTFile;
+
+    private HashMap<UUID, PlayerStats> playerData = new HashMap<>();
     private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
-    private HashMap<UUID, HashSet<ThrallState>> trackedEntities = new HashMap<>();
+
 
     public ThrallManager() {
         File worldDir = Bukkit.getWorlds().get(0).getWorldFolder();
@@ -103,7 +104,7 @@ public class ThrallManager implements Listener {
         Set<String> dataKeys = states.getKeys();
 
         logger.info("Found " + dataKeys.size() + " entity compounds.");
-        trackedEntities.clear();
+        playerData.clear();
         int thrallCount = 0;
         
         for (String key : dataKeys)
@@ -145,13 +146,12 @@ public class ThrallManager implements Listener {
                     state.setBehavior(new FollowBehavior(entityID, state));
                     break;
             }
-            
-            trackedEntities.computeIfAbsent(ownerID, x -> new HashSet<>()).add(state);
+
+            playerData.computeIfAbsent(ownerID, PlayerStats::new).addThrall(state);
             thrallCount ++;
         }
 
         logger.info("Loading Thrall entities completed. " + thrallCount + " entities in total.");
-        logger.info(trackedEntities.toString());
     }
 
     public void register(Skeleton entity, Player owner) {
@@ -169,8 +169,8 @@ public class ThrallManager implements Listener {
         entity.setPersistent(true);
         state.setBehavior(new FollowBehavior(entityID, state));
         entity.setRemoveWhenFarAway(false);
-
-        trackedEntities.computeIfAbsent(ownerID, x -> new HashSet<>()).add(state);
+        
+        playerData.computeIfAbsent(ownerID, PlayerStats::new).addThrall(state);
     }
 
     public ThrallState unregister(UUID entityID) {
@@ -182,7 +182,7 @@ public class ThrallManager implements Listener {
             return null;
         }
 
-        if (trackedEntities.get(state.getOwnerID()).remove(state))
+        if (playerData.get(state.getOwnerID()).removeThrall(state))
         {
             logger.info("Unregistering entity with UUID: " + entityID);
 
@@ -203,6 +203,8 @@ public class ThrallManager implements Listener {
         world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
         world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
         world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 40, 1, 1, 1, 0.2);
+        world.playSound(thrall.getLocation(), Sound.ENTITY_DONKEY_DEATH, 1, 0.5f);;
+
         register(thrall, owner);
         owner.sendMessage("Your Thrall rises!");
     }
@@ -210,55 +212,38 @@ public class ThrallManager implements Listener {
 
     public ThrallState getThrall(Player owner, UUID entityID)
     {
-        return trackedEntities.getOrDefault(owner.getUniqueId(), new HashSet<>()).stream()
-                .filter(x -> x.getEntityID().equals(entityID)).findFirst()
-                .orElse(null);
+        if (!playerData.containsKey(owner.getUniqueId()))
+        {
+            return null;
+        }
+        return playerData.get(owner.getUniqueId()).getThrall(entityID);
     }
+
     public ThrallState getThrall(UUID entityID)
     {
-        return trackedEntities.values().stream()
-                .flatMap(HashSet<ThrallState>::stream)
+        return  getThralls()
                 .filter(x -> x.getEntityID().equals(entityID)).findFirst()
                 .orElse(null);
     }
 
     public boolean isEntityTracked(UUID entityID)
     {
-        return trackedEntities.values().stream()
-                .flatMap(HashSet<ThrallState> :: stream)
+        return getThralls()
                 .anyMatch(x -> x.getEntityID().equals(entityID));
     }
 
-    public boolean isThrall(Entity entity)
-    {
-        return (entity instanceof Skeleton) && isEntityTracked(entity.getUniqueId());
-    }
-
-    public boolean belongsTo(Entity entity, Entity owner) {
-        return getThrall(entity.getUniqueId()).getOwnerID().equals(owner.getUniqueId());
-    }
-    public boolean belongsTo(ThrallState state, Entity owner) {
-        return state.getOwnerID().equals(owner.getUniqueId());
-    }
-
-    public boolean haveSameOwner(ThrallState entity, ThrallState target)
-    {
-        return entity.isSameOwner(target);
-    }
-
-    public boolean haveSameOwner(ThrallState entity, Entity target)
-    {
-        return getThralls(entity.getOwnerID())
-            .anyMatch(state -> state.getEntityID().equals(target.getUniqueId()));
-    }
 
     public Stream<ThrallState> getThralls()
     {
-        return trackedEntities.values().stream().flatMap(HashSet<ThrallState>::stream);
+        return playerData.values().stream().flatMap(PlayerStats::getThralls);
     }
     public Stream<ThrallState> getThralls(UUID playerID)
     {
-        return trackedEntities.getOrDefault(playerID, new HashSet<>()).stream();
+        if (!playerData.containsKey(playerID))
+        {
+            return null;
+        }
+        return playerData.get(playerID).getThralls();
     }
 
     
@@ -271,7 +256,7 @@ public class ThrallManager implements Listener {
             @Override
             public void run()
              {  
-                trackedEntities.values().stream().flatMap(HashSet<ThrallState>::stream)
+                getThralls()
                 .forEach(state ->
                 {
                     Entity entity = state.getEntity();
@@ -312,7 +297,7 @@ public class ThrallManager implements Listener {
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
 
-        if (!isThrall(event.getRightClicked())) {
+        if (!ThrallUtils.isThrall(event.getRightClicked())) {
             return;
         }
 
@@ -323,7 +308,7 @@ public class ThrallManager implements Listener {
         ItemStack playerItem = player.getInventory().getItemInMainHand();
         ThrallState state = getThrall(player, entity.getUniqueId());
 
-        if (state == null || !belongsTo(state, player) || !state.canInteract()) {
+        if (state == null || !state.belongsTo(player) || !state.canInteract()) {
             return;
         }
         
@@ -364,7 +349,7 @@ public class ThrallManager implements Listener {
                             ? (Entity)((Arrow)event.getDamager()).getShooter() 
                             : event.getDamager();
 
-        if (isThrall(damaged)) 
+        if (ThrallUtils.isThrall(damaged)) 
         {
             Skeleton entity = (Skeleton) damaged;
             ThrallState state = getThrall(entity.getUniqueId());
@@ -379,7 +364,7 @@ public class ThrallManager implements Listener {
                     event.setCancelled(true);
                 }
             }
-            else if (isThrall(attacker) && belongsTo(attacker, owner))
+            else if (ThrallUtils.isThrall(attacker) && ThrallUtils.belongsTo(attacker, owner))
             {
                 event.setCancelled(true);
             }
@@ -393,7 +378,7 @@ public class ThrallManager implements Listener {
         if (damaged instanceof Player) {
             Player player = (Player) damaged;
 
-            if (isThrall(attacker) && belongsTo(attacker, player))
+            if (ThrallUtils.isThrall(attacker) && ThrallUtils.belongsTo(attacker, player))
             {
                 event.setCancelled(true);
             }
@@ -412,7 +397,8 @@ public class ThrallManager implements Listener {
     {
         Player player = event.getPlayer();
         Material material = player.getInventory().getItemInMainHand().getType();
-        if (!trackedEntities.containsKey(player.getUniqueId()))
+
+        if (!playerData.containsKey(player.getUniqueId()))
         {
             return;
         }
@@ -454,7 +440,7 @@ public class ThrallManager implements Listener {
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
 
-        if (isThrall(entity))
+        if (ThrallUtils.isThrall(entity))
         {
             ThrallState state = unregister(entity.getUniqueId());
             
@@ -474,18 +460,18 @@ public class ThrallManager implements Listener {
         if (target == null)
             return;
 
-        if (isThrall(caller))
+        if (ThrallUtils.isThrall(caller))
         {
             ThrallState callerState = getThrall(caller.getUniqueId());
-            if (belongsTo(callerState, target))
+            if (callerState.belongsTo(target))
             {
                 event.setCancelled(true);
             }
 
-            if (isThrall(target))
+            if (ThrallUtils.isThrall(target))
             {
                 ThrallState targetState = getThrall(target.getUniqueId());
-                if (haveSameOwner(callerState, targetState))
+                if (callerState.isSameOwner(targetState))
                 {
                     event.setCancelled(true);
                 }
@@ -525,7 +511,6 @@ public class ThrallManager implements Listener {
             if (currentCures >= Main.config.getInt("minCures") && currentCures <= Main.config.getInt("maxCures")) 
             {
                 spawnThrall(entity.getLocation(), thrower);
-                world.playSound(entity.getLocation(), Sound.ENTITY_DONKEY_DEATH, 1, 0.5f);;
 
                 entity.remove();
                 trackedTamingLevel.remove(targetID);
@@ -542,7 +527,7 @@ public class ThrallManager implements Listener {
         }
         
         Entity caller = event.getEntity();
-        if (isThrall(caller))
+        if (ThrallUtils.isThrall(caller))
         {
             event.setCancelled(true);
         }

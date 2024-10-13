@@ -18,6 +18,23 @@ public class ThrallUtils {
     private static ThrallManager manager = Main.manager;
     public static double searchRadius = 10.0;
 
+
+    public static boolean isThrall(Entity entity)
+    {
+        return (entity instanceof Skeleton) && manager.isEntityTracked(entity.getUniqueId());
+    }
+
+    public static boolean belongsTo(Entity entity, Entity owner) {
+        return manager.getThrall(entity.getUniqueId()).belongsTo(owner);
+    }
+
+    public static boolean haveSameOwner(ThrallState thrall, Entity target)
+    {
+        return manager.getThralls(thrall.getOwnerID())
+            .anyMatch(state -> state.getEntityID().equals(target.getUniqueId()));
+    }
+
+
     public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity from) 
     {
         return findNearestEntity(from, Enemy.class);
@@ -37,7 +54,7 @@ public class ThrallUtils {
 
         return (LivingEntity) from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier).stream()
             .filter(x -> x instanceof LivingEntity && !x.equals(owner))
-            .filter(x -> !(manager.isThrall(x) && manager.haveSameOwner(state, x)))
+            .filter(x -> !(isThrall(x) && haveSameOwner(state, x)))
             .filter(x -> filterClass.isAssignableFrom(x.getClass()) || (x instanceof Player && ((Player)x).getGameMode() == GameMode.SURVIVAL) )
             .min(Comparator.comparingDouble(x -> x.getLocation().distance(location)))
             .orElse(null);

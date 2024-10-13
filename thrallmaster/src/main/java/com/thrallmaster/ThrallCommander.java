@@ -62,7 +62,7 @@ public class ThrallCommander
         RayTraceResult rayTraceResult = player.getWorld()
             .rayTrace(eyeLocation, eyeLocation.getDirection(), 100, FluidCollisionMode.ALWAYS, true, 1.0, e -> 
             {
-                return (e instanceof LivingEntity) && (e != player) && !manager.isThrall(e);
+                return (e instanceof LivingEntity) && (e != player) && !ThrallUtils.isThrall(e);
             });
         
         if (rayTraceResult != null)
@@ -157,9 +157,9 @@ public class ThrallCommander
             {
                 double selectRadius = 5;
                 player.getWorld().getNearbyEntities(block.getLocation(), selectRadius, selectRadius, selectRadius).stream()
-                    .filter(x -> manager.isThrall(x))
+                    .filter(x -> ThrallUtils.isThrall(x))
                     .map(x -> manager.getThrall(x.getUniqueId()))
-                    .filter(state ->  manager.belongsTo(state, player) && state.isValidEntity())
+                    .filter(state ->  state.belongsTo(player) && state.isValidEntity())
                     .forEach(state -> state.setSelected(true));
             }
         }
