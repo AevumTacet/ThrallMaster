@@ -62,6 +62,7 @@ public class ThrallManager implements Listener {
         {
             m_NBTFile = new NBTFile(new File(worldDir, "thrall.dat"));
             m_NBTFile.addCompound("ThrallStates");
+            m_NBTFile.addCompound("Whitelists");
         } 
         catch (IOException e) 
         {
@@ -149,12 +150,27 @@ public class ThrallManager implements Listener {
                     break;
             }
 
-            playerData.computeIfAbsent(ownerID, PlayerStats::new).addThrall(state);
+            getOwnerData(ownerID).addThrall(state);
             trackedEntities.add(entityID);
             thrallCount ++;
         }
 
         logger.info("Loading Thrall entities completed. " + thrallCount + " entities in total.");
+    }
+
+    public void registerWhitelist()
+    {
+        NBTCompound lists = m_NBTFile.getCompound("Whitelists");
+        Set<String> dataKeys = lists.getKeys();
+
+        for (String key : dataKeys)
+        {  
+            UUID playerID = UUID.fromString(key);
+            NBTCompound nbt = lists.getCompound(key);
+            PlayerStats stats = getOwnerData(playerID);
+            
+            nbt.getKeys().forEach(x -> stats.addAlly(UUID.fromString(x)));
+        }
     }
 
     public void register(Skeleton entity, Player owner) {
@@ -173,7 +189,7 @@ public class ThrallManager implements Listener {
         state.setBehavior(new FollowBehavior(entityID, state));
         entity.setRemoveWhenFarAway(false);
         
-        playerData.computeIfAbsent(ownerID, PlayerStats::new).addThrall(state);
+        getOwnerData(ownerID).addThrall(state);
         trackedEntities.add(entityID);
     }
 
@@ -197,6 +213,27 @@ public class ThrallManager implements Listener {
 
         return state;
     }
+
+    public void addAlly(UUID playerID, UUID allyID)
+    {
+        PlayerStats stats = getOwnerData(playerID);
+        stats.addAlly(allyID);
+
+        NBTCompound lists = m_NBTFile.getCompound("Whitelists");
+        NBTCompound nbt = lists.addCompound(playerID.toString());
+        nbt.setBoolean(allyID.toString(), true);
+    }
+
+    public void removeAlly(UUID playerID, UUID allyID)
+    {
+        PlayerStats stats = getOwnerData(playerID);
+        stats.removeAlly(allyID);
+
+        NBTCompound lists = m_NBTFile.getCompound("Whitelists");
+        NBTCompound nbt = lists.addCompound(playerID.toString());
+        nbt.removeKey(allyID.toString());
+    }
+
 
 
     public void spawnThrall(Location location, Player owner)

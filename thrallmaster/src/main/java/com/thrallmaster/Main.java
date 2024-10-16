@@ -30,6 +30,7 @@ public class Main extends JavaPlugin {
       ThrallManager.logger = getLogger();
       manager = new ThrallManager();
       manager.registerAllEntities(this.getServer().getWorlds().get(0));
+      manager.registerWhitelist();
 
       Commands.registerCommands(this);
 
