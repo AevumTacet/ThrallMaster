@@ -323,7 +323,7 @@ public class ThrallManager implements Listener {
         ItemStack playerItem = player.getInventory().getItemInMainHand();
         ThrallState state = getThrall(player, entity.getUniqueId());
 
-        if (state == null || !state.belongsTo(player) || !state.canInteract()) {
+        if (state == null || !ThrallUtils.belongsTo(state, player) || !state.canInteract()) {
             return;
         }
         
@@ -479,18 +479,9 @@ public class ThrallManager implements Listener {
         {
             ThrallState callerState = getThrall(caller.getUniqueId());
 
-            if (callerState.belongsTo(target) || ThrallUtils.isAlly(callerState, target))
+            if (ThrallUtils.isFriendly(callerState, target))
             {
                 event.setCancelled(true);
-            }
-
-            if (ThrallUtils.isThrall(target))
-            {
-                ThrallState targetState = getThrall(target.getUniqueId());
-                if (ThrallUtils.isFriendly(callerState, targetState))
-                {
-                    event.setCancelled(true);
-                }
             }
         }
     }

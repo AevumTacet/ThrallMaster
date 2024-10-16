@@ -57,6 +57,7 @@ public class Commands
                         }
                         
                         manager.getOwnerData(player.getUniqueId()).addAlly(target.getUniqueId());;
+                        player.sendMessage(target.getName() + " is now an ally!");
                     }))
                 .withSubcommand(new CommandAPICommand("remove")
                     .withArguments(new PlayerArgument("player"))
@@ -69,6 +70,7 @@ public class Commands
                         }
 
                         manager.getOwnerData(player.getUniqueId()).removeAlly(target.getUniqueId());;
+                        player.sendMessage(target.getName() + " is no longer an ally.");
                     }))
             )
 
@@ -81,19 +83,23 @@ public class Commands
                     {
                         throw CommandAPI.failWithString("Cannot transfer Thralls because target player doesn't exist.");
                     }
-
+                    
                     var selected = manager.getThralls(player.getUniqueId())
-                                    .filter(state -> state.isSelected() && state.isValidEntity())
-                                    .collect(Collectors.toList());
-
+                    .filter(state -> state.isSelected() && state.isValidEntity())
+                    .collect(Collectors.toList());
+                    if (selected.size() == 0)
+                    {
+                        throw CommandAPI.failWithString("You dont have Thralls selected.");
+                    }
+                    
                     selected.forEach(state ->
                         {
                             manager.unregister(state.getEntityID());
                             manager.register((Skeleton) state.getEntity(), target);
                         });
                         
-                    player.sendMessage("You transferred" + selected.size() + " Thralls to " + target.getName());
-                    target.sendMessage("You recieved" + selected.size() + "Thralls from " + player.getName());
+                    player.sendMessage("You transferred " + selected.size() + " Thralls to " + target.getName());
+                    target.sendMessage("You recieved " + selected.size() + " Thralls from " + player.getName());
                 })
                 )
         ;

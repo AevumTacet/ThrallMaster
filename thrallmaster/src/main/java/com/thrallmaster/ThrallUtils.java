@@ -11,6 +11,7 @@ import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.entity.Player;
@@ -26,58 +27,80 @@ public class ThrallUtils {
     }
 
     public static boolean belongsTo(Entity entity, Entity owner) {
-        if (!(owner instanceof Player))
+        if (!(owner instanceof Player) || !isThrall(entity))
         {
             return false;
         }
-        return manager.getThrall(entity.getUniqueId()).belongsTo(owner);
+
+        ThrallState thrall = manager.getThrall(entity.getUniqueId());
+        return belongsTo(thrall, owner);
+        
+    }
+    public static boolean belongsTo(ThrallState state, Entity owner) 
+    {
+        return state.getOwnerID().equals(owner.getUniqueId());
     }
 
-    public static boolean haveSameOwner(ThrallState thrall, Entity target)
+    public static boolean haveSameOwner(ThrallState state, Entity target)
     {
-        return manager.getThralls(thrall.getOwnerID())
-            .anyMatch(state -> state.getEntityID().equals(target.getUniqueId()));
+        return manager.getThralls(state.getOwnerID())
+            .anyMatch(x -> x.getEntityID().equals(target.getUniqueId()));
     }
 
-    public static boolean isAlly(ThrallState thrall, UUID playerID)
+    public static boolean isAlly(ThrallState state, UUID playerID)
     {
-        var ownerData =  manager.getOwnerData(thrall.getOwnerID());
+        var ownerData =  manager.getOwnerData(state.getOwnerID());
         if (ownerData == null)
         {
             return false;
         }
         return ownerData.isAlly(playerID);
     }
-    public static boolean isAlly(ThrallState thrall, ThrallState target)
+    public static boolean isAlly(ThrallState state, ThrallState target)
     {
         if (target == null)
         {
             return false;
         }
-        return isAlly(thrall, target.getOwnerID());
+        return isAlly(state, target.getOwnerID());
     }
-    public static boolean isAlly(ThrallState thrall, Entity target)
+    public static boolean isAlly(ThrallState state, Entity target)
     {
         if (target instanceof Player)
         {
-            return isAlly(thrall, target.getUniqueId());
+            Player player = (Player) target;
+            return isAlly(state, player.getUniqueId());
         }
-        var state = manager.getThrall(target.getUniqueId());
-        return isAlly(thrall, state);
+
+        var otherState = manager.getThrall(target.getUniqueId());
+        return isAlly(state, otherState);
     }
 
-    public static boolean isFriendly(ThrallState thrall, ThrallState target)
+    public static boolean isFriendly(ThrallState state, ThrallState target)
     {
-        return thrall.isSameOwner(target) || isAlly(thrall, target);
+        return state.isSameOwner(target) || isAlly(state, target);
     }
-    public static boolean isFriendly(ThrallState thrall, Entity target)
+    public static boolean isFriendly(ThrallState state, Entity target)
     {
         if (target instanceof Player)
         {
-            return belongsTo(target, target) || isAlly(thrall, target.getUniqueId());
+            if (state.aggressionState == AggressionState.DEFENSIVE)
+            {
+                return true;
+            }
+            Player player = (Player) target;
+            return belongsTo(state, player) || isAlly(state, player);
         }
-        return haveSameOwner(thrall, target) || isAlly(thrall, target);
+
+        if (target instanceof Wolf)
+        {
+            Wolf wolf = (Wolf) target;
+            return wolf.isTamed() && isFriendly(state, (Player) wolf.getOwner());
+        }
+
+        return haveSameOwner(state, target) || isAlly(state, target);
     }
+
     public static boolean isFriendly(Entity entity, Entity target)
     {
         if (isThrall(entity))
@@ -85,7 +108,6 @@ public class ThrallUtils {
             ThrallState state = manager.getThrall(entity.getUniqueId());
             return isFriendly(state, target);
         }
-        // TODO: Add support for tameable animals (i.e. Dogs)
         return false;
     }
 
@@ -109,8 +131,9 @@ public class ThrallUtils {
 
         return (LivingEntity) from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier).stream()
             .filter(x -> x instanceof LivingEntity && !x.equals(owner))
-            .filter(x -> !(isThrall(x) && isFriendly(state, x)))
-            .filter(x -> filterClass.isAssignableFrom(x.getClass()) || (x instanceof Player && ((Player)x).getGameMode() == GameMode.SURVIVAL) )
+            .filter(x -> filterClass.isAssignableFrom(x.getClass()))
+            .filter(x -> !isFriendly(state, x))
+            .filter(x -> (x instanceof Player && ((Player)x).getGameMode() == GameMode.SURVIVAL) )
             .min(Comparator.comparingDouble(x -> x.getLocation().distance(location)))
             .orElse(null);
     } 
