@@ -88,7 +88,13 @@ public class ThrallUtils {
             {
                 return true;
             }
+
             Player player = (Player) target;
+            if (player.getGameMode() != GameMode.SURVIVAL)  // By default, do not attack players in creative/spectator modes
+            {
+                return true;
+            }
+
             return belongsTo(state, player) || isAlly(state, player);
         }
 
@@ -98,7 +104,7 @@ public class ThrallUtils {
             return wolf.isTamed() && isFriendly(state, (Player) wolf.getOwner());
         }
 
-        return haveSameOwner(state, target) || isAlly(state, target);
+        return isAlly(state, target) || haveSameOwner(state, target);
     }
 
     public static boolean isFriendly(Entity entity, Entity target)
@@ -133,7 +139,6 @@ public class ThrallUtils {
             .filter(x -> x instanceof LivingEntity && !x.equals(owner))
             .filter(x -> filterClass.isAssignableFrom(x.getClass()))
             .filter(x -> !isFriendly(state, x))
-            .filter(x -> (x instanceof Player && ((Player)x).getGameMode() == GameMode.SURVIVAL) )
             .min(Comparator.comparingDouble(x -> x.getLocation().distance(location)))
             .orElse(null);
     } 
