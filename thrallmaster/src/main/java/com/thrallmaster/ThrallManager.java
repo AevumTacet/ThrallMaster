@@ -365,8 +365,11 @@ public class ThrallManager implements Listener {
         }
         
         if (player.isSneaking()) {
-            ThrallUtils.equipThrall(entity, playerItem);
-            player.getInventory().setItemInMainHand(null);
+            boolean equipped = ThrallUtils.equipThrall(entity, playerItem);
+            if (equipped)
+            {
+                player.getInventory().setItemInMainHand(null);
+            }
         } 
         else {
             if (MaterialUtils.isBone(playerItem.getType())

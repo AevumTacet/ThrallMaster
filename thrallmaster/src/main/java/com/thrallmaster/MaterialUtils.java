@@ -54,13 +54,14 @@ public class MaterialUtils
 
     public static boolean isRanged(Material material)
     {
-        return isBow(material) || isCrossbow(material);
+        return isBow(material);// || isCrossbow(material);
     }
 
 
     public static boolean isSword(Material material)
     {
         return (material == Material.IRON_SWORD ||
+                material == Material.WOODEN_SWORD ||
                 material == Material.STONE_SWORD ||
                 material == Material.GOLDEN_SWORD ||
                 material == Material.DIAMOND_SWORD ||
@@ -70,6 +71,7 @@ public class MaterialUtils
     public static boolean isAxe(Material material)
     {
         return (material == Material.IRON_AXE ||
+                material == Material.WOODEN_AXE ||
                 material == Material.STONE_AXE ||
                 material == Material.GOLDEN_AXE ||
                 material == Material.DIAMOND_AXE ||

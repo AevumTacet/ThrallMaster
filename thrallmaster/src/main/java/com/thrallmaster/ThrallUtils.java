@@ -144,7 +144,7 @@ public class ThrallUtils {
     } 
 
 
-    public static void equipThrall(LivingEntity entity, ItemStack item)
+    public static boolean equipThrall(LivingEntity entity, ItemStack item)
     {
         World world = entity.getWorld();
         Material material = item.getType();
@@ -154,6 +154,7 @@ public class ThrallUtils {
         {
             world.dropItemNaturally(entity.getLocation(), equipment.getItemInMainHand());
             equipment.setItemInMainHand(item);
+            return true;
         }
         else if (MaterialUtils.isArmor(material))
         {
@@ -162,28 +163,28 @@ public class ThrallUtils {
                 case HELMET:
                 world.dropItemNaturally(entity.getLocation(), equipment.getHelmet());
                 equipment.setHelmet(item);
-                break;
+                return true;
 
                 case CHESTPLATE:
                 world.dropItemNaturally(entity.getLocation(), equipment.getChestplate());
                 equipment.setChestplate(item);
-                break;
+                return true;
 
                 case LEGGINGS:
                 world.dropItemNaturally(entity.getLocation(), equipment.getLeggings());
                 equipment.setLeggings(item);
-                break;
+                return true;
 
                 case BOOTS:
                 world.dropItemNaturally(entity.getLocation(), equipment.getBoots());
                 equipment.setBoots(item);
-                break;
+                return true;
 
                 default:
-                    break;
+                return false;
                 
             }
         }
-
+        return false;
     }
 }
