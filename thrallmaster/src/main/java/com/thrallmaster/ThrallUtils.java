@@ -101,7 +101,7 @@ public class ThrallUtils {
         if (target instanceof Wolf)
         {
             Wolf wolf = (Wolf) target;
-            return wolf.isTamed() && isFriendly(state, (Player) wolf.getOwner());
+            return wolf.isTamed() && isAlly(state, wolf.getOwner().getUniqueId());
         }
 
         return isAlly(state, target) || haveSameOwner(state, target);

@@ -1,6 +1,7 @@
 package com.thrallmaster;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -24,10 +25,20 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Criteria;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
+import org.jetbrains.annotations.NotNull;
+
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
@@ -35,11 +46,14 @@ import com.thrallmaster.Behavior.IdleBehavior;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTFile;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -54,6 +68,7 @@ public class ThrallManager implements Listener {
     private HashMap<UUID, PlayerStats> playerData = new HashMap<>();
     private HashSet<UUID> trackedEntities = new HashSet<>();
     private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
+    private HashMap<UUID, ThrallBoard> trackedBoards = new HashMap<>();
 
 
     public ThrallManager() {
@@ -241,6 +256,8 @@ public class ThrallManager implements Listener {
         World world = location.getWorld();
         Skeleton thrall = world.spawn(location, Skeleton.class);
         thrall.getEquipment().clear();
+        thrall.setShouldBurnInDay(false);
+        thrall.setAware(true);
 
         world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
         world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
@@ -249,6 +266,8 @@ public class ThrallManager implements Listener {
 
         register(thrall, owner);
         owner.sendMessage("Your Thrall rises!");
+        
+        updateBoard(owner.getUniqueId());
     }
 
 
@@ -345,6 +364,20 @@ public class ThrallManager implements Listener {
         }.runTaskTimer(Main.plugin, 0, 10);
     }
 
+    public void updateBoard(UUID playerID)
+    {
+        if (!trackedBoards.containsKey(playerID))
+        {
+            return;
+        }
+
+        ThrallBoard board = trackedBoards.get(playerID);
+        PlayerStats stats = getOwnerData(playerID);
+
+        board.clearBoard();
+        board.updateBoard(stats);
+    }
+
     // Evento que maneja la interacción con un Skeleton para alternar entre estados FOLLOW e IDLE
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
@@ -393,8 +426,8 @@ public class ThrallManager implements Listener {
                 }
             }
         }
-
         world.spawnParticle(Particle.HAPPY_VILLAGER, entity.getEyeLocation(), 10, 0.1, 0.1, 0.1, 0.01);
+        updateBoard(state.getOwnerID());
     }
 
     @EventHandler
@@ -427,6 +460,8 @@ public class ThrallManager implements Listener {
             {
                 state.setAttackMode(attacker);
             }
+            
+            updateBoard(state.getOwnerID());
         }
 
         // Si el dañado es el dueño del Skeleton
@@ -468,7 +503,7 @@ public class ThrallManager implements Listener {
             
             else if (MaterialUtils.isHorn(material))
             {
-                ThrallCommander.MultiSelect(player);   
+                ThrallCommander.MultiSelect(player);
                 event.setCancelled(true);
             }
         }
@@ -483,10 +518,11 @@ public class ThrallManager implements Listener {
             else if (MaterialUtils.isHorn(material))
             {
                 if (player.hasCooldown(Material.GOAT_HORN)) return;
-                ThrallCommander.HornCommand(player);   
+                ThrallCommander.HornCommand(player);
             }
-            
         }
+
+        updateBoard(player.getUniqueId());
 
     }
 
@@ -503,6 +539,8 @@ public class ThrallManager implements Listener {
             {
                 state.getOwner().sendMessage("Your Thrall has fallen.");
             }
+
+            updateBoard(state.getOwnerID());
         }
     }
 
@@ -581,9 +619,24 @@ public class ThrallManager implements Listener {
     }
 
     @EventHandler
-    public void onWorldLoaded(WorldLoadEvent event)
+    public void onPlayerJoin(PlayerJoinEvent event) 
     {
-        this.registerAllEntities(event.getWorld());
+        Player player = event.getPlayer();
+        PlayerStats stats = getOwnerData(player.getUniqueId());
+
+        if (stats == null || stats.getCount() == 0)
+        {
+            return;
+        }
+        
+        new BukkitRunnable() {
+            @Override
+            public void run()
+            {
+                ThrallBoard board = new ThrallBoard(stats);
+                trackedBoards.put(player.getUniqueId(), board);
+            }}.runTaskLater(Main.plugin, 20);
+            
     }
 
 }

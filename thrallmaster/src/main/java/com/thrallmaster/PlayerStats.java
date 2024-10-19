@@ -16,10 +16,18 @@ public class PlayerStats
         this.thralls = new HashSet<>();
         this.allies = new HashSet<>();
     }
-
+    
+    public UUID getPlayerID() {
+        return playerID;
+    }
     public Stream<ThrallState> getThralls()
     {
         return this.thralls.stream();
+    }
+
+    public int getCount()
+    {
+        return this.thralls.size();
     }
 
     public ThrallState getThrall(UUID entityID)
