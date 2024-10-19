@@ -1,6 +1,5 @@
 package com.thrallmaster;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Location;

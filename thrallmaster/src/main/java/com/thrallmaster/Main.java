@@ -3,6 +3,8 @@ package com.thrallmaster;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.thrallmaster.Protocols.ThrallProtocol;
+
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 
@@ -16,6 +18,7 @@ public class Main extends JavaPlugin {
    public void onLoad() {
       super.onLoad();
       CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(true));
+      ThrallProtocol.onLoad(this);
    }
 
 

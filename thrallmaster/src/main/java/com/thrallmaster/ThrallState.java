@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HostileBehavior;
+import com.thrallmaster.Protocols.SelectionOutlineProtocol;
 
 public class ThrallState
 {
@@ -48,6 +49,15 @@ public class ThrallState
                 entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1, 0.05);
             } else {
                 entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 0.8f);
+            }
+            
+            try
+             {
+                SelectionOutlineProtocol outline = new SelectionOutlineProtocol(entity, selected);
+                outline.sendPacket(this.getOwner());
+            } catch (Exception e)
+            {
+                e.printStackTrace();
             }
         }
 
