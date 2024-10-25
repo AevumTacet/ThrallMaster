@@ -1,7 +1,6 @@
 package com.thrallmaster;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -26,35 +25,18 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.RenderType;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-import org.jetbrains.annotations.NotNull;
-
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
+import com.thrallmaster.IO.ThrallSaver;
+import com.thrallmaster.States.PlayerState;
+import com.thrallmaster.States.ThrallState;
 
-import de.tr7zw.nbtapi.NBTCompound;
-import de.tr7zw.nbtapi.NBTFile;
-import de.tr7zw.nbtapi.iface.ReadWriteNBT;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -63,138 +45,91 @@ import java.util.stream.Stream;
 public class ThrallManager implements Listener {
 
     public static Logger logger;
-    private static NBTFile m_NBTFile;
 
-    private HashMap<UUID, PlayerStats> playerData = new HashMap<>();
+    private HashMap<UUID, PlayerState> playerData = new HashMap<>();
     private HashSet<UUID> trackedEntities = new HashSet<>();
     private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
     private HashMap<UUID, ThrallBoard> trackedBoards = new HashMap<>();
 
-
-    public ThrallManager() {
-        File worldDir = Bukkit.getWorlds().get(0).getWorldFolder();
-        try 
-        {
-            m_NBTFile = new NBTFile(new File(worldDir, "thrall.dat"));
-            m_NBTFile.addCompound("ThrallStates");
-            m_NBTFile.addCompound("Whitelists");
-        } 
-        catch (IOException e) 
-        {
-            logger.warning("Thrall master NBT IO could not be initialized!");
-            e.printStackTrace();
-        }
-
+    public ThrallManager() 
+    {
         Update();
     }
 
-    public static NBTCompound getNBTCompound(UUID id)
+    public void restoreThralls(World world)
     {
-        NBTCompound states = m_NBTFile.getCompound("ThrallStates");
-        return states.getCompound(id.toString());
-    }
-    
-    public static int saveNBT()
-    {
-        if (m_NBTFile == null)
-        {
-            return 0;
-        }
-
-        try 
-        {
-            var count = m_NBTFile.getCompound("ThrallStates").getKeys().size();
-            m_NBTFile.save();
-            return count;
-        } 
-        catch (IOException e) 
-        {
-            logger.warning("Could not save NBT settings!");
-            e.printStackTrace();
-            return 0;    
-        }
-    }
-
-    public void registerAllEntities(World world)
-    {
-        NBTCompound states = m_NBTFile.getCompound("ThrallStates");
-        Set<String> dataKeys = states.getKeys();
-
-        logger.info("Found " + dataKeys.size() + " entity compounds.");
+        int compoundSize = ThrallSaver.getThrallCount();
+        logger.info("Found " + compoundSize + " entity compounds.");
         playerData.clear();
-        int thrallCount = 0;
         
-        for (String key : dataKeys)
-        {
-            ReadWriteNBT nbt = states.getCompound(key);
-
-            UUID entityID = UUID.fromString(key);
-            UUID ownerID =  UUID.fromString(nbt.getString("OwnerID"));
-            String currentBehavior =  nbt.getString("CurrentBehavior");
-
-            ThrallState state = new ThrallState(entityID, ownerID);
-            switch (currentBehavior) {
-                case "IDLE":
-                    if (nbt.hasTag("IdleLocationW") && nbt.hasTag("IdleLocationX") && 
-                        nbt.hasTag("IdleLocationY") && nbt.hasTag("IdleLocationZ"))
-                    {
-                        String locationW = nbt.getString("IdleLocationW");
-                        double locationX = nbt.getDouble("IdleLocationX");
-                        double locationY = nbt.getDouble("IdleLocationY");
-                        double locationZ = nbt.getDouble("IdleLocationZ");
-
-                        Location startLocation = new Location(Bukkit.getWorld(locationW), locationX, locationY, locationZ);
-                        state.setBehavior(new IdleBehavior(entityID, state, startLocation));
-                    }
-                    else
-                    {
-                        logger.warning("Warning: Idle state with no IdleLocation tag found.");
-                        state.setBehavior(new IdleBehavior(entityID, state, null));
-                    }
-
-                    break;
-                    
-                case "FOLLOW":
-                    state.setBehavior(new FollowBehavior(entityID, state));
-                    break;
-            
-                default:
-                    logger.warning("Thrall state is unspecified, defaulting to follow");
-                    state.setBehavior(new FollowBehavior(entityID, state));
-                    break;
-            }
-
-            getOwnerData(ownerID).addThrall(state);
-            trackedEntities.add(entityID);
-            thrallCount ++;
-        }
-
-        logger.info("Loading Thrall entities completed. " + thrallCount + " entities in total.");
+        ThrallSaver.getThralls()
+            .forEach(nbt ->
+            {
+                String key = nbt.getName();
+                UUID entityID = UUID.fromString(key);
+                UUID ownerID =  UUID.fromString(nbt.getString("OwnerID"));
+                String currentBehavior =  nbt.getString("CurrentBehavior");
+    
+                ThrallState state = new ThrallState(entityID, ownerID);
+                switch (currentBehavior) {
+                    case "IDLE":
+                        if (nbt.hasTag("IdleLocationW") && nbt.hasTag("IdleLocationX") && 
+                            nbt.hasTag("IdleLocationY") && nbt.hasTag("IdleLocationZ"))
+                        {
+                            String locationW = nbt.getString("IdleLocationW");
+                            double locationX = nbt.getDouble("IdleLocationX");
+                            double locationY = nbt.getDouble("IdleLocationY");
+                            double locationZ = nbt.getDouble("IdleLocationZ");
+    
+                            Location startLocation = new Location(Bukkit.getWorld(locationW), locationX, locationY, locationZ);
+                            state.setBehavior(new IdleBehavior(entityID, state, startLocation));
+                        }
+                        else
+                        {
+                            logger.warning("Warning: Idle state with no IdleLocation tag found.");
+                            state.setBehavior(new IdleBehavior(entityID, state, null));
+                        }
+    
+                        break;
+                        
+                    case "FOLLOW":
+                        state.setBehavior(new FollowBehavior(entityID, state));
+                        break;
+                
+                    default:
+                        logger.warning("Thrall state is unspecified, defaulting to follow");
+                        state.setBehavior(new FollowBehavior(entityID, state));
+                        break;
+                }
+    
+                getOwnerData(ownerID).addThrall(state);
+                trackedEntities.add(entityID);
+            });
+        
+        logger.info("Restoring Thrall entities completed. " + trackedEntities.size() + " entities in total.");
     }
 
-    public void registerWhitelist()
+    public void restoreAllies()
     {
-        NBTCompound lists = m_NBTFile.getCompound("Whitelists");
-        Set<String> dataKeys = lists.getKeys();
-
-        for (String key : dataKeys)
-        {  
-            UUID playerID = UUID.fromString(key);
-            NBTCompound nbt = lists.getCompound(key);
-            PlayerStats stats = getOwnerData(playerID);
-            
-            nbt.getKeys().forEach(x -> stats.addAlly(UUID.fromString(x)));
-        }
+        ThrallSaver.getAllies()
+            .forEach(nbt ->
+            {
+                String key = nbt.getName();
+                UUID playerID = UUID.fromString(key);
+                PlayerState stats = getOwnerData(playerID);
+                
+                nbt.getKeys().forEach(x -> stats.addAlly(UUID.fromString(x)));
+            });
+        logger.info("Restored Thrall whitelist info.");
     }
 
-    public void register(Skeleton entity, Player owner) {
+    public void registerThrall(Skeleton entity, Player owner) {
         logger.info("Registering entity entity with UUID: " + entity.getUniqueId());
         UUID entityID = entity.getUniqueId();
         UUID ownerID = owner.getUniqueId();
 
-        NBTCompound states = m_NBTFile.getCompound("ThrallStates");
+        var nbt = ThrallSaver.getThrall(entityID);
         ThrallState state = new ThrallState(entityID, ownerID);
-        NBTCompound nbt = states.addCompound(entityID.toString());
 
         nbt.setString("OwnerID", ownerID.toString());
         nbt.setString("CurrentBehavior", "FOLLOW");
@@ -221,8 +156,7 @@ public class ThrallManager implements Listener {
             logger.info("Unregistering entity with UUID: " + entityID);
             trackedEntities.remove(entityID);
 
-            NBTCompound states = m_NBTFile.getCompound("ThrallStates");
-            states.removeKey(entityID.toString());
+            ThrallSaver.removeThrall(entityID);
         }
 
         return state;
@@ -230,24 +164,21 @@ public class ThrallManager implements Listener {
 
     public void addAlly(UUID playerID, UUID allyID)
     {
-        PlayerStats stats = getOwnerData(playerID);
+        PlayerState stats = getOwnerData(playerID);
         stats.addAlly(allyID);
 
-        NBTCompound lists = m_NBTFile.getCompound("Whitelists");
-        NBTCompound nbt = lists.addCompound(playerID.toString());
+        var nbt = ThrallSaver.getAlly(playerID);
         nbt.setBoolean(allyID.toString(), true);
     }
 
     public void removeAlly(UUID playerID, UUID allyID)
     {
-        PlayerStats stats = getOwnerData(playerID);
+        PlayerState stats = getOwnerData(playerID);
         stats.removeAlly(allyID);
 
-        NBTCompound lists = m_NBTFile.getCompound("Whitelists");
-        NBTCompound nbt = lists.addCompound(playerID.toString());
+        var nbt = ThrallSaver.getAlly(playerID);
         nbt.removeKey(allyID.toString());
     }
-
 
 
     public void spawnThrall(Location location, Player owner)
@@ -263,7 +194,7 @@ public class ThrallManager implements Listener {
         world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 40, 1, 1, 1, 0.2);
         world.playSound(thrall.getLocation(), Sound.ENTITY_DONKEY_DEATH, 1, 0.5f);;
 
-        register(thrall, owner);
+        registerThrall(thrall, owner);
         owner.sendMessage("Your Thrall rises!");
         
         updateBoard(owner.getUniqueId());
@@ -295,17 +226,17 @@ public class ThrallManager implements Listener {
         return trackedEntities.contains(entityID);
     }
 
-    public PlayerStats getOwnerData(UUID playerID)
+    public PlayerState getOwnerData(UUID playerID)
     {
-        return playerData.computeIfAbsent(playerID, PlayerStats::new);
+        return playerData.computeIfAbsent(playerID, PlayerState::new);
     }
-    public Stream<PlayerStats> getOwners()
+    public Stream<PlayerState> getOwners()
     {
         return playerData.values().stream();
     }
     public Stream<ThrallState> getThralls()
     {
-        return playerData.values().stream().flatMap(PlayerStats::getThralls);
+        return playerData.values().stream().flatMap(PlayerState::getThralls);
     }
     public Stream<ThrallState> getThralls(UUID playerID)
     {
@@ -355,7 +286,7 @@ public class ThrallManager implements Listener {
 
                 if (elapsedTicks % 600 == 0)
                 {
-                    saveNBT();
+                    ThrallSaver.save();
                 }
 
                 elapsedTicks += 1;
@@ -371,7 +302,7 @@ public class ThrallManager implements Listener {
         }
 
         ThrallBoard board = trackedBoards.get(playerID);
-        PlayerStats stats = getOwnerData(playerID);
+        PlayerState stats = getOwnerData(playerID);
 
         board.clearBoard();
         board.updateBoard(stats);
@@ -621,7 +552,7 @@ public class ThrallManager implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) 
     {
         Player player = event.getPlayer();
-        PlayerStats stats = getOwnerData(player.getUniqueId());
+        PlayerState stats = getOwnerData(player.getUniqueId());
 
         if (stats == null || stats.getCount() == 0)
         {

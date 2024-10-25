@@ -20,6 +20,7 @@ import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
+import com.thrallmaster.States.ThrallState;
 
 public class ThrallCommander 
 {

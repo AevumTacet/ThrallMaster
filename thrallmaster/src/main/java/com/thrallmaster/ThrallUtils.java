@@ -14,6 +14,9 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+
+import com.thrallmaster.States.ThrallState;
+
 import org.bukkit.entity.Player;
 
 public class ThrallUtils {

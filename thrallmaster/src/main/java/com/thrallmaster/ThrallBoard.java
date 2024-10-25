@@ -14,6 +14,10 @@ import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+
+import com.thrallmaster.States.PlayerState;
+import com.thrallmaster.States.ThrallState;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -23,7 +27,7 @@ public final class ThrallBoard
     private Scoreboard scoreboard;
     private Objective healthList;
 
-    public ThrallBoard(PlayerStats player)
+    public ThrallBoard(PlayerState player)
     {
         playerID = player.getPlayerID();
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
@@ -47,7 +51,7 @@ public final class ThrallBoard
         }
     }
 
-    public void updateBoard(PlayerStats player)
+    public void updateBoard(PlayerState player)
     {
         List<ThrallState> thralls = player.getThralls().collect(Collectors.toList());
         if (thralls.size() == 0 || scoreboard == null)

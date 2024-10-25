@@ -9,8 +9,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
-import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
+import com.thrallmaster.States.ThrallState;
 
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 

@@ -3,6 +3,7 @@ package com.thrallmaster;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.thrallmaster.IO.ThrallSaver;
 import com.thrallmaster.Protocols.ThrallProtocol;
 
 import dev.jorel.commandapi.CommandAPI;
@@ -13,6 +14,7 @@ public class Main extends JavaPlugin {
    public static Main plugin;
    public static FileConfiguration config;
    public static ThrallManager manager;
+   public static ThrallSaver saver;
 
    @Override
    public void onLoad() {
@@ -27,15 +29,18 @@ public class Main extends JavaPlugin {
       plugin = this;
       config = getConfig();
       saveDefaultConfig();
+      
+      saver = new ThrallSaver(plugin);
 
       CommandAPI.onEnable();
 
       ThrallManager.logger = getLogger();
       manager = new ThrallManager();
-      manager.registerAllEntities(this.getServer().getWorlds().get(0));
-      manager.registerWhitelist();
+      manager.restoreThralls(this.getServer().getWorlds().get(0));
+      manager.restoreAllies();
 
       Commands.registerCommands(this);
+
 
       this.getServer().getPluginManager().registerEvents(manager, this);
       getLogger().info("Thrall Master plugin enabled.");
@@ -48,7 +53,7 @@ public class Main extends JavaPlugin {
       CommandAPI.onDisable();
 
       getLogger().info("Saving Thrall NBT state.");
-      int count = ThrallManager.saveNBT();
+      int count = ThrallSaver.save();
       getLogger().info(count + " Entitites saved.");
    }
 

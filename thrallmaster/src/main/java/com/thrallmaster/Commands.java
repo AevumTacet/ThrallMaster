@@ -94,7 +94,7 @@ public class Commands
                     selected.forEach(state ->
                         {
                             manager.unregister(state.getEntityID());
-                            manager.register((Skeleton) state.getEntity(), target);
+                            manager.registerThrall((Skeleton) state.getEntity(), target);
                         });
                         
                     player.sendMessage("You transferred " + selected.size() + " Thralls to " + target.getName());

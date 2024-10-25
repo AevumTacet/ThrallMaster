@@ -9,8 +9,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
 
 import com.thrallmaster.AggressionState;
-import com.thrallmaster.ThrallState;
 import com.thrallmaster.ThrallUtils;
+import com.thrallmaster.States.ThrallState;
 
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 

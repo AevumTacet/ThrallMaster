@@ -1,4 +1,4 @@
-package com.thrallmaster;
+package com.thrallmaster.States;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
@@ -8,11 +8,16 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
+
+import com.thrallmaster.AggressionState;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HostileBehavior;
+import com.thrallmaster.IO.Exportable;
 import com.thrallmaster.Protocols.SelectionOutlineProtocol;
 
-public class ThrallState
+import de.tr7zw.nbtapi.NBTCompound;
+
+public class ThrallState implements Exportable
 {
     private UUID entityID;
     public UUID getEntityID() {
@@ -183,5 +188,17 @@ public class ThrallState
     public boolean belongsTo(Entity owner) 
     {
         return ownerID.equals(owner.getUniqueId());
+    }
+
+    @Override
+    public void export(NBTCompound nbt) 
+    {
+        var comp = nbt.addCompound(entityID.toString());
+        
+        comp.setString("EntityID", entityID.toString());
+        comp.setString("OwnerID", ownerID.toString());
+        comp.setString("AggressionState", aggressionState.toString());
+        
+        behavior.export(comp);
     }
 }

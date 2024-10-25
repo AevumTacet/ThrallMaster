@@ -1,16 +1,19 @@
-package com.thrallmaster;
+package com.thrallmaster.States;
 
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class PlayerStats 
+import com.thrallmaster.IO.Exportable;
+import de.tr7zw.nbtapi.NBTCompound;
+
+public class PlayerState implements Exportable
 {
     private UUID playerID;
     private HashSet<ThrallState> thralls;
     private HashSet<UUID> allies;
     
-    public PlayerStats(UUID playerID) 
+    public PlayerState(UUID playerID) 
     {
         this.playerID = playerID;
         this.thralls = new HashSet<>();
@@ -63,5 +66,17 @@ public class PlayerStats
     public boolean isAlly(UUID playerID)
     {
         return allies.contains(playerID);
+    }
+
+    @Override
+    public void export(NBTCompound nbt)
+    {   
+        nbt.setString("PlayerID", playerID.toString());
+
+        var thrallComp = nbt.addCompound("Thralls");
+        var alliesComp = nbt.addCompound("Allies");
+
+        getThralls().forEach(state -> state.export(thrallComp));
+        getAllies().forEach(ally -> alliesComp.setInteger(ally.toString(), 0));
     }
 }

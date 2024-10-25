@@ -8,7 +8,9 @@ import org.bukkit.entity.Skeleton;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallManager;
-import com.thrallmaster.ThrallState;
+import com.thrallmaster.IO.Exportable;
+import com.thrallmaster.IO.ThrallSaver;
+import com.thrallmaster.States.ThrallState;
 
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -16,7 +18,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 
-public abstract class Behavior {
+public abstract class Behavior implements Exportable
+{
     protected UUID entityID;
     protected ThrallState state;
 
@@ -57,23 +60,23 @@ public abstract class Behavior {
         }
         this.getEntity().customName(textComponent);
     }
+    
+
+    @Override
+    public void export(NBTCompound nbt) 
+    {
+        var comp = nbt.addCompound("Behavior");
+        this.onSetPersistenData(comp); 
+    }
 
     public final void setPersistentData()
     {
-        NBTCompound nbt = ThrallManager.getNBTCompound(entityID);
-
-        if (nbt != null)
-        {
-            this.onSetPersistenData(nbt);
-        }
+        var nbt = ThrallSaver.getThrall(entityID);
+        this.onSetPersistenData(nbt);
     }
     public final void removePersistentData()
     {
-        NBTCompound nbt = ThrallManager.getNBTCompound(entityID);
-
-        if (nbt != null)
-        {
-            this.onRemovePersistentData(nbt);
-        }
+        var nbt = ThrallSaver.getThrall(entityID);
+        this.onRemovePersistentData(nbt);
     }
 }
