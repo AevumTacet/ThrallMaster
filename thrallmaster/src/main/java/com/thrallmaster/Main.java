@@ -45,8 +45,11 @@ public class Main extends JavaPlugin {
    @Override
    public void onDisable() {
       super.onDisable();
-      ThrallManager.saveNBT();
       CommandAPI.onDisable();
+
+      getLogger().info("Saving Thrall NBT state.");
+      int count = ThrallManager.saveNBT();
+      getLogger().info(count + " Entitites saved.");
    }
 
    public static void reload() {

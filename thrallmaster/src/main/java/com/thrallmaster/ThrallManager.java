@@ -94,25 +94,24 @@ public class ThrallManager implements Listener {
         return states.getCompound(id.toString());
     }
     
-    public static void saveNBT()
+    public static int saveNBT()
     {
         if (m_NBTFile == null)
         {
-            return;
+            return 0;
         }
 
         try 
         {
             var count = m_NBTFile.getCompound("ThrallStates").getKeys().size();
-            logger.info("Saving Thrall NBT state.");
             m_NBTFile.save();
-            logger.info(count + " Entitites saved.");
-            // logger.info(m_NBTFile.toString());
+            return count;
         } 
         catch (IOException e) 
         {
             logger.warning("Could not save NBT settings!");
             e.printStackTrace();
+            return 0;    
         }
     }
 
