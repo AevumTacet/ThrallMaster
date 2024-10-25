@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.thrallmaster.IO.Exportable;
+import com.thrallmaster.IO.Serializable;
 import de.tr7zw.nbtapi.NBTCompound;
 
-public class PlayerState implements Exportable
+public class PlayerState implements Serializable
 {
     private UUID playerID;
     private HashSet<ThrallState> thralls;

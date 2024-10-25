@@ -12,12 +12,12 @@ import java.util.UUID;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HostileBehavior;
-import com.thrallmaster.IO.Exportable;
+import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.Protocols.SelectionOutlineProtocol;
 
 import de.tr7zw.nbtapi.NBTCompound;
 
-public class ThrallState implements Exportable
+public class ThrallState implements Serializable
 {
     private UUID entityID;
     public UUID getEntityID() {

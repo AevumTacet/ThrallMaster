@@ -3,7 +3,7 @@ package com.thrallmaster;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.thrallmaster.IO.ThrallSaver;
+import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.Protocols.ThrallProtocol;
 
 import dev.jorel.commandapi.CommandAPI;
@@ -14,7 +14,7 @@ public class Main extends JavaPlugin {
    public static Main plugin;
    public static FileConfiguration config;
    public static ThrallManager manager;
-   public static ThrallSaver saver;
+   public static NBTExporter saver;
 
    @Override
    public void onLoad() {
@@ -30,14 +30,11 @@ public class Main extends JavaPlugin {
       config = getConfig();
       saveDefaultConfig();
       
-      saver = new ThrallSaver(plugin);
-
       CommandAPI.onEnable();
 
       ThrallManager.logger = getLogger();
       manager = new ThrallManager();
-      manager.restoreThralls(this.getServer().getWorlds().get(0));
-      manager.restoreAllies();
+      manager.restorePlayers();
 
       Commands.registerCommands(this);
 
@@ -53,10 +50,9 @@ public class Main extends JavaPlugin {
       CommandAPI.onDisable();
 
       getLogger().info("Saving Thrall NBT state.");
-      int count = ThrallSaver.save();
-      getLogger().info(count + " Entitites saved.");
+      // getLogger().info(count + " Entitites saved.");
 
-      manager.savePlayers();
+      manager.savePlayers(true);
    }
 
    public static void reload() {

@@ -8,8 +8,8 @@ import org.bukkit.entity.Skeleton;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.ThrallManager;
-import com.thrallmaster.IO.Exportable;
-import com.thrallmaster.IO.ThrallSaver;
+import com.thrallmaster.IO.Serializable;
+import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.States.ThrallState;
 
 import de.tr7zw.nbtapi.NBTCompound;
@@ -18,7 +18,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 
-public abstract class Behavior implements Exportable
+public abstract class Behavior implements Serializable
 {
     protected UUID entityID;
     protected ThrallState state;

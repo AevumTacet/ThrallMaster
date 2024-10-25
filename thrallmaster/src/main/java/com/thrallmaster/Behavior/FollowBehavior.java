@@ -120,5 +120,10 @@ public class FollowBehavior extends Behavior {
         }
         entity.teleport(owner.getLocation());
     }
+
+    @Override
+    protected void onSetPersistenData(ReadWriteNBT nbt) {
+        nbt.setString("CurrentBehavior", "FOLLOW");
+    }
     
 }
