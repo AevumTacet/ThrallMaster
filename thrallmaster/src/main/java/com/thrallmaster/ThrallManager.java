@@ -56,6 +56,11 @@ public class ThrallManager implements Listener {
         Update();
     }
 
+    public void savePlayers() {
+        ThrallSaver.clear();
+        playerData.values().forEach(player -> ThrallSaver.savePlayer(player));
+    }
+
     public void restoreThralls(World world)
     {
         int compoundSize = ThrallSaver.getThrallCount();
@@ -128,16 +133,12 @@ public class ThrallManager implements Listener {
         UUID entityID = entity.getUniqueId();
         UUID ownerID = owner.getUniqueId();
 
-        var nbt = ThrallSaver.getThrall(entityID);
         ThrallState state = new ThrallState(entityID, ownerID);
-
-        nbt.setString("OwnerID", ownerID.toString());
-        nbt.setString("CurrentBehavior", "FOLLOW");
-
-        entity.setPersistent(true);
         state.setBehavior(new FollowBehavior(entityID, state));
-        entity.setRemoveWhenFarAway(false);
         
+        entity.setPersistent(true);
+        entity.setRemoveWhenFarAway(false);
+
         getOwnerData(ownerID).addThrall(state);
         trackedEntities.add(entityID);
     }

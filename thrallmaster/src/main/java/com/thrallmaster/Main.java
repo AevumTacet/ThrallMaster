@@ -55,6 +55,8 @@ public class Main extends JavaPlugin {
       getLogger().info("Saving Thrall NBT state.");
       int count = ThrallSaver.save();
       getLogger().info(count + " Entitites saved.");
+
+      manager.savePlayers();
    }
 
    public static void reload() {

@@ -125,15 +125,10 @@ public class ThrallState implements Exportable
     
         
     public void setBehavior(Behavior m_Behavior) {
-        if (this.behavior != null)
-        {
-            this.behavior.removePersistentData();
-        }
-        
+       
         this.behavior = m_Behavior;
         this.behavior.onBehaviorStart();
         this.behavior.setEntityName();
-        this.behavior.setPersistentData();
     }
 
     public void setAttackMode(Entity target)

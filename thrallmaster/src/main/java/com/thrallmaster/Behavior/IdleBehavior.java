@@ -101,8 +101,7 @@ public class IdleBehavior extends Behavior {
                     break;
             }
             
-            state.getOwner().sendMessage("El Skeleton está en estado: " + state.aggressionState);
-            this.setPersistentData();
+            state.getOwner().sendMessage("El Thrall está en estado: " + state.aggressionState);
         }
     }
 
@@ -121,7 +120,6 @@ public class IdleBehavior extends Behavior {
     @Override
     public void onSetPersistenData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "IDLE");
-        nbt.setEnum("AgressionState", state.aggressionState);
 
         if (startLocation != null)
         {

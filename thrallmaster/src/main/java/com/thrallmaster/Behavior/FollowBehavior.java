@@ -120,10 +120,5 @@ public class FollowBehavior extends Behavior {
         }
         entity.teleport(owner.getLocation());
     }
-
-    @Override
-    public void onSetPersistenData(ReadWriteNBT nbt) {
-        nbt.setEnum("AgressionState", state.aggressionState);
-    }
     
 }

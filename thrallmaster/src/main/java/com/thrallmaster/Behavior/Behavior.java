@@ -69,14 +69,4 @@ public abstract class Behavior implements Exportable
         this.onSetPersistenData(comp); 
     }
 
-    public final void setPersistentData()
-    {
-        var nbt = ThrallSaver.getThrall(entityID);
-        this.onSetPersistenData(nbt);
-    }
-    public final void removePersistentData()
-    {
-        var nbt = ThrallSaver.getThrall(entityID);
-        this.onRemovePersistentData(nbt);
-    }
 }

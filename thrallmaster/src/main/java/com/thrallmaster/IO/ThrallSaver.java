@@ -34,6 +34,7 @@ public class ThrallSaver
             file = new NBTFile(new File(worldDir, "thrall.dat"));
             file.addCompound(THRALLS);
             file.addCompound(ALLIES);
+            file.addCompound("PlayerData");
         } 
         catch (IOException e) 
         {
@@ -98,6 +99,16 @@ public class ThrallSaver
         return states.getKeys().size();
     }
 
+    public static void savePlayer(Exportable player)
+    {
+        var nbt = saver.file.addCompound("PlayerData");
+        player.export(nbt);
+
+        System.out.println("Player saved:");
+        System.out.println(nbt.toString());
+
+    }
+
     public static int save()
     {
         try 
@@ -112,5 +123,10 @@ public class ThrallSaver
             e.printStackTrace();
             return 0;    
         }
+    }
+
+
+    public static void clear() {
+        saver.file.clearNBT();
     }
 }
