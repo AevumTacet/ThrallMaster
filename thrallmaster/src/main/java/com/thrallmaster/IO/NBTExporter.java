@@ -40,14 +40,25 @@ public class NBTExporter
         return nbt;
     }
 
-    public void savePlayer(Serializable player)
+    public void writePlayer(Serializable player)
     {
         var nbt = getDataContainer();
         player.export(nbt);
 
         System.out.println("Player saved:");
         System.out.println(nbt.toString());
+    }
 
+    public void save()
+    {
+        try 
+        {
+            file.save();
+        } 
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public void clear() {

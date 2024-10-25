@@ -71,10 +71,11 @@ public class PlayerState implements Serializable
     @Override
     public void export(NBTCompound nbt)
     {   
-        nbt.setString("PlayerID", playerID.toString());
+        var comp = nbt.addCompound(playerID.toString());
+        comp.setString("PlayerID", playerID.toString());
 
-        var thrallComp = nbt.addCompound("Thralls");
-        var alliesComp = nbt.addCompound("Allies");
+        var thrallComp = comp.addCompound("Thralls");
+        var alliesComp = comp.addCompound("Allies");
 
         getThralls().forEach(state -> state.export(thrallComp));
         getAllies().forEach(ally -> alliesComp.setInteger(ally.toString(), 0));

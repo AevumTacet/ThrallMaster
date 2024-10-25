@@ -58,8 +58,8 @@ public class ThrallManager implements Listener {
 
     public void savePlayers(boolean verbose) {
         nbt.clear();
-        playerData.values().forEach(player -> nbt.savePlayer(player));
-
+        playerData.values().forEach(player -> nbt.writePlayer(player));
+        nbt.save();
         if (verbose == true)
         {
             logger.info("Saved player data for " + playerData.size() + " players.");
