@@ -69,6 +69,7 @@ public class FollowBehavior extends Behavior {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
             {
+                state.target = nearestEntity;
                 state.setBehavior(new HostileBehavior(entityID, state, this));
             } 
         }
@@ -122,7 +123,7 @@ public class FollowBehavior extends Behavior {
     }
 
     @Override
-    protected void onSetPersistenData(ReadWriteNBT nbt) {
+    protected void onSetPersistentData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "FOLLOW");
     }
     

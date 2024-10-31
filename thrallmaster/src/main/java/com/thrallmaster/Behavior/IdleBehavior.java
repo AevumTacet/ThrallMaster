@@ -70,6 +70,7 @@ public class IdleBehavior extends Behavior {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
             if (nearestEntity != null)
             {
+                state.target = nearestEntity;
                 state.setBehavior(new HostileBehavior(entityID, state, this));
             } 
         }
@@ -118,7 +119,7 @@ public class IdleBehavior extends Behavior {
     }
 
     @Override
-    public void onSetPersistenData(ReadWriteNBT nbt) {
+    public void onSetPersistentData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "IDLE");
 
         if (startLocation != null)

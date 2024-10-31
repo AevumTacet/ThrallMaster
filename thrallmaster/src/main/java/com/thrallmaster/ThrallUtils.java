@@ -3,6 +3,7 @@ package com.thrallmaster;
 import java.util.Comparator;
 import java.util.UUID;
 
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +15,9 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import com.thrallmaster.States.ThrallState;
 
@@ -137,15 +141,42 @@ public class ThrallUtils {
         Player owner = state.getOwner();
         Location location = from.getLocation();
         double multiplier = MaterialUtils.isRanged(((Skeleton) from).getEquipment().getItemInMainHand().getType()) ? 1.5 : 1.0;
+        double radius = searchRadius * multiplier;
 
-        return (LivingEntity) from.getWorld().getNearbyEntities(location, searchRadius * multiplier, searchRadius * multiplier, searchRadius * multiplier).stream()
-            .filter(x -> x instanceof LivingEntity && !x.equals(owner))
+        return (LivingEntity) from.getWorld()
+            .getNearbyEntities(location, radius, radius, radius,
+             x -> x instanceof LivingEntity && !x.equals(owner)).stream()
             .filter(x -> filterClass.isAssignableFrom(x.getClass()))
             .filter(x -> !isFriendly(state, x))
-            .min(Comparator.comparingDouble(x -> x.getLocation().distance(location)))
+            // .filter(x -> isTargetVisibleFor(state, (LivingEntity) x))
+            .min(Comparator.comparingDouble(x -> x.getLocation().distance(location) + state.selectionBias))
             .orElse(null);
     } 
 
+    public static boolean isTargetVisibleFor(ThrallState state, LivingEntity target)
+    {
+        LivingEntity entity = (LivingEntity) state.getEntity();
+        if (entity == null)
+        {
+            return false;
+        }
+
+        Location eyeLocation = entity.getEyeLocation().subtract(0, 0.5, 0);
+
+        Vector direction = target.getEyeLocation().subtract(eyeLocation).toVector();
+        RayTraceResult result = entity.getWorld()
+            .rayTrace(eyeLocation, direction, searchRadius * 1.5, FluidCollisionMode.NEVER, true, 2.0, e ->
+            {
+                return e.getUniqueId().equals(target.getUniqueId());
+            });
+
+        if (result != null && result.getHitEntity() != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     public static boolean equipThrall(LivingEntity entity, ItemStack item)
     {

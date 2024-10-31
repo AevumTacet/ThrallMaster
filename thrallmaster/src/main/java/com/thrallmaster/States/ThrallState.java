@@ -6,6 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.joml.Random;
 
 import java.util.UUID;
 
@@ -73,6 +74,8 @@ public class ThrallState implements Serializable
     public LivingEntity target;
     
     private long lastInteractionTime;
+    public float selectionBias;
+    public int phaseOffset;
 
     public ThrallState (LivingEntity entity, Player owner)
     {
@@ -80,12 +83,18 @@ public class ThrallState implements Serializable
     }
     
     public ThrallState(UUID entityID, UUID ownerID) {
+
+        Random random = new Random();
+
         this.entityID = entityID;
         this.ownerID = ownerID;
         this.lastInteractionTime = 0;
         this.lastSelectionTime = 0;
         this.aggressionState = AggressionState.DEFENSIVE;
         this.target = null;
+
+        this.selectionBias = (random.nextFloat() - 0.5f) * 6;
+        this.phaseOffset = random.nextInt(3);
     }
     
     @Override

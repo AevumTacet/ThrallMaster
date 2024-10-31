@@ -29,13 +29,19 @@ public class ThrallCommander
     public static void ToggleSelection(Player player)
     {
         UUID playerID = player.getUniqueId();
-        RayTraceResult rayTraceResult = player.rayTraceEntities(40);
-            if (rayTraceResult != null)
+        Location eyeLocation = player.getEyeLocation();
+        RayTraceResult rayTraceResult = player.getWorld()
+            .rayTrace(eyeLocation, eyeLocation.getDirection(), 40, FluidCollisionMode.NEVER, true, 2.0, e ->
+            {
+                return (e instanceof LivingEntity) && (e != player) && ThrallUtils.isThrall(e);
+            });
+
+            if (rayTraceResult != null &&  rayTraceResult.getHitEntity() != null)
             {
                 Entity entity = rayTraceResult.getHitEntity();
                 ThrallState state = manager.getThrall(player, entity.getUniqueId());
 
-                if (entity != null && state != null)
+                if (state != null)
                 {
                     state.setSelected(!state.isSelected());
                 }

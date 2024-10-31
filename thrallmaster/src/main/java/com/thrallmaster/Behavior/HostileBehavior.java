@@ -27,7 +27,14 @@ public class HostileBehavior extends Behavior {
     @Override
     public void onBehaviorStart() 
     {
+        Skeleton entity = this.getEntity();
         this.startTime = System.currentTimeMillis();
+        
+        if (entity != null)
+        {
+            entity.getWorld().spawnParticle(Particle.SMOKE, entity.getEyeLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1, 0.01);
+            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_STRIDER_AMBIENT, 1, 0.5f);
+        }
     }
 
     @Override
@@ -40,17 +47,6 @@ public class HostileBehavior extends Behavior {
         if (state.target != null && state.target.isValid())
         {
             entity.setTarget(state.target);
-        }
-        else if (state.aggressionState == AggressionState.HOSTILE) {
-            LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
-            if (nearestEntity != null)
-            {
-                state.target = nearestEntity;
-                entity.setTarget(nearestEntity);
-
-                entity.getWorld().spawnParticle(Particle.SMOKE, entity.getEyeLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1, 0.01);
-                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_STRIDER_AMBIENT, 1, 0.5f);
-            }
         }
 
         long currentTime = System.currentTimeMillis();
@@ -93,10 +89,10 @@ public class HostileBehavior extends Behavior {
     }
 
     @Override
-    protected void onSetPersistenData(ReadWriteNBT nbt) {
+    protected void onSetPersistentData(ReadWriteNBT nbt) {
         if (prevBehavior != null)
         {
-            prevBehavior.onSetPersistenData(nbt);
+            prevBehavior.onSetPersistentData(nbt);
         }
     }
     

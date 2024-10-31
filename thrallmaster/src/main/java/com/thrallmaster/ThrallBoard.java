@@ -60,8 +60,8 @@ public final class ThrallBoard
         }
 
         Objective healthList = scoreboard.getObjective("health");
-        Team team_hostile = scoreboard.getTeam("Defensive");
-        Team team_defensive = scoreboard.getTeam("Hostile");
+        Team team_hostile = scoreboard.getTeam("Hostile");
+        Team team_defensive = scoreboard.getTeam("Defensive");
         
         thralls.forEach(state -> 
         {

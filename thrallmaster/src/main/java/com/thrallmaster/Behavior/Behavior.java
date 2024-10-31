@@ -6,16 +6,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Skeleton;
 
-import com.thrallmaster.AggressionState;
-import com.thrallmaster.ThrallManager;
 import com.thrallmaster.IO.Serializable;
-import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.States.ThrallState;
 
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 
 public abstract class Behavior implements Serializable
@@ -34,7 +29,7 @@ public abstract class Behavior implements Serializable
     public abstract void onBehaviorInteract(Material material);
     
     public void onBehaviorStuck() {}
-    protected void onSetPersistenData(ReadWriteNBT nbt) {}
+    protected void onSetPersistentData(ReadWriteNBT nbt) {}
     protected void onRemovePersistentData(ReadWriteNBT nbt)  {}
 
     public final Skeleton getEntity()
@@ -46,7 +41,7 @@ public abstract class Behavior implements Serializable
     public void export(NBTCompound nbt) 
     {
         var comp = nbt.addCompound("Behavior");
-        this.onSetPersistenData(comp); 
+        this.onSetPersistentData(comp); 
     }
 
 }

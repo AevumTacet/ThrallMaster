@@ -1,5 +1,6 @@
 package com.thrallmaster;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -8,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
@@ -28,6 +30,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.IO.Deserializer;
@@ -118,7 +122,7 @@ public class ThrallManager implements Listener {
 
         if (playerData.get(state.getOwnerID()).removeThrall(state))
         {
-            logger.info("Unregistering entity with UUID: " + entityID);
+            logger.info("Un-registering entity with UUID: " + entityID);
             trackedEntities.remove(entityID);
         }
 
@@ -146,7 +150,11 @@ public class ThrallManager implements Listener {
         thrall.setShouldBurnInDay(false);
         thrall.setAware(true);
         thrall.customName(Component.text("Thrall"));
-        thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(1.02);
+        thrall.setCustomNameVisible(true);
+        // thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(1.02);
+        
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
 
         world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
         world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
@@ -376,7 +384,7 @@ public class ThrallManager implements Listener {
     {
         Player player = event.getPlayer();
         Material material = player.getInventory().getItemInMainHand().getType();
-
+        
         if (!playerData.containsKey(player.getUniqueId()))
         {
             return;
@@ -451,7 +459,8 @@ public class ThrallManager implements Listener {
                 event.setCancelled(true);
             }
         }
-        else if (caller instanceof Wolf && ThrallUtils.isThrall(target))
+        
+        if (caller instanceof Wolf && ThrallUtils.isThrall(target))
         {
             ThrallState targetState = getThrall(target.getUniqueId());
             
@@ -459,6 +468,11 @@ public class ThrallManager implements Listener {
             {
                 event.setCancelled(true);
             }
+        }
+        
+        if (caller instanceof IronGolem && ThrallUtils.isThrall(target))
+        {
+            event.setCancelled(true);
         }
     }
 
