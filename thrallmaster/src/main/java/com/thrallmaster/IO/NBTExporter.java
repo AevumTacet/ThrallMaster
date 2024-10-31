@@ -44,9 +44,6 @@ public class NBTExporter
     {
         var nbt = getDataContainer();
         player.export(nbt);
-
-        System.out.println("Player saved:");
-        System.out.println(nbt.toString());
     }
 
     public void save()

@@ -40,11 +40,6 @@ public class ThrallState implements Serializable
 
     public void setSelected(boolean selected)
     {
-        if (behavior != null)
-        {
-            behavior.setEntityName();
-        }
-
         Entity entity = getEntity();
         if (entity != null && (this.selected != selected))
         {
@@ -128,7 +123,6 @@ public class ThrallState implements Serializable
        
         this.behavior = m_Behavior;
         this.behavior.onBehaviorStart();
-        this.behavior.setEntityName();
     }
 
     public void setAttackMode(Entity target)

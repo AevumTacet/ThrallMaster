@@ -60,7 +60,8 @@ public final class ThrallBoard
         }
 
         Objective healthList = scoreboard.getObjective("health");
-        Team team = scoreboard.getTeam("Thralls");
+        Team team_hostile = scoreboard.getTeam("Defensive");
+        Team team_defensive = scoreboard.getTeam("Hostile");
         
         thralls.forEach(state -> 
         {
@@ -68,21 +69,35 @@ public final class ThrallBoard
            {
                 LivingEntity entity = (LivingEntity) state.getEntity();
                 int health = (int) entity.getHealth();
-                team.addEntity(entity);
+
+                if (state.aggressionState == AggressionState.HOSTILE)
+                {
+                    team_defensive.removeEntity(entity);
+                    team_hostile.addEntity(entity);
+                }
+                else if (state.aggressionState == AggressionState.DEFENSIVE)
+                {
+                    team_hostile.removeEntity(entity);
+                    team_defensive.addEntity(entity);
+                }
 
                 Score score = healthList.getScore(entity.getUniqueId().toString());
 
                 score.setScore(health);
-                score.customName(Component.text("Thrall ")
-                    .append(Component.text("[ " + state.getBehavior().getBehaviorName() + "]").color(NamedTextColor.WHITE)));
+                score.customName(Component.text(entity.getName())
+                    .append(Component.text("[ " + state.getBehavior().getBehaviorName() + "]")
+                    .color(NamedTextColor.WHITE))
+                    .append( Component.text(state.isSelected() ? "*" : "")));
             }
         });
     }
 
     private void generateObjectives()
     {
-        Team team = scoreboard.registerNewTeam("Thralls");
-        team.color(NamedTextColor.GREEN);
+        Team team_hostile = scoreboard.registerNewTeam("Hostile");
+        Team team_defensive = scoreboard.registerNewTeam("Defensive");
+        team_hostile.color(NamedTextColor.RED);
+        team_defensive.color(NamedTextColor.GREEN);
 
         healthList = scoreboard.registerNewObjective("health", Criteria.DUMMY, Component.text("Thralls"));
         healthList.setDisplaySlot(DisplaySlot.SIDEBAR);

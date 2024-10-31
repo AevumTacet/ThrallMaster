@@ -42,26 +42,6 @@ public abstract class Behavior implements Serializable
         return (Skeleton) Bukkit.getEntity(entityID);
     }
 
-    public final void setEntityName()
-    {
-        if (this.getEntity() == null)
-        {
-            return;
-        }
-        
-        var textComponent = Component.text("Thrall [")
-                            .color(state.aggressionState == AggressionState.HOSTILE ? NamedTextColor.RED : NamedTextColor.GREEN)
-                            .append(Component.text(this.getBehaviorName()))
-                            .color(NamedTextColor.WHITE)
-                            .append(Component.text("]"));
-        if (this.state.isSelected())
-        {
-            textComponent = textComponent.append(Component.text("[S]"));
-        }
-        this.getEntity().customName(textComponent);
-    }
-    
-
     @Override
     public void export(NBTCompound nbt) 
     {

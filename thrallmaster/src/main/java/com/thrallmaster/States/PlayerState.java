@@ -65,7 +65,7 @@ public class PlayerState implements Serializable
     }
     public boolean isAlly(UUID playerID)
     {
-        return allies.contains(playerID);
+        return this.playerID.equals(playerID) || allies.contains(playerID);
     }
 
     @Override

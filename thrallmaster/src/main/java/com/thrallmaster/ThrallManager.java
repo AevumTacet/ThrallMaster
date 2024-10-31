@@ -35,6 +35,8 @@ import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.States.PlayerState;
 import com.thrallmaster.States.ThrallState;
 
+import net.kyori.adventure.text.Component;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -143,6 +145,8 @@ public class ThrallManager implements Listener {
         thrall.getEquipment().clear();
         thrall.setShouldBurnInDay(false);
         thrall.setAware(true);
+        thrall.customName(Component.text("Thrall"));
+        thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(1.02);
 
         world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
         world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
@@ -450,7 +454,7 @@ public class ThrallManager implements Listener {
         else if (caller instanceof Wolf && ThrallUtils.isThrall(target))
         {
             ThrallState targetState = getThrall(target.getUniqueId());
-
+            
             if (ThrallUtils.isFriendly(targetState, caller))
             {
                 event.setCancelled(true);
