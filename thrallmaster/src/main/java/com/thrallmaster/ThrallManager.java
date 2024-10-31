@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -442,6 +443,15 @@ public class ThrallManager implements Listener {
             ThrallState callerState = getThrall(caller.getUniqueId());
 
             if (ThrallUtils.isFriendly(callerState, target))
+            {
+                event.setCancelled(true);
+            }
+        }
+        else if (caller instanceof Wolf && ThrallUtils.isThrall(target))
+        {
+            ThrallState targetState = getThrall(target.getUniqueId());
+
+            if (ThrallUtils.isFriendly(targetState, caller))
             {
                 event.setCancelled(true);
             }
