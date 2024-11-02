@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Enemy;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -63,50 +64,15 @@ public class FollowBehavior extends Behavior {
             entity.getPathfinder().moveTo(owner.getLocation(), speed);
         }
 
-
         if (state.aggressionState == AggressionState.HOSTILE)
         {
-            LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity);
-            if (nearestEntity != null)
-            {
-                state.target = nearestEntity;
-                state.setBehavior(new HostileBehavior(entityID, state, this));
-            } 
+            targetNearbyEntities(Enemy.class);
         }
     }
 
     @Override
     public String getBehaviorName() {
         return "Following";
-    }
-
-    @Override
-    public void onBehaviorInteract(Material material) {
-        Skeleton entity = this.getEntity();
-        
-        if (MaterialUtils.isAir(material))
-        {
-            state.setBehavior(new IdleBehavior(entityID, state));
-            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.5f);
-        }
-
-        if (MaterialUtils.isMelee(material))
-        {
-            switch (state.aggressionState)
-                {
-                    case DEFENSIVE:
-                    default:
-                        state.aggressionState = AggressionState.HOSTILE;
-                        entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.6f);
-                        break;
-                        
-                        case HOSTILE:
-                        state.aggressionState = AggressionState.DEFENSIVE;
-                        entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
-                        break;
-                }
-            state.getOwner().sendMessage("El Skeleton está en estado: " + state.aggressionState);
-        }
     }
 
     @Override
