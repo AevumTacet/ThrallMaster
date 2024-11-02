@@ -1,17 +1,11 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import com.thrallmaster.AggressionState;
-import com.thrallmaster.MaterialUtils;
-import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
-
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class IdleBehavior extends Behavior {

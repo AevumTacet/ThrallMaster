@@ -1,17 +1,12 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
-
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
-
 import com.thrallmaster.AggressionState;
-import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
-
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class HostileBehavior extends Behavior {

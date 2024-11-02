@@ -154,7 +154,7 @@ public class ThrallManager implements Listener {
         thrall.customName(Component.text("Thrall"));
         thrall.setCustomNameVisible(true);
 
-        AttributeModifier damageModifier = new AttributeModifier(NamespacedKey.fromString("DamageModifier"), 1.5, AttributeModifier.Operation.ADD_SCALAR);
+        AttributeModifier damageModifier = new AttributeModifier(new NamespacedKey(Main.plugin, "DamageModifier"), 1.5, AttributeModifier.Operation.ADD_SCALAR);
         thrall.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).addModifier(damageModifier);
         
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);

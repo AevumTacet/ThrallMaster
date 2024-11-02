@@ -2,7 +2,6 @@ package com.thrallmaster;
 
 import java.util.Comparator;
 import java.util.UUID;
-
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -17,10 +16,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-
 import com.thrallmaster.States.ThrallState;
-
 import org.bukkit.entity.Player;
 
 public class ThrallUtils {
