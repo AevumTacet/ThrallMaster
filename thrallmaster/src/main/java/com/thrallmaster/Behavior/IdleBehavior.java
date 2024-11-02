@@ -86,7 +86,7 @@ public class IdleBehavior extends Behavior {
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
         }
 
-        if (MaterialUtils.isSword(material))
+        if (MaterialUtils.isMelee(material))
         {
             switch (state.aggressionState)
             {

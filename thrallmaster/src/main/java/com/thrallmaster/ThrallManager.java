@@ -3,10 +3,12 @@ package com.thrallmaster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
@@ -151,7 +153,9 @@ public class ThrallManager implements Listener {
         thrall.setAware(true);
         thrall.customName(Component.text("Thrall"));
         thrall.setCustomNameVisible(true);
-        // thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(1.02);
+
+        AttributeModifier damageModifier = new AttributeModifier(NamespacedKey.fromString("DamageModifier"), 1.5, AttributeModifier.Operation.ADD_SCALAR);
+        thrall.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).addModifier(damageModifier);
         
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
@@ -407,7 +411,7 @@ public class ThrallManager implements Listener {
 
         else if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
         {
-            if (MaterialUtils.isSword(material))
+            if (MaterialUtils.isMelee(material))
             {
                 ThrallCommander.CommandSelection(player);
             }
@@ -452,12 +456,7 @@ public class ThrallManager implements Listener {
 
         if (ThrallUtils.isThrall(caller))
         {
-            ThrallState callerState = getThrall(caller.getUniqueId());
-
-            if (ThrallUtils.isFriendly(callerState, target))
-            {
-                event.setCancelled(true);
-            }
+            event.setCancelled(true);
         }
         
         if (caller instanceof Wolf && ThrallUtils.isThrall(target))
