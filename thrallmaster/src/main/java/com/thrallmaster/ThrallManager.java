@@ -267,14 +267,19 @@ public class ThrallManager implements Listener {
 
     public void updateBoard(UUID playerID)
     {
-        if (!trackedBoards.containsKey(playerID))
+        PlayerState stats = getOwnerData(playerID);
+        if (stats == null)
         {
             return;
         }
 
-        ThrallBoard board = trackedBoards.get(playerID);
-        PlayerState stats = getOwnerData(playerID);
+        if (!trackedBoards.containsKey(playerID))
+        {
+            ThrallBoard board = new ThrallBoard(stats);
+            trackedBoards.put(playerID, board);
+        }
 
+        ThrallBoard board = trackedBoards.get(playerID);
         board.clearBoard();
         board.updateBoard(stats);
     }
@@ -313,7 +318,7 @@ public class ThrallManager implements Listener {
                 player.getInventory().setItemInMainHand(playerItem);
                 world.spawnParticle(Particle.HEART, entity.getEyeLocation(), 1);
                 world.playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                entity.heal(1);
+                entity.heal(2);
             }
             else {
 
@@ -544,8 +549,7 @@ public class ThrallManager implements Listener {
             @Override
             public void run()
             {
-                ThrallBoard board = new ThrallBoard(stats);
-                trackedBoards.put(player.getUniqueId(), board);
+                updateBoard(player.getUniqueId());
             }}.runTaskLater(Main.plugin, 20);
             
     }
