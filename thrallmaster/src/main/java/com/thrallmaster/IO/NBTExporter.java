@@ -24,8 +24,6 @@ public class NBTExporter
         {
             file = new NBTFile(new File(worldDir, "thrall.dat"));
             this.getDataContainer();
-
-            logger.warning(file.toString());
         } 
         catch (IOException e) 
         {

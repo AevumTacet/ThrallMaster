@@ -31,7 +31,7 @@ public class ThrallCommander
         UUID playerID = player.getUniqueId();
         Location eyeLocation = player.getEyeLocation();
         RayTraceResult rayTraceResult = player.getWorld()
-            .rayTrace(eyeLocation, eyeLocation.getDirection(), 40, FluidCollisionMode.NEVER, true, 2.0, e ->
+            .rayTrace(eyeLocation, eyeLocation.getDirection(), 40, FluidCollisionMode.NEVER, true, 1.2, e ->
             {
                 return (e instanceof LivingEntity) && (e != player) && ThrallUtils.isThrall(e);
             });

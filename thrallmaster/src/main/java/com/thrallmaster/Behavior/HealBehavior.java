@@ -50,9 +50,7 @@ public class HealBehavior extends Behavior {
                 state.target = null;
                 return;
             }
-
-            entity.lookAt(state.target);
-
+            
             if (distance <= 1)
             {
                 item.setAmount(item.getAmount() - 1);
@@ -61,7 +59,6 @@ public class HealBehavior extends Behavior {
                 entity.getWorld().spawnParticle(Particle.HEART, state.target.getEyeLocation(), 1);
                 entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
                 state.target.heal(1);
-                ((Skeleton) state.target).getPathfinder().moveTo(entity, 0);
                 
                 entity.swingHand(EquipmentSlot.HAND);
                 entity.getPathfinder().moveTo(state.target.getLocation(), 0);
@@ -70,7 +67,9 @@ public class HealBehavior extends Behavior {
             {
                 entity.getPathfinder().moveTo(state.target.getLocation());
             }
-
+            
+            entity.lookAt(state.target);
+            ((Skeleton) state.target).getPathfinder().moveTo(entity, 0);
         }
         
         long currentTime = System.currentTimeMillis();

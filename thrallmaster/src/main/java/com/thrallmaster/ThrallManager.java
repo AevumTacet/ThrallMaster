@@ -33,7 +33,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
@@ -41,9 +40,7 @@ import com.thrallmaster.IO.Deserializer;
 import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.States.PlayerState;
 import com.thrallmaster.States.ThrallState;
-
 import net.kyori.adventure.text.Component;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -155,10 +152,11 @@ public class ThrallManager implements Listener {
         thrall.customName(Component.text("Thrall"));
         thrall.setCustomNameVisible(true);
 
-        AttributeModifier damageModifier = new AttributeModifier(new NamespacedKey(Main.plugin, "DamageModifier"), 1.5, AttributeModifier.Operation.ADD_SCALAR);
+        AttributeModifier damageModifier = new AttributeModifier(new NamespacedKey(Main.plugin, "DamageModifier"), 2, AttributeModifier.Operation.ADD_SCALAR);
         thrall.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).addModifier(damageModifier);
+        thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(30);
         
-        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);
+        // Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
 
         world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
@@ -170,8 +168,8 @@ public class ThrallManager implements Listener {
         owner.sendMessage("Your Thrall rises!");
         
         updateBoard(owner.getUniqueId());
-    }
 
+    }
 
     public ThrallState getThrall(Player owner, UUID entityID)
     {
@@ -220,7 +218,6 @@ public class ThrallManager implements Listener {
     }
 
     
-    // Tarea recurrente que actualiza el seguimiento de Skeletons y el estado de ataque cada 10 ticks
     private long elapsedTicks = 1;
 
     private void Update()
@@ -576,5 +573,4 @@ public class ThrallManager implements Listener {
             trackedBoards.remove(playerID);
         }
     }
-
 }

@@ -43,15 +43,17 @@ public abstract class Behavior implements Serializable
             switch (state.aggressionState)
             {
                 case DEFENSIVE:
+                state.aggressionState = AggressionState.HOSTILE;
+                entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.6f);
+                break;
+                
+                case HOSTILE:
+                state.aggressionState = AggressionState.DEFENSIVE;
+                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
+                break;
+                
                 default:
-                    state.aggressionState = AggressionState.HOSTILE;
-                    entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1, 0.6f);
-                    break;
-                    
-                    case HOSTILE:
-                    state.aggressionState = AggressionState.DEFENSIVE;
-                    entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
-                    break;
+                break;
             }
             
             state.getOwner().sendMessage(entity.getName() + " is now " + state.aggressionState.toString().toLowerCase());
