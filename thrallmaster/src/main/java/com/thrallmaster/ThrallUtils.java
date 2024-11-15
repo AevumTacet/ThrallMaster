@@ -2,6 +2,8 @@ package com.thrallmaster;
 
 import java.util.Comparator;
 import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -121,12 +123,12 @@ public class ThrallUtils {
     }
 
 
-    public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity from) 
+    public static <T extends LivingEntity> Stream<LivingEntity> findNearestEntities(Entity from) 
     {
-        return findNearestEntity(from, Enemy.class);
+        return findNearestEntities(from, Enemy.class);
     }
 
-    public static <T extends LivingEntity> LivingEntity findNearestEntity(Entity from, Class<T> filterClass) 
+    public static <T extends LivingEntity> Stream<LivingEntity> findNearestEntities(Entity from, Class<T> filterClass) 
     {
         if (from == null)
         {
@@ -139,14 +141,10 @@ public class ThrallUtils {
         double multiplier = MaterialUtils.isRanged(((Skeleton) from).getEquipment().getItemInMainHand().getType()) ? 1.5 : 1.0;
         double radius = searchRadius * multiplier;
 
-        return (LivingEntity) from.getWorld()
-            .getNearbyEntities(location, radius, radius, radius,
-             x -> x instanceof LivingEntity && !x.equals(owner)).stream()
-            .filter(x -> filterClass.isAssignableFrom(x.getClass()))
-            .filter(x -> !isFriendly(state, x))
-            // .filter(x -> isTargetVisibleFor(state, (LivingEntity) x))
-            .min(Comparator.comparingDouble(x -> x.getLocation().distance(location) + state.selectionBias))
-            .orElse(null);
+        return from.getWorld().getNearbyEntities(location, radius, radius, radius, x -> x instanceof LivingEntity).stream()
+             .map(x -> (LivingEntity) x)
+             .filter(x -> !x.equals(from) && !x.equals(owner))
+             .filter(x -> filterClass.isAssignableFrom(x.getClass()));
     } 
 
     public static boolean isTargetVisibleFor(ThrallState state, LivingEntity target)
@@ -214,6 +212,24 @@ public class ThrallUtils {
                 return false;
                 
             }
+        }
+        else if (MaterialUtils.isBone(material))
+        {
+            ItemStack currentItem = equipment.getItemInMainHand();
+
+            if (!MaterialUtils.isBone(currentItem.getType()))
+            {
+                world.dropItemNaturally(entity.getLocation(), currentItem);
+                equipment.setItemInMainHand(item);
+            }
+            else
+            {
+                equipment.setItemInMainHand(currentItem.add(1));
+            }
+            
+            ThrallState state = manager.getThrall(entity.getUniqueId());
+            state.aggressionState = AggressionState.HEALER;
+            return true;
         }
         return false;
     }

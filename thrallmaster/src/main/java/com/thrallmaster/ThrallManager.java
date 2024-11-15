@@ -29,6 +29,7 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -234,7 +235,7 @@ public class ThrallManager implements Listener {
                     Entity entity = state.getEntity();
                     Behavior behavior = state.getBehavior();
 
-                    if (behavior != null && entity != null)
+                    if (behavior != null && entity != null && elapsedTicks % 5 == state.phaseOffset)
                     {
                         behavior.onBehaviorTick();
 
@@ -248,12 +249,24 @@ public class ThrallManager implements Listener {
                     {
                         entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, entity.getLocation().add(0, 2, 0), 5, 0.1, 0.1, 0.1, 0.01);
                         
-                        if (System.currentTimeMillis() - state.getLastSelectionTime() >= 20 * 1000)
+                        if (System.currentTimeMillis() - state.getLastSelectionTime() >= 10 * 1000)
                         {
                             state.setSelected(false);
                         }
                     }
                 });
+
+                if (elapsedTicks % 10 == 0)
+                {
+                    for (UUID id : playerData.keySet())
+                    {
+                        Player player = Bukkit.getPlayer(id);
+                        if (player != null && player.isOnline())
+                        {
+                            updateBoard(id);
+                        }
+                    }
+                }
 
                 if (elapsedTicks % 600 == 0)
                 {
@@ -262,7 +275,7 @@ public class ThrallManager implements Listener {
 
                 elapsedTicks += 1;
             }
-        }.runTaskTimer(Main.plugin, 0, 10);
+        }.runTaskTimer(Main.plugin, 0, 2);
     }
 
     public void updateBoard(UUID playerID)
@@ -318,7 +331,7 @@ public class ThrallManager implements Listener {
                 player.getInventory().setItemInMainHand(playerItem);
                 world.spawnParticle(Particle.HEART, entity.getEyeLocation(), 1);
                 world.playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                entity.heal(2);
+                entity.heal(1);
             }
             else {
 
@@ -551,7 +564,17 @@ public class ThrallManager implements Listener {
             {
                 updateBoard(player.getUniqueId());
             }}.runTaskLater(Main.plugin, 20);
-            
+    }
+
+    @EventHandler
+    public void onPlayerDisconnect(PlayerQuitEvent event) 
+    {
+        UUID playerID = event.getPlayer().getUniqueId();
+
+        if (trackedBoards.containsKey(playerID))
+        {
+            trackedBoards.remove(playerID);
+        }
     }
 
 }

@@ -1,12 +1,19 @@
 package com.thrallmaster.Behavior;
 
+import java.util.Comparator;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Enemy;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
+import com.thrallmaster.MaterialUtils;
+import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
@@ -24,6 +31,19 @@ public class FollowBehavior extends Behavior {
         {
             entity.setTarget(null);
         }
+    }
+
+    @Override
+    public void onBehaviorInteract(Material material) {
+        Skeleton entity = this.getEntity();
+
+        if (MaterialUtils.isAir(material))
+        {
+            state.setBehavior(new IdleBehavior(entityID, state));
+            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
+        }
+        
+        super.onBehaviorInteract(material);
     }
 
     @Override
@@ -58,7 +78,30 @@ public class FollowBehavior extends Behavior {
 
         if (state.aggressionState == AggressionState.HOSTILE)
         {
-            targetNearbyEntities(Enemy.class);
+            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
+                                    .filter(x -> !ThrallUtils.isFriendly(state, x))
+                                    .min(Comparator.comparingDouble(x -> x.getLocation().distance(entity.getLocation()) + state.selectionBias))
+                                    .orElse(null);;
+            if (nearestEntity != null)
+            {
+                state.target = nearestEntity;
+                state.setBehavior(new HostileBehavior(entityID, state, this));
+            }
+        }
+        else if (state.aggressionState == AggressionState.HEALER)
+        {
+            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Skeleton.class)
+                                    .filter(x -> ThrallUtils.isFriendly(state, x))
+                                    .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+                                    .filter(x -> !(manager.getThrall(x.getUniqueId()).getBehavior() instanceof HostileBehavior))
+                                    .min(Comparator.comparingDouble
+                                    (x -> (x.getLocation().distance(entity.getLocation()) + state.selectionBias) *  x.getHealth() ))
+                                    .orElse(null);;
+            if (nearestEntity != null)
+            {
+                state.target = nearestEntity;
+                state.setBehavior(new HealBehavior(entityID, state, this));
+            }
         }
     }
 

@@ -94,7 +94,7 @@ public class ThrallState implements Serializable
         this.target = null;
 
         this.selectionBias = (random.nextFloat() - 0.5f) * 6;
-        this.phaseOffset = random.nextInt(3);
+        this.phaseOffset = random.nextInt(5);
     }
     
     @Override

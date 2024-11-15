@@ -1,25 +1,23 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
-
 import com.thrallmaster.AggressionState;
+import com.thrallmaster.Main;
 import com.thrallmaster.MaterialUtils;
-import com.thrallmaster.ThrallUtils;
+import com.thrallmaster.ThrallManager;
 import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.States.ThrallState;
-
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 
 public abstract class Behavior implements Serializable
 {
+    protected static ThrallManager manager = Main.manager;
     protected UUID entityID;
     protected ThrallState state;
 
@@ -36,27 +34,9 @@ public abstract class Behavior implements Serializable
     protected void onSetPersistentData(ReadWriteNBT nbt) {}
     protected void onRemovePersistentData(ReadWriteNBT nbt)  {}
 
-    protected <T extends LivingEntity> void targetNearbyEntities(Class<T> filterClass)
-    {
-        Skeleton entity = this.getEntity();
-
-        LivingEntity nearestEntity = ThrallUtils.findNearestEntity(entity, filterClass);
-        if (nearestEntity != null)
-        {
-            state.target = nearestEntity;
-            state.setBehavior(new HostileBehavior(entityID, state, this));
-        } 
-    }
-
     public void onBehaviorInteract(Material material)
     {
         Skeleton entity = this.getEntity();
-
-        if (MaterialUtils.isAir(material))
-        {
-            state.setBehavior(new FollowBehavior(entityID, state));
-            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
-        }
 
         if (MaterialUtils.isMelee(material))
         {
