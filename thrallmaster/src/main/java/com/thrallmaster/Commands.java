@@ -18,12 +18,12 @@ public class Commands {
 
     public static void registerCommands(Plugin plugin) {
         CommandAPICommand base = new CommandAPICommand("thrall")
-                .withSubcommand(new CommandAPICommand("reload"))
-                .withPermission("thrall.reload")
-                .executes((sender, args) -> {
-                    sender.sendMessage("Reloading ThrallMaster configuration.");
-                    Main.reload();
-                })
+                .withSubcommand(new CommandAPICommand("reload")
+                        .withPermission("thrall.reload")
+                        .executes((sender, args) -> {
+                            sender.sendMessage("Reloading ThrallMaster configuration.");
+                            Main.reload();
+                        }))
 
                 .withSubcommand(new CommandAPICommand("spawn")
                         .withPermission("thrall.spawn")

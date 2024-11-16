@@ -138,25 +138,27 @@ public class ThrallManager implements Listener {
         thrall.getEquipment().clear();
         thrall.setShouldBurnInDay(false);
         thrall.setAware(true);
-        thrall.customName(Component.text("Thrall"));
+        thrall.customName(Component.text(Settings.THRALL_NAME));
         thrall.setCustomNameVisible(true);
 
         AttributeModifier damageModifier = new AttributeModifier(new NamespacedKey(Main.plugin, "DamageModifier"), 2,
                 AttributeModifier.Operation.ADD_SCALAR);
         thrall.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).addModifier(damageModifier);
-        thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(30);
+        thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
+        thrall.setHealth(Settings.THRALL_HEALTH);
 
         // Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
 
-        world.spawnParticle(Particle.SOUL, thrall.getLocation(), 40, 1, 1, 1, 0.02);
-        world.spawnParticle(Particle.FLAME, thrall.getLocation().add(0, 1, 0), 100, 0.1, 0.2, 0.1, 0.05);
-        world.spawnParticle(Particle.LANDING_LAVA, thrall.getLocation(), 40, 1, 1, 1, 0.2);
-        world.playSound(thrall.getLocation(), Sound.ENTITY_DONKEY_DEATH, 1, 0.5f);
-        ;
+        for (var particle : Settings.SPAWN_PARTICLES) {
+            world.spawnParticle(particle.type, thrall.getLocation(), particle.count, particle.bx, particle.by,
+                    particle.bz, particle.speed);
+        }
+        world.playSound(thrall.getLocation(), Settings.SPAWN_SOUND.type, Settings.SPAWN_SOUND.volume,
+                Settings.SPAWN_SOUND.pitch);
 
         registerThrall(thrall, owner);
-        owner.sendMessage("Your Thrall rises!");
+        owner.sendMessage(Settings.SPAWN_MESSAGE);
 
         updateBoard(owner.getUniqueId());
 
@@ -437,7 +439,7 @@ public class ThrallManager implements Listener {
         var potion = event.getPotion();
         var effects = potion.getEffects().stream();
 
-        if (!effects.anyMatch(x -> x.getType() == PotionEffectType.WEAKNESS)) {
+        if (!effects.anyMatch(x -> x.getType() == Settings.POTION_TYPE)) {
             return;
         }
 
@@ -453,15 +455,16 @@ public class ThrallManager implements Listener {
             trackedTamingLevel.put(targetID, currentCures);
 
             var world = entity.getWorld();
-            world.spawnParticle(Particle.FLAME, entity.getLocation().add(0, 1, 0), 20, 0.1, 0.2, 0.1, 0.01);
-            world.spawnParticle(Particle.ENCHANT, entity.getLocation(), 80, 1.5, 1.5, 1.5, 0.02);
-            world.playSound(entity.getLocation(), Sound.ENTITY_ZOMBIFIED_PIGLIN_ANGRY, 1, 1);
-            ;
 
-            // Verifica si se alcanzó el número necesario de curaciones
-            if (currentCures >= Main.config.getInt("minCures") && currentCures <= Main.config.getInt("maxCures")) {
+            for (var particle : Settings.RITUAL_PARTICLES) {
+                world.spawnParticle(particle.type, entity.getLocation(), particle.count, particle.bx, particle.by,
+                        particle.bz, particle.speed);
+            }
+            world.playSound(entity.getLocation(), Settings.RITUAL_SOUND.type, Settings.RITUAL_SOUND.volume,
+                    Settings.RITUAL_SOUND.pitch);
+
+            if (currentCures >= Settings.POTION_COUNT) {
                 spawnThrall(entity.getLocation(), thrower);
-
                 entity.remove();
                 trackedTamingLevel.remove(targetID);
             }

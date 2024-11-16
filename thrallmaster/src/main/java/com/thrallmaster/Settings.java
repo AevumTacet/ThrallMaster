@@ -110,15 +110,15 @@ public class Settings {
 
 	public static class SoundInfo {
 		public Sound type;
-		public double volume;
-		public double pitch;
+		public float volume;
+		public float pitch;
 
 		public static SoundInfo fromConfig(ConfigurationSection section) {
 			SoundInfo sound = new SoundInfo();
 			sound.type = validate(section.getString("type", "None"),
 					Sound.BLOCK_ANVIL_HIT, x -> Sound.valueOf(x.toUpperCase()));
-			sound.volume = section.getDouble("volume", 1.0);
-			sound.pitch = section.getDouble("pitch", 1.0);
+			sound.volume = (float) section.getDouble("volume", 1.0);
+			sound.pitch = (float) section.getDouble("pitch", 1.0);
 
 			return sound;
 		}

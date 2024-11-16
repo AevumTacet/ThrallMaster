@@ -1,8 +1,3 @@
-# Configuración de curación para Piglins zombificados
-minCures: 4
-maxCures: 8
-piglins:
-
 general:
   spawn-name: Thrall
   initial-health: 20
@@ -15,11 +10,11 @@ ritual-action:
   potion-count: 4                     # Number of potions used to convert a Zombified Piglin into a Thrall
   potion-type: WEAKNESS               # Type of potion effect, see PotionEffectType class.
   particles:                          # List with the Particle class effect to spawn when the Thrall is being converted
-    -FLAME:
+    FLAME:
       count: 80
       speed: 0.01
       box-size: [0.1, 0.2, 0.1]
-    -ENCHANT:
+    ENCHANT:
       count: 60
       speed: 0.02
       box-size: [1.5, 1.5, 1.5]
@@ -32,11 +27,11 @@ ritual-action:
 thrall-spawn:
   message: Your Thrall rises!         # Message to send to the owner when the Thrall spawns
   particles:                          # List with the Particle class effect to spawn when the Thrall is spawned
-    -SOUL:
+    SOUL:
       count: 40
       speed: 0.02
       box-size: [1, 1, 1]
-    -FLAME:
+    FLAME:
       count: 80
       speed: 0.05
       box-size: [0.1, 0.2, 0.1]
