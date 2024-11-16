@@ -3,9 +3,7 @@ package com.thrallmaster;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -31,6 +29,7 @@ public class Settings {
 	private Settings() {
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void loadConfig(Plugin plugin) {
 		config = plugin.getConfig();
 		RITUAL_PARTICLES = new ArrayList<>();
@@ -46,7 +45,7 @@ public class Settings {
 		var ritualAction = config.getConfigurationSection("ritual-action");
 		POTION_COUNT = ritualAction.getInt("potion-count", 4);
 		POTION_TYPE = validate(ritualAction.getString("potion-type", "weakness"), PotionEffectType.WEAKNESS,
-				key -> (PotionEffectType) Registry.EFFECT.getOrThrow(NamespacedKey.minecraft(key.toLowerCase())));
+				x -> PotionEffectType.getByName(x), false);
 
 		var ritualParticles = ritualAction.getConfigurationSection("particles");
 		for (String key : ritualParticles.getKeys(false)) {
@@ -65,14 +64,23 @@ public class Settings {
 		SPAWN_SOUND = SoundInfo.fromConfig(thrallSpawn.getConfigurationSection("sound"));
 	}
 
-	private static <K, T> T validate(K key, T def, Function<K, T> map) {
+	private static <K, T> T validate(K key, T def, Function<K, T> map, boolean canBeNull) {
 		try {
-			return map.apply(key);
+			var result = map.apply(key);
+			if (result == null && !canBeNull) {
+				throw new Exception();
+			}
+
+			return result;
 		} catch (Exception e) {
 			System.err.println(
 					"[Settings] Invalid parameter \"" + key.toString() + "\". Defaulting to \"" + def.toString() + "\".");
 			return def;
 		}
+	}
+
+	private static <K, T> T validate(K key, T def, Function<K, T> map) {
+		return validate(key, def, map, true);
 	}
 
 	public static class ParticleInfo {

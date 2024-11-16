@@ -56,5 +56,6 @@ public class Main extends JavaPlugin {
    public static void reload() {
       plugin.reloadConfig();
       config = plugin.getConfig();
+      Settings.loadConfig(plugin);
    }
 }
