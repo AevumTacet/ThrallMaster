@@ -2,3 +2,45 @@
 minCures: 4
 maxCures: 8
 piglins:
+
+general:
+  spawn-name: Thrall
+  initial-health: 20
+  max-health: 30
+  detection-range: 10.0
+  ranged-detection-multiplier: 1.5
+
+# Thrall regeneration ritual settings that controls the amount of potions to be used and the effects that will play each time a potion is applied.
+ritual-action:
+  potion-count: 4                     # Number of potions used to convert a Zombified Piglin into a Thrall
+  potion-type: WEAKNESS               # Type of potion effect, see PotionEffectType class.
+  particles:                          # List with the Particle class effect to spawn when the Thrall is being converted
+    -FLAME:
+      count: 80
+      speed: 0.01
+      box-size: [0.1, 0.2, 0.1]
+    -ENCHANT:
+      count: 60
+      speed: 0.02
+      box-size: [1.5, 1.5, 1.5]
+  sound:                              # Sound to play when the Zombified Piglin is hit by a potion
+    type: ENTITY_ZOMBIFIED_PIGLIN_ANGRY
+    volume: 1.0
+    pitch: 1.0
+
+# Effects that play when a Thrall is spawned or converted
+thrall-spawn:
+  message: Your Thrall rises!         # Message to send to the owner when the Thrall spawns
+  particles:                          # List with the Particle class effect to spawn when the Thrall is spawned
+    -SOUL:
+      count: 40
+      speed: 0.02
+      box-size: [1, 1, 1]
+    -FLAME:
+      count: 80
+      speed: 0.05
+      box-size: [0.1, 0.2, 0.1]
+  sound:                              # Sound to play when the Thrall spawns
+    type: ENTITY_DONKEY_DEATH
+    volume: 1.0
+    pitch: 0.5

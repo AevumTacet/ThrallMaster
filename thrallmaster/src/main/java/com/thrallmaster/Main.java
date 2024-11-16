@@ -23,13 +23,13 @@ public class Main extends JavaPlugin {
       ThrallProtocol.onLoad(this);
    }
 
-
    @Override
    public void onEnable() {
       plugin = this;
       config = getConfig();
       saveDefaultConfig();
-      
+
+      Settings.loadConfig(plugin);
       CommandAPI.onEnable();
 
       ThrallManager.logger = getLogger();
@@ -38,11 +38,9 @@ public class Main extends JavaPlugin {
 
       Commands.registerCommands(this);
 
-
       this.getServer().getPluginManager().registerEvents(manager, this);
       getLogger().info("Thrall Master plugin enabled.");
    }
-
 
    @Override
    public void onDisable() {
