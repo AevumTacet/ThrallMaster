@@ -353,7 +353,13 @@ public class ThrallManager implements Listener {
         // Stop Thralls from poisoning their targets (Wither case)
         if (ThrallUtils.isThrall(attacker)) {
             LivingEntity livingEntity = (LivingEntity) damaged;
-            livingEntity.removePotionEffect(PotionEffectType.WITHER);
+
+            Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
+                @Override
+                public void run() {
+                    livingEntity.removePotionEffect(PotionEffectType.WITHER);
+                }
+            }, 1);
         }
     }
 
