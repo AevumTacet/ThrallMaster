@@ -3,12 +3,10 @@ package com.thrallmaster;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -34,6 +32,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
@@ -224,7 +224,8 @@ public class ThrallManager implements Listener {
                                 entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
                                         entity.getLocation().add(0, 2, 0), 5, 0.1, 0.1, 0.1, 0.01);
 
-                                if (System.currentTimeMillis() - state.getLastSelectionTime() >= 10 * 1000) {
+                                if (System.currentTimeMillis()
+                                        - state.getLastSelectionTime() >= Settings.THRALL_SELECTION_COOLDOWN * 1000) {
                                     state.setSelected(false);
                                 }
                             }
@@ -376,11 +377,25 @@ public class ThrallManager implements Listener {
         // Remove fire effects from Thralls if they are not carrying a bow with
         // enchanments
         if (ThrallUtils.isThrall(shooter)) {
-            if (bow.containsEnchantment(Enchantment.FLAME)) {
-                return;
+            // use custom accuracy algorith if enabled.
+            if (Settings.THRALL_ACCURACY != -1) {
+                ThrallState state = getThrall(shooter.getUniqueId());
+                Entity target = state.target;
+
+                if (target != null) {
+                    double speed = arrow.getVelocity().length();
+                    double scale = 1.0 - Settings.THRALL_ACCURACY;
+                    final Vector velocity = target.getLocation().subtract(shooter.getLocation())
+                            .add(target.getVelocity()).toVector();
+                    velocity.add(Vector.getRandom().multiply(scale));
+                    arrow.setVelocity(velocity.normalize().multiply(speed));
+                }
             }
-            if (arrow.getFireTicks() != 0) {
-                arrow.setFireTicks(0);
+
+            if (!bow.containsEnchantment(Enchantment.FLAME)) {
+                if (arrow.getFireTicks() != 0) {
+                    arrow.setFireTicks(0);
+                }
             }
         }
     }
