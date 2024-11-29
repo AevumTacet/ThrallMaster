@@ -7,6 +7,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -355,6 +356,13 @@ public class ThrallManager implements Listener {
         if (ThrallUtils.isThrall(attacker)) {
             LivingEntity livingEntity = (LivingEntity) damaged;
 
+            // Wither Skeletons ranged attacks are considered "unarmed", so the damage needs
+            // to be modified
+            if (event.getDamager() instanceof Arrow && attacker instanceof WitherSkeleton) {
+                var damage = event.getDamage();
+                event.setDamage(damage * 4);
+            }
+
             Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
                 @Override
                 public void run() {
@@ -383,10 +391,12 @@ public class ThrallManager implements Listener {
                 LivingEntity target = state.target;
 
                 if (target != null) {
-                    double speed = arrow.getVelocity().length();
+                    double speed = arrow.getVelocity().length() * 1.5;
                     double scale = 1.0 - Settings.THRALL_ACCURACY;
-                    final Vector velocity = target.getEyeLocation().subtract(shooter.getEyeLocation())
-                            .add(target.getVelocity()).toVector();
+                    double yCorrection = target.getLocation().distance(shooter.getLocation()) / 15;
+
+                    final Vector velocity = target.getEyeLocation().subtract(arrow.getLocation()).toVector()
+                            .add(target.getVelocity()).add(new Vector(0, yCorrection, 0));
 
                     velocity.add(Vector.getRandom().multiply(scale));
                     arrow.setVelocity(velocity.normalize().multiply(speed));
