@@ -8,6 +8,7 @@ import org.bukkit.entity.AbstractSkeleton;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
 import com.thrallmaster.MaterialUtils;
+import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallManager;
 import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.States.ThrallState;
@@ -58,8 +59,8 @@ public abstract class Behavior implements Serializable {
                     break;
             }
 
-            state.getOwner()
-                    .sendMessage(entity.getName() + " is now " + state.aggressionState.toString().toLowerCase());
+            state.getOwner().sendMessage(
+                    String.format(Settings.AGGRESSION_CHANGED_MSG, entity.getName(), state.aggressionState.toString()));
         }
     }
 

@@ -10,6 +10,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
+import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -29,7 +30,7 @@ public class IdleBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
-        return "Guarding";
+        return Settings.IDLE_NAME;
     }
 
     @Override
@@ -67,8 +68,9 @@ public class IdleBehavior extends Behavior {
         }
 
         double distance = entity.getLocation().distance(startLocation);
-        if (distance > 4) {
-            entity.getPathfinder().moveTo(startLocation, 1.0);
+        if (distance > Settings.THRALL_WANDER_MAX) {
+            double speed = distance < Settings.THRALL_FOLLOW_MAX ? 1.0 : Settings.RUN_SPEED_MUL;
+            entity.getPathfinder().moveTo(startLocation, speed);
         }
 
         if (state.aggressionState == AggressionState.HOSTILE) {

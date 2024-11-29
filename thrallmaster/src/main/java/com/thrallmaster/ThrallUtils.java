@@ -153,6 +153,7 @@ public class ThrallUtils {
     }
 
     public static boolean equipThrall(LivingEntity entity, ItemStack item) {
+        ThrallState state = manager.getThrall(entity.getUniqueId());
         World world = entity.getWorld();
         Material material = item.getType();
         EntityEquipment equipment = entity.getEquipment();
@@ -160,6 +161,10 @@ public class ThrallUtils {
         if (MaterialUtils.isWeapon(material)) {
             world.dropItemNaturally(entity.getLocation(), equipment.getItemInMainHand());
             equipment.setItemInMainHand(item);
+
+            if (state.aggressionState == AggressionState.HEALER) {
+                state.aggressionState = AggressionState.DEFENSIVE;
+            }
             return true;
         } else if (MaterialUtils.isArmor(material)) {
             switch (MaterialUtils.getArmorType(material)) {
@@ -194,10 +199,9 @@ public class ThrallUtils {
                 world.dropItemNaturally(entity.getLocation(), currentItem);
                 equipment.setItemInMainHand(item);
             } else {
-                equipment.setItemInMainHand(currentItem.add(1));
+                equipment.setItemInMainHand(currentItem.add(item.getAmount()));
             }
 
-            ThrallState state = manager.getThrall(entity.getUniqueId());
             state.aggressionState = AggressionState.HEALER;
             return true;
         }

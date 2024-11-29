@@ -6,6 +6,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
 import com.thrallmaster.AggressionState;
+import com.thrallmaster.Settings;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
@@ -42,7 +43,8 @@ public class HostileBehavior extends Behavior {
         }
 
         long currentTime = System.currentTimeMillis();
-        if ((state.target == null || !state.target.isValid()) || (currentTime - startTime > 30 * 1000)) {
+        if ((state.target == null || !state.target.isValid())
+                || (currentTime - startTime > Settings.THRALL_AGGRO_COOLDOWN * 1000)) {
             returnToPreviousState();
             this.startTime = currentTime;
         }
@@ -50,7 +52,7 @@ public class HostileBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
-        return "Attacking";
+        return Settings.ATTACK_NAME;
     }
 
     @Override

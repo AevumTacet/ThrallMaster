@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
+import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -72,7 +73,8 @@ public class HealBehavior extends Behavior {
             state.aggressionState = AggressionState.DEFENSIVE;
         }
 
-        if ((state.target == null || !state.target.isValid()) || (currentTime - startTime > 30 * 1000)) {
+        if ((state.target == null || !state.target.isValid())
+                || (currentTime - startTime > Settings.THRALL_AGGRO_COOLDOWN * 1000)) {
             returnToPreviousState();
             this.startTime = currentTime;
         }
@@ -80,7 +82,7 @@ public class HealBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
-        return "Healing";
+        return Settings.HEAL_NAME;
     }
 
     @Override

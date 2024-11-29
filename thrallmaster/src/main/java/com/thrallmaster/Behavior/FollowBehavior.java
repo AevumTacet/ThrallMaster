@@ -11,8 +11,8 @@ import org.bukkit.entity.Enemy;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import com.thrallmaster.AggressionState;
-import com.thrallmaster.Main;
 import com.thrallmaster.MaterialUtils;
+import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -46,9 +46,6 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public void onBehaviorTick() {
-        double minDistance = Main.config.getDouble("minFollowDistance", 5.0);
-        double maxDistance = Main.config.getDouble("maxFollowDistance", 20.0);
-
         Player owner = Bukkit.getPlayer(state.getOwnerID());
         AbstractSkeleton entity = this.getEntity();
 
@@ -57,11 +54,11 @@ public class FollowBehavior extends Behavior {
         }
 
         double distance = entity.getLocation().distance(owner.getLocation());
-        double speed = distance < maxDistance / 3 ? 1.0 : 1.5;
+        double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
 
-        if (distance < minDistance / 2) {
+        if (distance < Settings.THRALL_FOLLOW_MIN / 2) {
             entity.getPathfinder().moveTo(owner.getLocation(), 0);
-        } else if (distance > maxDistance) {
+        } else if (distance > Settings.THRALL_FOLLOW_MAX) {
             entity.teleport(owner.getLocation());
         } else {
             entity.lookAt(owner);
@@ -98,7 +95,7 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
-        return "Following";
+        return Settings.FOLLOW_NAME;
     }
 
     @Override

@@ -14,8 +14,15 @@ public class Settings {
 	public static String THRALL_NAME;
 	public static int THRALL_HEALTH;
 	public static int THRALL_MAX_HEALTH;
+	public static double THRALL_SELECTION_COOLDOWN;
+	public static double THRALL_ACCURACY;
 	public static double THRALL_DETECTION_RANGE;
 	public static double THRALL_DETECTION_MUL;
+	public static double THRALL_WANDER_MAX;
+	public static double THRALL_FOLLOW_MIN;
+	public static double THRALL_FOLLOW_MAX;
+	public static double THRALL_AGGRO_COOLDOWN;
+	public static double RUN_SPEED_MUL;
 	public static int POTION_COUNT;
 	public static String SPAWN_MESSAGE;
 	public static String DEATH_MESSAGE;
@@ -26,6 +33,15 @@ public class Settings {
 	public static ArrayList<ParticleInfo> RITUAL_PARTICLES;
 	public static ArrayList<ParticleInfo> SPAWN_PARTICLES;
 	public static ArrayList<ParticleInfo> DEATH_PARTICLES;
+	public static String AGGRESSION_CHANGED_MSG;
+	public static String AGGRESSION_CHANGED_MSG_MULTI;
+
+	public static String IDLE_NAME;
+	public static String FOLLOW_NAME;
+	public static String ATTACK_NAME;
+	public static String HEAL_NAME;
+	public static String DEFENSIVE_NAME;
+	public static String AGGRESSIVE_NAME;
 
 	private Settings() {
 	}
@@ -33,62 +49,80 @@ public class Settings {
 	public static void loadConfig(Plugin plugin) {
 		FileConfiguration config = plugin.getConfig();
 
-		loadGeneralSettings(config);
-		loadRitualSettings(config);
-		loadSpawnSettings(config);
-		loadDeathSettings(config);
+		loadGeneralSettings(config.getConfigurationSection("general"));
+		loadStateSettings(config.getConfigurationSection("states"));
+		loadRitualSettings(config.getConfigurationSection("ritual-action"));
+		loadSpawnSettings(config.getConfigurationSection("thrall-spawn"));
+		loadDeathSettings(config.getConfigurationSection("thrall-death"));
 	}
 
-	private static void loadGeneralSettings(FileConfiguration config) {
-		var general = config.getConfigurationSection("general");
-		THRALL_NAME = general.getString("spawn-name", "Thrall");
-		THRALL_HEALTH = general.getInt("initial-health", 20);
-		THRALL_MAX_HEALTH = general.getInt("max-health", 30);
-		THRALL_DETECTION_RANGE = general.getDouble("detection-range", 10);
-		THRALL_DETECTION_MUL = general.getDouble("ranged-detection-multiplier", 1.5);
+	private static void loadGeneralSettings(ConfigurationSection section) {
+		THRALL_NAME = section.getString("spawn-name", "Thrall");
+		THRALL_HEALTH = section.getInt("initial-health", 20);
+		THRALL_MAX_HEALTH = section.getInt("max-health", 30);
+		THRALL_ACCURACY = validate(section.getDouble("ranged-accuracy", -1), -1.0,
+				x -> ((x >= 0) && (x <= 1)) ? x : null, false);
+
+		THRALL_SELECTION_COOLDOWN = section.getDouble("selection-release-cooldown", 30);
+		THRALL_DETECTION_RANGE = section.getDouble("detection-range", 10);
+		THRALL_DETECTION_MUL = section.getDouble("ranged-detection-multiplier", 1.5);
+		RUN_SPEED_MUL = section.getDouble("run-speed-multiplier", 1.5);
+		AGGRESSION_CHANGED_MSG = section.getString("aggression-state-message", "");
+		AGGRESSION_CHANGED_MSG_MULTI = section.getString("horn-command-message", "");
+
+		THRALL_WANDER_MAX = section.getDouble("idle-wander-max-distance", 4);
+		THRALL_FOLLOW_MIN = section.getDouble("follow-min-distance", 3);
+		THRALL_FOLLOW_MAX = section.getDouble("follow-max-distance", 30);
+		THRALL_AGGRO_COOLDOWN = section.getDouble("attack-demiss-cooldown", 30);
 	}
 
-	private static void loadSpawnSettings(FileConfiguration config) {
+	private static void loadSpawnSettings(ConfigurationSection section) {
 		SPAWN_PARTICLES = new ArrayList<>();
-		var thrallSpawn = config.getConfigurationSection("thrall-spawn");
 
-		SPAWN_MESSAGE = thrallSpawn.getString("message", "");
-		var spawnParticles = thrallSpawn.getConfigurationSection("particles");
+		SPAWN_MESSAGE = section.getString("message", "");
+		var spawnParticles = section.getConfigurationSection("particles");
 		for (String key : spawnParticles.getKeys(false)) {
 			ParticleInfo particle = ParticleInfo.fromConfig(spawnParticles.getConfigurationSection(key));
 			SPAWN_PARTICLES.add(particle);
 		}
-		SPAWN_SOUND = SoundInfo.fromConfig(thrallSpawn.getConfigurationSection("sound"));
+		SPAWN_SOUND = SoundInfo.fromConfig(section.getConfigurationSection("sound"));
 	}
 
-	private static void loadDeathSettings(FileConfiguration config) {
-		DEATH_PARTICLES = new ArrayList<>();
-		var thrallDeath = config.getConfigurationSection("thrall-death");
+	private static void loadStateSettings(ConfigurationSection section) {
+		IDLE_NAME = section.getString("idle", "Guarding");
+		FOLLOW_NAME = section.getString("follow", "Following");
+		ATTACK_NAME = section.getString("attack", "Attacking");
+		HEAL_NAME = section.getString("heal", "Healing");
+		DEFENSIVE_NAME = section.getString("defensive", "Defending");
+		AGGRESSIVE_NAME = section.getString("aggressive", "Aggressive");
+	}
 
-		DEATH_MESSAGE = thrallDeath.getString("message", "");
-		var deathParticles = thrallDeath.getConfigurationSection("particles");
+	private static void loadDeathSettings(ConfigurationSection section) {
+		DEATH_PARTICLES = new ArrayList<>();
+
+		DEATH_MESSAGE = section.getString("message", "");
+		var deathParticles = section.getConfigurationSection("particles");
 		for (String key : deathParticles.getKeys(false)) {
 			ParticleInfo particle = ParticleInfo.fromConfig(deathParticles.getConfigurationSection(key));
 			DEATH_PARTICLES.add(particle);
 		}
-		DEATH_SOUND = SoundInfo.fromConfig(thrallDeath.getConfigurationSection("sound"));
+		DEATH_SOUND = SoundInfo.fromConfig(section.getConfigurationSection("sound"));
 	}
 
 	@SuppressWarnings("deprecation")
-	private static void loadRitualSettings(FileConfiguration config) {
+	private static void loadRitualSettings(ConfigurationSection section) {
 		RITUAL_PARTICLES = new ArrayList<>();
-		var ritualAction = config.getConfigurationSection("ritual-action");
 
-		POTION_COUNT = ritualAction.getInt("potion-count", 4);
-		POTION_TYPE = validate(ritualAction.getString("potion-type", "weakness"), PotionEffectType.WEAKNESS,
+		POTION_COUNT = section.getInt("potion-count", 4);
+		POTION_TYPE = validate(section.getString("potion-type", "weakness"), PotionEffectType.WEAKNESS,
 				x -> PotionEffectType.getByName(x), false);
 
-		var ritualParticles = ritualAction.getConfigurationSection("particles");
+		var ritualParticles = section.getConfigurationSection("particles");
 		for (String key : ritualParticles.getKeys(false)) {
 			ParticleInfo particle = ParticleInfo.fromConfig(ritualParticles.getConfigurationSection(key));
 			RITUAL_PARTICLES.add(particle);
 		}
-		RITUAL_SOUND = SoundInfo.fromConfig(ritualAction.getConfigurationSection("sound"));
+		RITUAL_SOUND = SoundInfo.fromConfig(section.getConfigurationSection("sound"));
 	}
 
 	private static <K, T> T validate(K key, T def, Function<K, T> map, boolean canBeNull) {
