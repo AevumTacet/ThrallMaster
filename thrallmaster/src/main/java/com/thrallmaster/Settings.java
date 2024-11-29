@@ -18,31 +18,67 @@ public class Settings {
 	public static double THRALL_DETECTION_MUL;
 	public static int POTION_COUNT;
 	public static String SPAWN_MESSAGE;
+	public static String DEATH_MESSAGE;
 	public static PotionEffectType POTION_TYPE;
 	public static SoundInfo RITUAL_SOUND;
 	public static SoundInfo SPAWN_SOUND;
+	public static SoundInfo DEATH_SOUND;
 	public static ArrayList<ParticleInfo> RITUAL_PARTICLES;
 	public static ArrayList<ParticleInfo> SPAWN_PARTICLES;
-
-	private static FileConfiguration config;
+	public static ArrayList<ParticleInfo> DEATH_PARTICLES;
 
 	private Settings() {
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void loadConfig(Plugin plugin) {
-		config = plugin.getConfig();
-		RITUAL_PARTICLES = new ArrayList<>();
-		SPAWN_PARTICLES = new ArrayList<>();
+		FileConfiguration config = plugin.getConfig();
 
+		loadGeneralSettings(config);
+		loadRitualSettings(config);
+		loadSpawnSettings(config);
+		loadDeathSettings(config);
+	}
+
+	private static void loadGeneralSettings(FileConfiguration config) {
 		var general = config.getConfigurationSection("general");
 		THRALL_NAME = general.getString("spawn-name", "Thrall");
 		THRALL_HEALTH = general.getInt("initial-health", 20);
 		THRALL_MAX_HEALTH = general.getInt("max-health", 30);
 		THRALL_DETECTION_RANGE = general.getDouble("detection-range", 10);
 		THRALL_DETECTION_MUL = general.getDouble("ranged-detection-multiplier", 1.5);
+	}
 
+	private static void loadSpawnSettings(FileConfiguration config) {
+		SPAWN_PARTICLES = new ArrayList<>();
+		var thrallSpawn = config.getConfigurationSection("thrall-spawn");
+
+		SPAWN_MESSAGE = thrallSpawn.getString("message", "");
+		var spawnParticles = thrallSpawn.getConfigurationSection("particles");
+		for (String key : spawnParticles.getKeys(false)) {
+			ParticleInfo particle = ParticleInfo.fromConfig(spawnParticles.getConfigurationSection(key));
+			SPAWN_PARTICLES.add(particle);
+		}
+		SPAWN_SOUND = SoundInfo.fromConfig(thrallSpawn.getConfigurationSection("sound"));
+	}
+
+	private static void loadDeathSettings(FileConfiguration config) {
+		DEATH_PARTICLES = new ArrayList<>();
+		var thrallDeath = config.getConfigurationSection("thrall-death");
+
+		DEATH_MESSAGE = thrallDeath.getString("message", "");
+		var deathParticles = thrallDeath.getConfigurationSection("particles");
+		for (String key : deathParticles.getKeys(false)) {
+			ParticleInfo particle = ParticleInfo.fromConfig(deathParticles.getConfigurationSection(key));
+			DEATH_PARTICLES.add(particle);
+		}
+		DEATH_SOUND = SoundInfo.fromConfig(thrallDeath.getConfigurationSection("sound"));
+	}
+
+	@SuppressWarnings("deprecation")
+	private static void loadRitualSettings(FileConfiguration config) {
+		RITUAL_PARTICLES = new ArrayList<>();
 		var ritualAction = config.getConfigurationSection("ritual-action");
+
 		POTION_COUNT = ritualAction.getInt("potion-count", 4);
 		POTION_TYPE = validate(ritualAction.getString("potion-type", "weakness"), PotionEffectType.WEAKNESS,
 				x -> PotionEffectType.getByName(x), false);
@@ -53,15 +89,6 @@ public class Settings {
 			RITUAL_PARTICLES.add(particle);
 		}
 		RITUAL_SOUND = SoundInfo.fromConfig(ritualAction.getConfigurationSection("sound"));
-
-		var thrallSpawn = config.getConfigurationSection("thrall-spawn");
-		SPAWN_MESSAGE = thrallSpawn.getString("message", "");
-		var spawnParticles = thrallSpawn.getConfigurationSection("particles");
-		for (String key : spawnParticles.getKeys(false)) {
-			ParticleInfo particle = ParticleInfo.fromConfig(spawnParticles.getConfigurationSection(key));
-			SPAWN_PARTICLES.add(particle);
-		}
-		SPAWN_SOUND = SoundInfo.fromConfig(thrallSpawn.getConfigurationSection("sound"));
 	}
 
 	private static <K, T> T validate(K key, T def, Function<K, T> map, boolean canBeNull) {

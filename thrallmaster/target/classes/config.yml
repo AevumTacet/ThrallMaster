@@ -39,3 +39,16 @@ thrall-spawn:
     type: ENTITY_DONKEY_DEATH
     volume: 1.0
     pitch: 0.5
+
+thrall-death:
+  message: Your Thrall has fallen.
+  particles:                          # List with the Particle class effect to spawn when the Thrall is killed
+    SOUL:
+      count: 20
+      speed: 0.02
+      box-size: [1, 1, 1]
+      
+  sound:                              # Sound to play when the Thrall dies
+    type: ENTITY_DONKEY_DEATH
+    volume: 1.0
+    pitch: 0.5

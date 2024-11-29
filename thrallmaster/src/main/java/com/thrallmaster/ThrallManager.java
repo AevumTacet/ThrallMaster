@@ -142,9 +142,6 @@ public class ThrallManager implements Listener {
         thrall.customName(Component.text(Settings.THRALL_NAME));
         thrall.setCustomNameVisible(true);
 
-        AttributeModifier damageModifier = new AttributeModifier(new NamespacedKey(Main.plugin, "DamageModifier"), 2,
-                AttributeModifier.Operation.ADD_SCALAR);
-        thrall.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).addModifier(damageModifier);
         thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
         thrall.setHealth(Settings.THRALL_HEALTH);
 
@@ -422,12 +419,20 @@ public class ThrallManager implements Listener {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
+        World world = entity.getWorld();
 
         if (ThrallUtils.isThrall(entity)) {
             ThrallState state = unregister(entity.getUniqueId());
 
+            for (var particle : Settings.DEATH_PARTICLES) {
+                world.spawnParticle(particle.type, entity.getLocation(), particle.count, particle.bx, particle.by,
+                        particle.bz, particle.speed);
+            }
+            world.playSound(entity.getLocation(), Settings.DEATH_SOUND.type, Settings.DEATH_SOUND.volume,
+                    Settings.DEATH_SOUND.pitch);
+
             if (state.getOwner() != null) {
-                state.getOwner().sendMessage("Your Thrall has fallen.");
+                state.getOwner().sendMessage(Settings.DEATH_MESSAGE);
             }
 
             updateBoard(state.getOwnerID());
