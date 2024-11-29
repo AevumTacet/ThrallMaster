@@ -156,7 +156,7 @@ public class ThrallManager implements Listener {
                 Settings.SPAWN_SOUND.pitch);
 
         registerThrall(thrall, owner);
-        owner.sendMessage(Settings.SPAWN_MESSAGE);
+        owner.sendMessage(String.format(Settings.SPAWN_MESSAGE, thrall.getName()));
 
         updateBoard(owner.getUniqueId());
 
@@ -432,7 +432,7 @@ public class ThrallManager implements Listener {
                     Settings.DEATH_SOUND.pitch);
 
             if (state.getOwner() != null) {
-                state.getOwner().sendMessage(Settings.DEATH_MESSAGE);
+                state.getOwner().sendMessage(String.format(Settings.DEATH_MESSAGE, entity.getName()));
             }
 
             updateBoard(state.getOwnerID());

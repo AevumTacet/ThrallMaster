@@ -25,7 +25,7 @@ ritual-action:
 
 # Effects that play when a Thrall is spawned or converted
 thrall-spawn:
-  message: Your Thrall rises!         # Message to send to the owner when the Thrall spawns
+  message: Your Thrall rises!         # Message to send to the owner when the Thrall spawns, the placeholder %s represents the name of the Thrall
   particles:                          # List with the Particle class effect to spawn when the Thrall is spawned
     SOUL:
       count: 40
@@ -41,7 +41,7 @@ thrall-spawn:
     pitch: 0.5
 
 thrall-death:
-  message: Your Thrall has fallen.
+  message: %s has fallen.             # Message to be send to the owner when a Thrall is killed, the placeholder %s represents the name of the Thrall
   particles:                          # List with the Particle class effect to spawn when the Thrall is killed
     SOUL:
       count: 20
