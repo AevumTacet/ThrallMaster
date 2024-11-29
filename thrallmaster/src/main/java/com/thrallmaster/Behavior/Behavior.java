@@ -60,7 +60,8 @@ public abstract class Behavior implements Serializable {
             }
 
             state.getOwner().sendMessage(
-                    String.format(Settings.AGGRESSION_CHANGED_MSG, entity.getName(), state.aggressionState.toString()));
+                    String.format(Settings.AGGRESSION_CHANGED_MSG, entity.getName(),
+                            Settings.AGGRESSION_MAP.get(state.aggressionState)));
         }
     }
 

@@ -1,6 +1,7 @@
 package com.thrallmaster;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Function;
 
 import org.bukkit.Particle;
@@ -42,6 +43,7 @@ public class Settings {
 	public static String HEAL_NAME;
 	public static String DEFENSIVE_NAME;
 	public static String AGGRESSIVE_NAME;
+	public static HashMap<AggressionState, String> AGGRESSION_MAP;
 
 	private Settings() {
 	}
@@ -95,6 +97,14 @@ public class Settings {
 		HEAL_NAME = section.getString("heal", "Healing");
 		DEFENSIVE_NAME = section.getString("defensive", "Defending");
 		AGGRESSIVE_NAME = section.getString("aggressive", "Aggressive");
+
+		AGGRESSION_MAP = new HashMap<AggressionState, String>() {
+			{
+				put(AggressionState.DEFENSIVE, DEFENSIVE_NAME);
+				put(AggressionState.HOSTILE, AGGRESSIVE_NAME);
+				put(AggressionState.HEALER, HEAL_NAME);
+			}
+		};
 	}
 
 	private static void loadDeathSettings(ConfigurationSection section) {

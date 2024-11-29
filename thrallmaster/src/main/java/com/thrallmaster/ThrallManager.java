@@ -366,7 +366,7 @@ public class ThrallManager implements Listener {
 
     @EventHandler
     public void onArrowFired(EntityShootBowEvent event) {
-        Entity shooter = event.getEntity();
+        LivingEntity shooter = event.getEntity();
         Entity arrow = event.getProjectile();
         ItemStack bow = event.getBow();
 
@@ -380,13 +380,14 @@ public class ThrallManager implements Listener {
             // use custom accuracy algorith if enabled.
             if (Settings.THRALL_ACCURACY != -1) {
                 ThrallState state = getThrall(shooter.getUniqueId());
-                Entity target = state.target;
+                LivingEntity target = state.target;
 
                 if (target != null) {
                     double speed = arrow.getVelocity().length();
                     double scale = 1.0 - Settings.THRALL_ACCURACY;
-                    final Vector velocity = target.getLocation().subtract(shooter.getLocation())
+                    final Vector velocity = target.getEyeLocation().subtract(shooter.getEyeLocation())
                             .add(target.getVelocity()).toVector();
+
                     velocity.add(Vector.getRandom().multiply(scale));
                     arrow.setVelocity(velocity.normalize().multiply(speed));
                 }
