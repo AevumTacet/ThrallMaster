@@ -29,15 +29,26 @@ public class Commands {
                         .withPermission("thrall.spawn")
                         .withOptionalArguments(new PlayerArgument("owner"))
                         .withOptionalArguments(new LocationArgument("location"))
-                        .executesPlayer((player, args) -> {
+                        .executes((sender, args) -> {
                             Player owner = (Player) args.get("owner");
                             Location location = (Location) args.get("location");
 
-                            if (owner == null) {
-                                owner = player;
-                            }
-                            if (location == null) {
-                                location = player.getLocation();
+                            if (sender instanceof Player) {
+                                Player player = (Player) sender;
+                                if (owner == null) {
+                                    owner = player;
+                                }
+                                if (location == null) {
+                                    location = player.getLocation();
+                                }
+                            } else {
+                                if (owner == null) {
+                                    throw CommandAPI.failWithString(
+                                            "An owner must be passed when invoking this command using the console.");
+                                }
+                                if (location == null) {
+                                    location = owner.getLocation();
+                                }
                             }
 
                             manager.spawnThrall(location, owner);

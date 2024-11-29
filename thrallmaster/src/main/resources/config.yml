@@ -41,7 +41,7 @@ thrall-spawn:
     pitch: 0.5
 
 thrall-death:
-  message: "%%s has fallen."           # Message to be send to the owner when a Thrall is killed, the placeholder %%s represents the name of the Thrall
+  message: "%%s has fallen."          #  Message to be send to the owner when a Thrall is killed, the placeholder %%s represents the name of the Thrall
   particles:                          # List with the Particle class effect to spawn when the Thrall is killed
     SOUL:
       count: 20
