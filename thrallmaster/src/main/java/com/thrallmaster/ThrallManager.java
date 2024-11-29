@@ -295,6 +295,7 @@ public class ThrallManager implements Listener {
 
                 playerItem.setAmount(playerItem.getAmount() - 1);
                 player.getInventory().setItemInMainHand(playerItem);
+                player.swingMainHand();
                 world.spawnParticle(Particle.HEART, entity.getEyeLocation(), 1);
                 world.playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
                 entity.heal(1);
@@ -360,7 +361,7 @@ public class ThrallManager implements Listener {
             // to be modified
             if (event.getDamager() instanceof Arrow && attacker instanceof WitherSkeleton) {
                 var damage = event.getDamage();
-                event.setDamage(damage * 4);
+                event.setDamage(damage * 3);
             }
 
             Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
