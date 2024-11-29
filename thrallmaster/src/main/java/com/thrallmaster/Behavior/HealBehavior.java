@@ -5,7 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -26,62 +26,53 @@ public class HealBehavior extends Behavior {
     }
 
     @Override
-    public void onBehaviorStart() 
-    {
+    public void onBehaviorStart() {
         this.startTime = System.currentTimeMillis();
     }
 
     @Override
     public void onBehaviorTick() {
-        Skeleton entity = this.getEntity();
-        if (entity == null)
-        {
+        AbstractSkeleton entity = this.getEntity();
+        if (entity == null) {
             return;
         }
 
         ItemStack item = entity.getEquipment().getItemInMainHand();
-        
-        if (state.target != null && state.target.isValid() && ThrallUtils.isThrall(state.target))
-        {
+
+        if (state.target != null && state.target.isValid() && ThrallUtils.isThrall(state.target)) {
             double distance = entity.getLocation().distance(state.target.getLocation());
-            
-            if (state.target.getHealth() >= state.target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
-            {
+
+            if (state.target.getHealth() >= state.target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
                 state.target = null;
                 return;
             }
-            
-            if (distance <= 1)
-            {
+
+            if (distance <= 1) {
                 item.setAmount(item.getAmount() - 1);
                 entity.getEquipment().setItemInMainHand(item);
 
                 entity.getWorld().spawnParticle(Particle.HEART, state.target.getEyeLocation(), 1);
                 entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
                 state.target.heal(1);
-                
+
                 entity.swingHand(EquipmentSlot.HAND);
                 entity.getPathfinder().moveTo(state.target.getLocation(), 0);
-            }
-            else
-            {
+            } else {
                 entity.getPathfinder().moveTo(state.target.getLocation());
             }
-            
+
             entity.lookAt(state.target);
-            ((Skeleton) state.target).getPathfinder().moveTo(entity, 0);
+            ((AbstractSkeleton) state.target).getPathfinder().moveTo(entity, 0);
         }
-        
+
         long currentTime = System.currentTimeMillis();
 
-        if (!MaterialUtils.isBone(item.getType()) || item.getAmount() == 0)
-        {
+        if (!MaterialUtils.isBone(item.getType()) || item.getAmount() == 0) {
             state.target = null;
             state.aggressionState = AggressionState.DEFENSIVE;
         }
 
-        if ((state.target == null || !state.target.isValid()) || (currentTime - startTime > 30 * 1000) )
-        {
+        if ((state.target == null || !state.target.isValid()) || (currentTime - startTime > 30 * 1000)) {
             returnToPreviousState();
             this.startTime = currentTime;
         }
@@ -94,12 +85,11 @@ public class HealBehavior extends Behavior {
 
     @Override
     public void onBehaviorInteract(Material material) {
-        Skeleton entity = this.getEntity();
+        AbstractSkeleton entity = this.getEntity();
 
-        if (material == Material.AIR)
-        {
+        if (material == Material.AIR) {
             state.aggressionState = AggressionState.DEFENSIVE;
-            
+
             ItemStack currentItem = entity.getEquipment().getItemInMainHand();
             entity.getWorld().dropItemNaturally(entity.getLocation(), currentItem);
             entity.getEquipment().setItemInMainHand(ItemStack.of(Material.AIR, 1));
@@ -110,14 +100,12 @@ public class HealBehavior extends Behavior {
     }
 
     @Override
-    public void onBehaviorStuck() 
-    {
+    public void onBehaviorStuck() {
         prevBehavior.onBehaviorStuck();
         returnToPreviousState();
     }
 
-    public void returnToPreviousState()
-    {
+    public void returnToPreviousState() {
         state.setBehavior(prevBehavior);
         state.target = null;
         this.getEntity().setTarget(null);
@@ -125,16 +113,14 @@ public class HealBehavior extends Behavior {
 
     @Override
     protected void onSetPersistentData(ReadWriteNBT nbt) {
-        if (prevBehavior != null)
-        {
+        if (prevBehavior != null) {
             prevBehavior.onSetPersistentData(nbt);
         }
     }
-    
+
     @Override
     protected void onRemovePersistentData(ReadWriteNBT nbt) {
-        if (prevBehavior != null)
-        {
+        if (prevBehavior != null) {
             prevBehavior.onRemovePersistentData(nbt);
         }
     }

@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -26,23 +26,21 @@ public class FollowBehavior extends Behavior {
     @Override
     public void onBehaviorStart() {
         var entity = this.getEntity();
-        
-        if (entity != null)
-        {
+
+        if (entity != null) {
             entity.setTarget(null);
         }
     }
 
     @Override
     public void onBehaviorInteract(Material material) {
-        Skeleton entity = this.getEntity();
+        AbstractSkeleton entity = this.getEntity();
 
-        if (MaterialUtils.isAir(material))
-        {
+        if (MaterialUtils.isAir(material)) {
             state.setBehavior(new IdleBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
         }
-        
+
         super.onBehaviorInteract(material);
     }
 
@@ -52,53 +50,46 @@ public class FollowBehavior extends Behavior {
         double maxDistance = Main.config.getDouble("maxFollowDistance", 20.0);
 
         Player owner = Bukkit.getPlayer(state.getOwnerID());
-        Skeleton entity = this.getEntity();
+        AbstractSkeleton entity = this.getEntity();
 
-        if (owner == null || entity == null)
-        {
+        if (owner == null || entity == null) {
             return;
         }
-        
+
         double distance = entity.getLocation().distance(owner.getLocation());
         double speed = distance < maxDistance / 3 ? 1.0 : 1.5;
-        
-        if (distance < minDistance / 2) 
-        {
+
+        if (distance < minDistance / 2) {
             entity.getPathfinder().moveTo(owner.getLocation(), 0);
-        } 
-        else if (distance > maxDistance) 
-        {
+        } else if (distance > maxDistance) {
             entity.teleport(owner.getLocation());
-        } 
-        else 
-        {
+        } else {
             entity.lookAt(owner);
             entity.getPathfinder().moveTo(owner.getLocation(), speed);
         }
 
-        if (state.aggressionState == AggressionState.HOSTILE)
-        {
+        if (state.aggressionState == AggressionState.HOSTILE) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
-                                    .filter(x -> !ThrallUtils.isFriendly(state, x))
-                                    .min(Comparator.comparingDouble(x -> x.getLocation().distance(entity.getLocation()) + state.selectionBias))
-                                    .orElse(null);;
-            if (nearestEntity != null)
-            {
+                    .filter(x -> !ThrallUtils.isFriendly(state, x))
+                    .min(Comparator
+                            .comparingDouble(x -> x.getLocation().distance(entity.getLocation()) + state.selectionBias))
+                    .orElse(null);
+            ;
+            if (nearestEntity != null) {
                 state.target = nearestEntity;
                 state.setBehavior(new HostileBehavior(entityID, state, this));
             }
-        }
-        else if (state.aggressionState == AggressionState.HEALER)
-        {
-            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Skeleton.class)
-                                    .filter(x -> ThrallUtils.isFriendly(state, x))
-                                    .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
-                                    .filter(x -> !(manager.getThrall(x.getUniqueId()).getBehavior() instanceof HostileBehavior))
-                                    .min(Comparator.comparingDouble
-                                    (x -> (x.getLocation().distance(entity.getLocation()) + state.selectionBias) *  x.getHealth() ))
-                                    .orElse(null);;
-            if (nearestEntity != null)
-            {
+        } else if (state.aggressionState == AggressionState.HEALER) {
+            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, AbstractSkeleton.class)
+                    .filter(x -> ThrallUtils.isFriendly(state, x))
+                    .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+                    .filter(x -> !(manager.getThrall(x.getUniqueId()).getBehavior() instanceof HostileBehavior))
+                    .min(Comparator
+                            .comparingDouble(x -> (x.getLocation().distance(entity.getLocation()) + state.selectionBias)
+                                    * x.getHealth()))
+                    .orElse(null);
+            ;
+            if (nearestEntity != null) {
                 state.target = nearestEntity;
                 state.setBehavior(new HealBehavior(entityID, state, this));
             }
@@ -111,13 +102,11 @@ public class FollowBehavior extends Behavior {
     }
 
     @Override
-    public void onBehaviorStuck() 
-    {
-        Skeleton entity = this.getEntity();
+    public void onBehaviorStuck() {
+        AbstractSkeleton entity = this.getEntity();
         Player owner = Bukkit.getPlayer(state.getOwnerID());
 
-        if (entity == null || owner == null)
-        {
+        if (entity == null || owner == null) {
             return;
         }
         entity.teleport(owner.getLocation());
@@ -127,5 +116,5 @@ public class FollowBehavior extends Behavior {
     protected void onSetPersistentData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "FOLLOW");
     }
-    
+
 }

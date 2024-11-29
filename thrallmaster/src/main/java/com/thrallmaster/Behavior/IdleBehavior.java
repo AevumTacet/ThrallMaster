@@ -15,7 +15,7 @@ import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class IdleBehavior extends Behavior {
-    
+
     public Location startLocation;
 
     public IdleBehavior(UUID entityID, ThrallState state) {
@@ -28,17 +28,14 @@ public class IdleBehavior extends Behavior {
     }
 
     @Override
-    public String getBehaviorName()
-    {
+    public String getBehaviorName() {
         return "Guarding";
     }
-    
+
     @Override
-    public void onBehaviorStart() 
-    {
-        Skeleton entity = this.getEntity();
-        if (entity != null)
-        {
+    public void onBehaviorStart() {
+        AbstractSkeleton entity = this.getEntity();
+        if (entity != null) {
             entity.setAI(true);
             entity.setTarget(null);
         }
@@ -46,10 +43,9 @@ public class IdleBehavior extends Behavior {
 
     @Override
     public void onBehaviorInteract(Material material) {
-        Skeleton entity = this.getEntity();
+        AbstractSkeleton entity = this.getEntity();
 
-        if (MaterialUtils.isAir(material))
-        {
+        if (MaterialUtils.isAir(material)) {
             state.setBehavior(new FollowBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
         }
@@ -59,48 +55,44 @@ public class IdleBehavior extends Behavior {
 
     @Override
     public void onBehaviorTick() {
-        Skeleton entity = this.getEntity();
+        AbstractSkeleton entity = this.getEntity();
 
-        if (entity == null)
-        {
+        if (entity == null) {
             return;
         }
 
-        if (startLocation == null)
-        {
+        if (startLocation == null) {
             System.err.println("Thrall start location was null, defaulting to current location.");
             startLocation = entity.getLocation();
         }
 
         double distance = entity.getLocation().distance(startLocation);
-        if (distance > 4)
-        {
+        if (distance > 4) {
             entity.getPathfinder().moveTo(startLocation, 1.0);
         }
 
-        if (state.aggressionState == AggressionState.HOSTILE)
-        {
+        if (state.aggressionState == AggressionState.HOSTILE) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
-                                    .filter(x -> !ThrallUtils.isFriendly(state, x))
-                                    .min(Comparator.comparingDouble(x -> x.getLocation().distance(entity.getLocation()) + state.selectionBias))
-                                    .orElse(null);;
-            if (nearestEntity != null)
-            {
+                    .filter(x -> !ThrallUtils.isFriendly(state, x))
+                    .min(Comparator
+                            .comparingDouble(x -> x.getLocation().distance(entity.getLocation()) + state.selectionBias))
+                    .orElse(null);
+            ;
+            if (nearestEntity != null) {
                 state.target = nearestEntity;
                 state.setBehavior(new HostileBehavior(entityID, state, this));
             }
-        }
-        else if (state.aggressionState == AggressionState.HEALER)
-        {
-            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Skeleton.class)
-                                    .filter(x -> ThrallUtils.isFriendly(state, x))
-                                    .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
-                                    .filter(x -> !(manager.getThrall(x.getUniqueId()).getBehavior() instanceof HostileBehavior))
-                                    .min(Comparator.comparingDouble
-                                    (x -> (x.getLocation().distance(entity.getLocation()) + state.selectionBias) *  x.getHealth() ))
-                                    .orElse(null);;
-            if (nearestEntity != null)
-            {
+        } else if (state.aggressionState == AggressionState.HEALER) {
+            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, AbstractSkeleton.class)
+                    .filter(x -> ThrallUtils.isFriendly(state, x))
+                    .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+                    .filter(x -> !(manager.getThrall(x.getUniqueId()).getBehavior() instanceof HostileBehavior))
+                    .min(Comparator
+                            .comparingDouble(x -> (x.getLocation().distance(entity.getLocation()) + state.selectionBias)
+                                    * x.getHealth()))
+                    .orElse(null);
+            ;
+            if (nearestEntity != null) {
                 state.target = nearestEntity;
                 state.setBehavior(new HealBehavior(entityID, state, this));
             }
@@ -108,12 +100,10 @@ public class IdleBehavior extends Behavior {
     }
 
     @Override
-    public void onBehaviorStuck() 
-    {
-        Skeleton entity = this.getEntity();
+    public void onBehaviorStuck() {
+        AbstractSkeleton entity = this.getEntity();
 
-        if (entity == null)
-        {
+        if (entity == null) {
             return;
         }
         entity.teleport(startLocation);
@@ -123,8 +113,7 @@ public class IdleBehavior extends Behavior {
     public void onSetPersistentData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "IDLE");
 
-        if (startLocation != null)
-        {
+        if (startLocation != null) {
             nbt.setString("IdleLocationW", startLocation.getWorld().getName());
             nbt.setDouble("IdleLocationX", startLocation.getX());
             nbt.setDouble("IdleLocationY", startLocation.getY());

@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.plugin.Plugin;
 
 import dev.jorel.commandapi.CommandAPI;
@@ -89,7 +89,7 @@ public class Commands {
 
                             selected.forEach(state -> {
                                 manager.unregister(state.getEntityID());
-                                manager.registerThrall((Skeleton) state.getEntity(), target);
+                                manager.registerThrall((AbstractSkeleton) state.getEntity(), target);
                             });
 
                             player.sendMessage(

@@ -9,21 +9,22 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
-import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityCombustByBlockEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -91,7 +92,7 @@ public class ThrallManager implements Listener {
         logger.info("Restored " + trackedEntities.size() + " entities.");
     }
 
-    public void registerThrall(Skeleton entity, Player owner) {
+    public void registerThrall(AbstractSkeleton entity, Player owner) {
         logger.info("Registering entity entity with UUID: " + entity.getUniqueId());
         UUID entityID = entity.getUniqueId();
         UUID ownerID = owner.getUniqueId();
@@ -134,7 +135,7 @@ public class ThrallManager implements Listener {
 
     public void spawnThrall(Location location, Player owner) {
         World world = location.getWorld();
-        Skeleton thrall = world.spawn(location, Skeleton.class);
+        AbstractSkeleton thrall = world.spawn(location, WitherSkeleton.class);
         thrall.getEquipment().clear();
         thrall.setShouldBurnInDay(false);
         thrall.setAware(true);
@@ -266,8 +267,6 @@ public class ThrallManager implements Listener {
         board.updateBoard(stats);
     }
 
-    // Evento que maneja la interacción con un Skeleton para alternar entre estados
-    // FOLLOW e IDLE
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
 
@@ -275,7 +274,7 @@ public class ThrallManager implements Listener {
             return;
         }
 
-        Skeleton entity = (Skeleton) event.getRightClicked();
+        AbstractSkeleton entity = (AbstractSkeleton) event.getRightClicked();
 
         World world = entity.getWorld();
         Player player = event.getPlayer();
@@ -323,7 +322,7 @@ public class ThrallManager implements Listener {
                 : event.getDamager();
 
         if (ThrallUtils.isThrall(damaged)) {
-            Skeleton entity = (Skeleton) damaged;
+            AbstractSkeleton entity = (AbstractSkeleton) damaged;
             ThrallState state = getThrall(entity.getUniqueId());
             Player owner = state.getOwner();
 
@@ -341,7 +340,7 @@ public class ThrallManager implements Listener {
             updateBoard(state.getOwnerID());
         }
 
-        // Si el dañado es el dueño del Skeleton
+        // Thrall owner is damaged
         if (damaged instanceof Player) {
             Player player = (Player) damaged;
 
@@ -351,6 +350,34 @@ public class ThrallManager implements Listener {
                 getThralls(player.getUniqueId()).forEach(state -> {
                     state.setAttackMode(attacker);
                 });
+            }
+        }
+
+        // Stop Thralls from poisoning their targets (Wither case)
+        if (ThrallUtils.isThrall(attacker)) {
+            LivingEntity livingEntity = (LivingEntity) damaged;
+            livingEntity.removePotionEffect(PotionEffectType.WITHER);
+        }
+    }
+
+    @EventHandler
+    public void onArrowFired(EntityShootBowEvent event) {
+        Entity shooter = event.getEntity();
+        Entity arrow = event.getProjectile();
+        ItemStack bow = event.getBow();
+
+        if (shooter == null || arrow == null || bow == null) {
+            return;
+        }
+
+        // Remove fire effects from Thralls if they are not carrying a bow with
+        // enchanments
+        if (ThrallUtils.isThrall(shooter)) {
+            if (bow.containsEnchantment(Enchantment.FLAME)) {
+                return;
+            }
+            if (arrow.getFireTicks() != 0) {
+                arrow.setFireTicks(0);
             }
         }
     }
@@ -392,8 +419,6 @@ public class ThrallManager implements Listener {
 
     }
 
-    // Evento que se activa cuando un Skeleton muere U otras entidades a manos del
-    // entity
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();

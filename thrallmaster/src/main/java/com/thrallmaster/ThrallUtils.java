@@ -11,7 +11,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -24,7 +24,7 @@ public class ThrallUtils {
     private static ThrallManager manager = Main.manager;
 
     public static boolean isThrall(Entity entity) {
-        return (entity instanceof Skeleton) && manager.isEntityTracked(entity.getUniqueId());
+        return (entity instanceof AbstractSkeleton) && manager.isEntityTracked(entity.getUniqueId());
     }
 
     public static boolean belongsTo(Entity entity, Entity owner) {
@@ -119,7 +119,7 @@ public class ThrallUtils {
         ThrallState state = manager.getThrall(from.getUniqueId());
         Player owner = state.getOwner();
         Location location = from.getLocation();
-        Material item = ((Skeleton) from).getEquipment().getItemInMainHand().getType();
+        Material item = ((AbstractSkeleton) from).getEquipment().getItemInMainHand().getType();
         double multiplier = MaterialUtils.isRanged(item) ? Settings.THRALL_DETECTION_MUL : 1.0;
         double radius = Settings.THRALL_DETECTION_RANGE * multiplier;
 
