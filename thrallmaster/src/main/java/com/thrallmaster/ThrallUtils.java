@@ -213,6 +213,11 @@ public class ThrallUtils {
             state.aggressionState = AggressionState.HEALER;
             return true;
         } else if (MaterialUtils.isShield(material)) {
+            // Check if its not a ranger
+            if (MaterialUtils.isRanged(equipment.getItemInMainHand().getType())) {
+                return false;
+            }
+
             ItemStack currentItem = equipment.getItemInOffHand();
             world.dropItemNaturally(entity.getLocation(), currentItem);
 
