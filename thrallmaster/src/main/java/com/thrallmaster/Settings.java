@@ -25,6 +25,8 @@ public class Settings {
 	public static double THRALL_AGGRO_COOLDOWN;
 	public static double RUN_SPEED_MUL;
 	public static int POTION_COUNT;
+	public static double SHIELD_BLOCK_CHANCE;
+
 	public static String SPAWN_MESSAGE;
 	public static String DEATH_MESSAGE;
 	public static PotionEffectType POTION_TYPE;
@@ -76,6 +78,7 @@ public class Settings {
 		THRALL_FOLLOW_MIN = section.getDouble("follow-min-distance", 3);
 		THRALL_FOLLOW_MAX = section.getDouble("follow-max-distance", 30);
 		THRALL_AGGRO_COOLDOWN = section.getDouble("attack-demiss-cooldown", 30);
+		SHIELD_BLOCK_CHANCE = section.getDouble("shield-block-chance", 0.5);
 	}
 
 	private static void loadSpawnSettings(ConfigurationSection section) {

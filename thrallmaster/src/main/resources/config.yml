@@ -42,6 +42,9 @@ general:
   # Accuracy for arrows shot by Thralls as a number between 0 (blind) to 1 (sharpshooter), set to -1 to use Vanilla settings.
   ranged-accuracy: 0.75
 
+  # Chance for a Thrall to block an incoming attack when a shield is equipped
+  shield-block-chance: 0.5
+
 # Thrall Behavior names and States, State names should be typed taking "aggression-state-message" into consideration. Behavior names should be in present continous.
 states:
   idle: "Guarding"

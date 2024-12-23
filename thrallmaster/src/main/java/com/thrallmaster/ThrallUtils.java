@@ -212,6 +212,12 @@ public class ThrallUtils {
 
             state.aggressionState = AggressionState.HEALER;
             return true;
+        } else if (MaterialUtils.isShield(material)) {
+            ItemStack currentItem = equipment.getItemInOffHand();
+            world.dropItemNaturally(entity.getLocation(), currentItem);
+
+            equipment.setItemInOffHand(item);
+            return true;
         }
         return false;
     }

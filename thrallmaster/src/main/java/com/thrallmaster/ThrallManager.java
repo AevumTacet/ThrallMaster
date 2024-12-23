@@ -30,7 +30,10 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -45,6 +48,7 @@ import com.thrallmaster.States.ThrallState;
 import net.kyori.adventure.text.Component;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -144,11 +148,10 @@ public class ThrallManager implements Listener {
         thrall.customName(Component.text(Settings.THRALL_NAME));
         thrall.setCustomNameVisible(true);
 
-        thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.9);
+        thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.8);
         thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
         thrall.setHealth(Settings.THRALL_HEALTH);
 
-        // Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.AVOID_ENTITY);
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
 
         for (var particle : Settings.SPAWN_PARTICLES) {
@@ -323,25 +326,6 @@ public class ThrallManager implements Listener {
                 ? (Entity) ((Arrow) event.getDamager()).getShooter()
                 : event.getDamager();
 
-        if (ThrallUtils.isThrall(damaged)) {
-            AbstractSkeleton entity = (AbstractSkeleton) damaged;
-            ThrallState state = getThrall(entity.getUniqueId());
-            Player owner = state.getOwner();
-
-            if (attacker == owner) {
-                if (MaterialUtils.isAir(owner.getInventory().getItemInMainHand().getType())) {
-                    state.setSelected(!state.isSelected());
-                    event.setCancelled(true);
-                }
-            } else if (ThrallUtils.isThrall(attacker) && ThrallUtils.isFriendly(attacker, owner)) {
-                event.setCancelled(true);
-            } else {
-                state.setAttackMode(attacker);
-            }
-
-            updateBoard(state.getOwnerID());
-        }
-
         // Thrall owner is damaged
         if (damaged instanceof Player) {
             Player player = (Player) damaged;
@@ -355,23 +339,62 @@ public class ThrallManager implements Listener {
             }
         }
 
-        // Stop Thralls from poisoning their targets (Wither case)
+        // Damaged is a Thrall
+        if (ThrallUtils.isThrall(damaged)) {
+            AbstractSkeleton entity = (AbstractSkeleton) damaged;
+            ThrallState state = getThrall(entity.getUniqueId());
+            Player owner = state.getOwner();
+
+            if (attacker.equals(owner)) {
+                if (MaterialUtils.isAir(owner.getInventory().getItemInMainHand().getType())) {
+                    state.setSelected(!state.isSelected());
+                    event.setCancelled(true);
+                }
+            } else if (ThrallUtils.isThrall(attacker) && ThrallUtils.isFriendly(attacker, owner)) {
+                event.setCancelled(true);
+            } else {
+                state.setAttackMode(attacker);
+
+                // Block attacks when a shield is equipped
+                Random random = new Random();
+                ItemStack offHand = entity.getEquipment().getItemInOffHand();
+                if (MaterialUtils.isShield(offHand.getType()) && state.target.equals(attacker)) {
+                    if (random.nextDouble() > Settings.SHIELD_BLOCK_CHANCE) {
+                        entity.swingOffHand();
+                        entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
+                        MaterialUtils.applyDamage(offHand, (int) event.getDamage());
+                        event.setCancelled(true);
+                    }
+                }
+            }
+
+            updateBoard(state.getOwnerID());
+        }
+
+        // Attacker is a Thrall
         if (ThrallUtils.isThrall(attacker)) {
             LivingEntity livingEntity = (LivingEntity) damaged;
 
             // Wither Skeletons ranged attacks are considered "unarmed", so the damage needs
             // to be modified
-            if (event.getDamager() instanceof Arrow && attacker instanceof WitherSkeleton) {
-                var damage = event.getDamage();
-                event.setDamage(damage * 3);
+            if (attacker instanceof WitherSkeleton) {
+                if (event.getDamager() instanceof Arrow) {
+                    var damage = event.getDamage();
+                    event.setDamage(damage * 2);
+                }
+
+                Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        livingEntity.removePotionEffect(PotionEffectType.WITHER);
+                    }
+                }, 1);
             }
 
-            Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
-                @Override
-                public void run() {
-                    livingEntity.removePotionEffect(PotionEffectType.WITHER);
-                }
-            }, 1);
+            // Apply damage to the current item
+            LivingEntity entity = (LivingEntity) attacker;
+            ItemStack mainHand = entity.getEquipment().getItemInMainHand();
+            MaterialUtils.applyDamage(mainHand, (int) (event.getDamage() / 2));
         }
     }
 
