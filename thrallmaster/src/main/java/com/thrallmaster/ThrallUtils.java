@@ -24,7 +24,7 @@ public class ThrallUtils {
     private static ThrallManager manager = Main.manager;
 
     public static boolean isThrall(Entity entity) {
-        return (entity instanceof AbstractSkeleton) && manager.isEntityTracked(entity.getUniqueId());
+        return (entity instanceof AbstractSkeleton) && isEntityTracked(entity);
     }
 
     public static boolean belongsTo(Entity entity, Entity owner) {
@@ -35,6 +35,10 @@ public class ThrallUtils {
         ThrallState thrall = manager.getThrall(entity.getUniqueId());
         return belongsTo(thrall, owner);
 
+    }
+
+    public static boolean isEntityTracked(Entity entity) {
+        return manager.isEntityTracked(entity.getUniqueId()) && ThrallUtils.checkActiveFlag(entity);
     }
 
     public static boolean belongsTo(ThrallState state, Entity owner) {

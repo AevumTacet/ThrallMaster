@@ -232,9 +232,6 @@ public class ThrallManager implements Listener {
                                     state.setSelected(false);
                                 }
                             }
-                            if (entity != null && !ThrallUtils.checkActiveFlag(entity)) {
-                                unregister(entity.getUniqueId());
-                            }
                         });
 
                 if (elapsedTicks % 10 == 0) {
