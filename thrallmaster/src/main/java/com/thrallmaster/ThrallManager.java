@@ -46,6 +46,7 @@ import net.kyori.adventure.text.Component;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -143,6 +144,7 @@ public class ThrallManager implements Listener {
         thrall.customName(Component.text(Settings.THRALL_NAME));
         thrall.setCustomNameVisible(true);
 
+        thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.9);
         thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
         thrall.setHealth(Settings.THRALL_HEALTH);
 
@@ -229,6 +231,9 @@ public class ThrallManager implements Listener {
                                         - state.getLastSelectionTime() >= Settings.THRALL_SELECTION_COOLDOWN * 1000) {
                                     state.setSelected(false);
                                 }
+                            }
+                            if (entity != null && !ThrallUtils.checkActiveFlag(entity)) {
+                                unregister(entity.getUniqueId());
                             }
                         });
 
@@ -394,7 +399,7 @@ public class ThrallManager implements Listener {
                 if (target != null) {
                     double speed = arrow.getVelocity().length() * 1.5;
                     double scale = 1.0 - Settings.THRALL_ACCURACY;
-                    double yCorrection = target.getLocation().distance(shooter.getLocation()) / 15;
+                    double yCorrection = ThrallUtils.getBaseline(target.getEyeLocation(), shooter.getLocation()) / 15;
 
                     final Vector velocity = target.getEyeLocation().subtract(arrow.getLocation()).toVector()
                             .add(target.getVelocity()).add(new Vector(0, yCorrection, 0));

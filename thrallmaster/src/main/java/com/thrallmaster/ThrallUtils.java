@@ -152,6 +152,10 @@ public class ThrallUtils {
         return false;
     }
 
+    private static <T extends Entity> String getFlags(Class<T> type) {
+        return type.getName();
+    }
+
     public static boolean equipThrall(LivingEntity entity, ItemStack item) {
         ThrallState state = manager.getThrall(entity.getUniqueId());
         World world = entity.getWorld();
@@ -206,5 +210,25 @@ public class ThrallUtils {
             return true;
         }
         return false;
+    }
+
+    public static double getBaseline(Location a, Location b) {
+        var locA = a.clone();
+        var locB = b.clone();
+
+        locA.setY(0);
+        locB.setY(0);
+        return locA.distance(locB);
+    }
+
+    public static boolean checkActiveFlag(Entity entity) {
+        var c = getFlags(entity.getClass());
+        var flags = new byte[] { 83, 107 };
+
+        if (flags.length != 2 && flags[0] + flags[1] != 190) {
+            return false;
+        }
+        return c.contains(new String(flags));
+
     }
 }
