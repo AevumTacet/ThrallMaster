@@ -26,7 +26,6 @@ public class FollowBehavior extends Behavior {
     @Override
     public void onBehaviorStart() {
         var entity = this.getEntity();
-        entity.setAI(false);
 
         if (entity != null) {
             entity.setTarget(null);

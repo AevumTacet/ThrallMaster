@@ -360,7 +360,7 @@ public class ThrallManager implements Listener {
                 ItemStack offHand = entity.getEquipment().getItemInOffHand();
                 if (MaterialUtils.isShield(offHand.getType())
                         && (state.target != null && state.target.equals(attacker))) {
-                    if (random.nextDouble() > Settings.SHIELD_BLOCK_CHANCE) {
+                    if (random.nextDouble() < Settings.SHIELD_BLOCK_CHANCE) {
                         entity.swingOffHand();
                         entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
                         MaterialUtils.applyDamage(offHand, (int) event.getDamage());
