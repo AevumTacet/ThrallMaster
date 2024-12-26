@@ -106,7 +106,9 @@ public class Commands {
                             player.sendMessage(
                                     "You transferred " + selected.size() + " Thralls to " + target.getName());
                             target.sendMessage("You recieved " + selected.size() + " Thralls from " + player.getName());
-                        }));
+                        }))
+
+        ;
 
         base.register();
     }

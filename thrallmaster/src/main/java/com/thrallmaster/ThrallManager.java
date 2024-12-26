@@ -252,7 +252,7 @@ public class ThrallManager implements Listener {
 
                 elapsedTicks += 1;
             }
-        }.runTaskTimer(Main.plugin, 0, 2);
+        }.runTaskTimer(Main.plugin, 0, 1);
     }
 
     public void updateBoard(UUID playerID) {
@@ -358,7 +358,8 @@ public class ThrallManager implements Listener {
                 // Block attacks when a shield is equipped
                 Random random = new Random();
                 ItemStack offHand = entity.getEquipment().getItemInOffHand();
-                if (MaterialUtils.isShield(offHand.getType()) && state.target.equals(attacker)) {
+                if (MaterialUtils.isShield(offHand.getType())
+                        && (state.target != null && state.target.equals(attacker))) {
                     if (random.nextDouble() > Settings.SHIELD_BLOCK_CHANCE) {
                         entity.swingOffHand();
                         entity.getWorld().playSound(entity.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
@@ -378,10 +379,10 @@ public class ThrallManager implements Listener {
             // Wither Skeletons ranged attacks are considered "unarmed", so the damage needs
             // to be modified
             if (attacker instanceof WitherSkeleton) {
-                if (event.getDamager() instanceof Arrow) {
-                    var damage = event.getDamage();
-                    event.setDamage(damage * 2);
-                }
+                // if (event.getDamager() instanceof Arrow) {
+                // var damage = event.getDamage();
+                // event.setDamage(damage);
+                // }
 
                 Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
                     @Override
@@ -417,12 +418,16 @@ public class ThrallManager implements Listener {
                 LivingEntity target = state.target;
 
                 if (target != null) {
-                    double speed = arrow.getVelocity().length() * 1.5;
                     double scale = 1.0 - Settings.THRALL_ACCURACY;
-                    double yCorrection = ThrallUtils.getBaseline(target.getEyeLocation(), shooter.getLocation()) / 15;
+                    double speed = arrow.getVelocity().length() * 1.5;
+                    double distance = ThrallUtils.getBaseline(target.getEyeLocation(), shooter.getLocation());
+                    double time = distance / speed;
+
+                    double yCorrection = distance / 15;
+                    var vCorrection = target.getVelocity().multiply(time);
 
                     final Vector velocity = target.getEyeLocation().subtract(arrow.getLocation()).toVector()
-                            .add(target.getVelocity()).add(new Vector(0, yCorrection, 0));
+                            .add(vCorrection).add(new Vector(0, yCorrection, 0));
 
                     velocity.add(Vector.getRandom().multiply(scale));
                     arrow.setVelocity(velocity.normalize().multiply(speed));

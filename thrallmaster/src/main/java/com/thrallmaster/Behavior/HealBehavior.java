@@ -28,7 +28,9 @@ public class HealBehavior extends Behavior {
 
     @Override
     public void onBehaviorStart() {
+        AbstractSkeleton entity = this.getEntity();
         this.startTime = System.currentTimeMillis();
+        entity.setAI(true);
     }
 
     @Override
@@ -43,7 +45,8 @@ public class HealBehavior extends Behavior {
         if (state.target != null && state.target.isValid() && ThrallUtils.isThrall(state.target)) {
             double distance = entity.getLocation().distance(state.target.getLocation());
 
-            if (state.target.getHealth() >= state.target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+            if (state.target.getHealth() >= state.target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()
+                    || state.getBehavior() instanceof HostileBehavior) {
                 state.target = null;
                 return;
             }
@@ -57,13 +60,13 @@ public class HealBehavior extends Behavior {
                 state.target.heal(1);
 
                 entity.swingHand(EquipmentSlot.HAND);
-                entity.getPathfinder().moveTo(state.target.getLocation(), 0);
+                entity.getPathfinder().stopPathfinding();
             } else {
                 entity.getPathfinder().moveTo(state.target.getLocation());
             }
 
             entity.lookAt(state.target);
-            ((AbstractSkeleton) state.target).getPathfinder().moveTo(entity, 0);
+            ((AbstractSkeleton) state.target).getPathfinder().stopPathfinding();
         }
 
         long currentTime = System.currentTimeMillis();

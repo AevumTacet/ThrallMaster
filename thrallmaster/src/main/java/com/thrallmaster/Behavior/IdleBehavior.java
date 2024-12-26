@@ -73,6 +73,12 @@ public class IdleBehavior extends Behavior {
             entity.getPathfinder().moveTo(startLocation, speed);
         }
 
+        double distancePlayer = state.getOwner().getLocation().distance(entity.getLocation());
+        if (distancePlayer < Settings.THRALL_FOLLOW_MIN / 2) {
+            entity.getPathfinder().stopPathfinding();
+            entity.lookAt(state.getOwner().getEyeLocation());
+        }
+
         if (state.aggressionState == AggressionState.HOSTILE) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
                     .filter(x -> !ThrallUtils.isFriendly(state, x))

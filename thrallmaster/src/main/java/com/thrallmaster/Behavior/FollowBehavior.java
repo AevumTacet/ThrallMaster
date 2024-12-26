@@ -26,6 +26,7 @@ public class FollowBehavior extends Behavior {
     @Override
     public void onBehaviorStart() {
         var entity = this.getEntity();
+        entity.setAI(false);
 
         if (entity != null) {
             entity.setTarget(null);
@@ -56,10 +57,12 @@ public class FollowBehavior extends Behavior {
         double distance = entity.getLocation().distance(owner.getLocation());
         double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
 
-        if (distance < Settings.THRALL_FOLLOW_MIN / 2) {
-            entity.getPathfinder().moveTo(owner.getLocation(), 0);
+        if (distance < Settings.THRALL_FOLLOW_MIN) {
+            entity.getPathfinder().stopPathfinding();
         } else if (distance > Settings.THRALL_FOLLOW_MAX) {
-            entity.teleport(owner.getLocation());
+            if (!(owner.isFlying() || owner.isSwimming())) {
+                entity.teleport(owner.getLocation());
+            }
         } else {
             entity.lookAt(owner);
             entity.getPathfinder().moveTo(owner.getLocation(), speed);

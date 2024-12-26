@@ -173,6 +173,13 @@ public class ThrallUtils {
             if (state.aggressionState == AggressionState.HEALER) {
                 state.aggressionState = AggressionState.DEFENSIVE;
             }
+
+            if (MaterialUtils.isRanged(material)) {
+                if (MaterialUtils.isShield(equipment.getItemInOffHand().getType())) {
+                    world.dropItemNaturally(entity.getLocation(), equipment.getItemInOffHand());
+                    equipment.setItemInOffHand(null);
+                }
+            }
             return true;
         } else if (MaterialUtils.isArmor(material)) {
             switch (MaterialUtils.getArmorType(material)) {

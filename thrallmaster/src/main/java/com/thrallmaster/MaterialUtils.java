@@ -135,7 +135,8 @@ public class MaterialUtils {
     public static void applyDamage(ItemStack item, int amount) {
         if (item.getItemMeta() instanceof Damageable) {
             Damageable meta = (Damageable) item.getItemMeta();
-            int damage = meta.getDamage() - amount;
+
+            int damage = meta.getDamage() + amount;
             meta.setDamage(damage);
             item.setItemMeta(meta);
         }

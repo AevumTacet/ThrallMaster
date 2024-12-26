@@ -1,10 +1,14 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
+import org.bukkit.entity.Player;
+
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Settings;
 import com.thrallmaster.States.ThrallState;
@@ -24,6 +28,7 @@ public class HostileBehavior extends Behavior {
     public void onBehaviorStart() {
         AbstractSkeleton entity = this.getEntity();
         this.startTime = System.currentTimeMillis();
+        entity.setAI(true);
 
         if (entity != null) {
             entity.getWorld().spawnParticle(Particle.SMOKE, entity.getEyeLocation().add(0, 1, 0), 10, 0.1, 0.1, 0.1,
@@ -47,6 +52,13 @@ public class HostileBehavior extends Behavior {
                 || (currentTime - startTime > Settings.THRALL_AGGRO_COOLDOWN * 1000)) {
             returnToPreviousState();
             this.startTime = currentTime;
+        }
+
+        Player owner = state.getOwner();
+        double distance = entity.getLocation().distance(owner.getLocation());
+
+        if (distance > Settings.THRALL_FOLLOW_MAX) {
+            returnToPreviousState();
         }
     }
 
