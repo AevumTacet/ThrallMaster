@@ -58,8 +58,9 @@ public class FollowBehavior extends Behavior {
 
         if (distance < Settings.THRALL_FOLLOW_MIN) {
             entity.getPathfinder().stopPathfinding();
+
         } else if (distance > Settings.THRALL_FOLLOW_MAX) {
-            if (!(owner.isFlying() || owner.isSwimming())) {
+            if (!MaterialUtils.isAir(owner.getLocation().getBlock().getType())) {
                 entity.teleport(owner.getLocation());
             }
         } else {

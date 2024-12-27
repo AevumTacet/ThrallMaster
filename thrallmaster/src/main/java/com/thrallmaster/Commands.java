@@ -7,6 +7,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.plugin.Plugin;
 
+import com.thrallmaster.States.ThrallState;
+
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LocationArgument;
@@ -107,8 +109,13 @@ public class Commands {
                                     "You transferred " + selected.size() + " Thralls to " + target.getName());
                             target.sendMessage("You recieved " + selected.size() + " Thralls from " + player.getName());
                         }))
-
-        ;
+                .withSubcommand(new CommandAPICommand("select_all")
+                        .executesPlayer((player, args) -> {
+                            manager.getThralls(player.getUniqueId())
+                                    .forEach(state -> state.setSelected(true));
+                            player.sendMessage(
+                                    "Selecting " + manager.getOwnerData(player.getUniqueId()).getCount() + " Thralls.");
+                        }));
 
         base.register();
     }

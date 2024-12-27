@@ -218,9 +218,10 @@ public class ThrallManager implements Listener {
                             Entity entity = state.getEntity();
                             Behavior behavior = state.getBehavior();
 
-                            if (behavior != null && entity != null && elapsedTicks % 5 == state.phaseOffset) {
-                                behavior.onBehaviorTick();
+                            if (behavior != null && entity != null && state.getOwner() != null
+                                    && elapsedTicks % 5 == state.phaseOffset) {
 
+                                behavior.onBehaviorTick();
                                 if (entity.isUnderWater()) {
                                     behavior.onBehaviorStuck();
                                 }
