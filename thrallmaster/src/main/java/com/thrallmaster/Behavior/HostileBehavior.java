@@ -1,8 +1,6 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -57,7 +55,7 @@ public class HostileBehavior extends Behavior {
         Player owner = state.getOwner();
         double distance = entity.getLocation().distance(owner.getLocation());
 
-        if (distance > Settings.THRALL_FOLLOW_MAX) {
+        if (prevBehavior instanceof FollowBehavior && distance > Settings.THRALL_FOLLOW_MAX) {
             returnToPreviousState();
         }
     }
