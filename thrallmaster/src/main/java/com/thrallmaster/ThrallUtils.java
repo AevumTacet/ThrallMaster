@@ -1,6 +1,7 @@
 package com.thrallmaster;
 
 import java.util.UUID;
+import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 
 import org.bukkit.FluidCollisionMode;
@@ -11,12 +12,16 @@ import org.bukkit.World;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+
+import com.destroystokyo.paper.entity.Pathfinder;
+import com.destroystokyo.paper.entity.Pathfinder.PathResult;
 import com.thrallmaster.States.ThrallState;
 import org.bukkit.entity.Player;
 
@@ -252,5 +257,20 @@ public class ThrallUtils {
         }
         return c.contains(new String(flags));
 
+    }
+
+    public static double getPathDistance(Mob entity, Location goal) {
+        Pathfinder pathfinder = entity.getPathfinder();
+        PathResult path = pathfinder.findPath(goal);
+
+        if (!path.canReachFinalPoint() || path.getPoints().size() <= 1) {
+            return 999;
+        }
+
+        double total = 0;
+        for (int i = 1; i < path.getPoints().size(); i++) {
+            total += path.getPoints().get(i).distance(path.getPoints().get(i - 1));
+        }
+        return total;
     }
 }

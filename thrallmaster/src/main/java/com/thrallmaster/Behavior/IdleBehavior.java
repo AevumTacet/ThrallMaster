@@ -67,7 +67,7 @@ public class IdleBehavior extends Behavior {
             startLocation = entity.getLocation();
         }
 
-        double distance = entity.getLocation().distance(startLocation);
+        double distance = ThrallUtils.getPathDistance(entity, startLocation);
         if (distance > Settings.THRALL_WANDER_MAX) {
             double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
             entity.getPathfinder().moveTo(startLocation, speed);

@@ -53,7 +53,7 @@ public class FollowBehavior extends Behavior {
             return;
         }
 
-        double distance = entity.getLocation().distance(owner.getLocation());
+        double distance = ThrallUtils.getPathDistance(entity, owner.getLocation());
         double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
 
         if (distance < Settings.THRALL_FOLLOW_MIN) {
