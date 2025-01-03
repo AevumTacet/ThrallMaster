@@ -16,8 +16,8 @@ import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class IdleBehavior extends Behavior {
-
     public Location startLocation;
+    private int elapsedTicks;
 
     public IdleBehavior(UUID entityID, ThrallState state) {
         this(entityID, state, Bukkit.getEntity(entityID).getLocation());
@@ -79,7 +79,7 @@ public class IdleBehavior extends Behavior {
             entity.lookAt(state.getOwner().getEyeLocation());
         }
 
-        if (state.aggressionState == AggressionState.HOSTILE) {
+        if (state.aggressionState == AggressionState.HOSTILE && elapsedTicks % 4 == 0) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
                     .filter(x -> !ThrallUtils.isFriendly(state, x))
                     .min(Comparator
@@ -90,7 +90,8 @@ public class IdleBehavior extends Behavior {
                 state.target = nearestEntity;
                 state.setBehavior(new HostileBehavior(entityID, state, this));
             }
-        } else if (state.aggressionState == AggressionState.HEALER) {
+        }
+        if (state.aggressionState == AggressionState.HEALER && elapsedTicks % 4 == 0) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, AbstractSkeleton.class)
                     .filter(x -> ThrallUtils.isFriendly(state, x))
                     .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
@@ -105,6 +106,8 @@ public class IdleBehavior extends Behavior {
                 state.setBehavior(new HealBehavior(entityID, state, this));
             }
         }
+
+        elapsedTicks++;
     }
 
     @Override

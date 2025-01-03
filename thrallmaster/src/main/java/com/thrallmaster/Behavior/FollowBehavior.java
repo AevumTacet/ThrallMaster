@@ -18,6 +18,7 @@ import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class FollowBehavior extends Behavior {
+    private int elapsedTicks;
 
     public FollowBehavior(UUID entityID, ThrallState state) {
         super(entityID, state);
@@ -68,7 +69,7 @@ public class FollowBehavior extends Behavior {
             entity.getPathfinder().moveTo(owner.getLocation(), speed);
         }
 
-        if (state.aggressionState == AggressionState.HOSTILE) {
+        if (state.aggressionState == AggressionState.HOSTILE && elapsedTicks % 4 == 0) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
                     .filter(x -> !ThrallUtils.isFriendly(state, x))
                     .min(Comparator
@@ -79,7 +80,9 @@ public class FollowBehavior extends Behavior {
                 state.target = nearestEntity;
                 state.setBehavior(new HostileBehavior(entityID, state, this));
             }
-        } else if (state.aggressionState == AggressionState.HEALER) {
+        }
+
+        if (state.aggressionState == AggressionState.HEALER && elapsedTicks % 4 == 0) {
             LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, AbstractSkeleton.class)
                     .filter(x -> ThrallUtils.isFriendly(state, x))
                     .filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
@@ -94,6 +97,8 @@ public class FollowBehavior extends Behavior {
                 state.setBehavior(new HealBehavior(entityID, state, this));
             }
         }
+
+        elapsedTicks++;
     }
 
     @Override
