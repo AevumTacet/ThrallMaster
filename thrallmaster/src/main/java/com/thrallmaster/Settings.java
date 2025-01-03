@@ -26,6 +26,7 @@ public class Settings {
 	public static double RUN_SPEED_MUL;
 	public static int POTION_COUNT;
 	public static double SHIELD_BLOCK_CHANCE;
+	public static double ARROWFALL_MULTIPLIER;
 
 	public static String SPAWN_MESSAGE;
 	public static String DEATH_MESSAGE;
@@ -79,6 +80,7 @@ public class Settings {
 		THRALL_FOLLOW_MAX = section.getDouble("follow-max-distance", 30);
 		THRALL_AGGRO_COOLDOWN = section.getDouble("attack-demiss-cooldown", 30);
 		SHIELD_BLOCK_CHANCE = section.getDouble("shield-block-chance", 0.5);
+		ARROWFALL_MULTIPLIER = section.getDouble("arrow-fall-distance", 10);
 	}
 
 	private static void loadSpawnSettings(ConfigurationSection section) {

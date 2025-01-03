@@ -423,7 +423,7 @@ public class ThrallManager implements Listener {
                     double distance = ThrallUtils.getBaseline(target.getEyeLocation(), shooter.getLocation());
                     double time = distance / speed;
 
-                    double yCorrection = distance / 15;
+                    double yCorrection = distance / Settings.ARROWFALL_MULTIPLIER;
                     var vCorrection = target.getVelocity().multiply(time);
 
                     final Vector velocity = target.getEyeLocation().subtract(arrow.getLocation()).toVector()
