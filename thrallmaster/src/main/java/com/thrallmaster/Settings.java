@@ -27,6 +27,7 @@ public class Settings {
 	public static int POTION_COUNT;
 	public static double SHIELD_BLOCK_CHANCE;
 	public static double ARROWFALL_MULTIPLIER;
+	public static float SELECTION_BIAS;
 
 	public static String SPAWN_MESSAGE;
 	public static String DEATH_MESSAGE;
@@ -81,6 +82,7 @@ public class Settings {
 		THRALL_AGGRO_COOLDOWN = section.getDouble("attack-demiss-cooldown", 30);
 		SHIELD_BLOCK_CHANCE = section.getDouble("shield-block-chance", 0.5);
 		ARROWFALL_MULTIPLIER = section.getDouble("arrow-fall-distance", 10);
+		SELECTION_BIAS = (float) section.getDouble("selection-bias", 4);
 	}
 
 	private static void loadSpawnSettings(ConfigurationSection section) {

@@ -49,6 +49,9 @@ general:
   # Chance for a Thrall to block an incoming attack when a shield is equipped
   shield-block-chance: 0.5
 
+  # Maximum amplitue for a random distance (in blocks) selection offset used to avoid many Thralls targetting the same entity at once.
+  selection-bias: 4
+
 
 # Thrall Behavior names and States, State names should be typed taking "aggression-state-message" into consideration. Behavior names should be in present continous.
 states:

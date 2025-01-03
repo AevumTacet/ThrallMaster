@@ -11,6 +11,7 @@ import org.joml.Random;
 import java.util.UUID;
 
 import com.thrallmaster.AggressionState;
+import com.thrallmaster.Settings;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.IO.Serializable;
@@ -94,7 +95,7 @@ public class ThrallState implements Serializable {
         this.aggressionState = AggressionState.DEFENSIVE;
         this.target = null;
 
-        this.selectionBias = (random.nextFloat() - 0.5f) * 8;
+        this.selectionBias = (random.nextFloat() - 0.5f) * 2 * Settings.SELECTION_BIAS;
         this.phaseOffset = random.nextInt(5);
     }
 
