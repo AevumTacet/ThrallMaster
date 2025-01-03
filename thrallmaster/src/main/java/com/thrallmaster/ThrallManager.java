@@ -454,11 +454,13 @@ public class ThrallManager implements Listener {
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
             if (MaterialUtils.isAir(material)) {
                 ThrallCommander.ToggleSelection(player);
+                updateBoard(player.getUniqueId());
                 // event.setCancelled(true);
             }
 
             else if (MaterialUtils.isHorn(material)) {
                 ThrallCommander.MultiSelect(player);
+                updateBoard(player.getUniqueId());
                 event.setCancelled(true);
             }
         }
@@ -472,10 +474,9 @@ public class ThrallManager implements Listener {
                 if (player.hasCooldown(Material.GOAT_HORN))
                     return;
                 ThrallCommander.HornCommand(player);
+                updateBoard(player.getUniqueId());
             }
         }
-
-        updateBoard(player.getUniqueId());
 
     }
 
