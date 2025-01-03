@@ -263,6 +263,10 @@ public class ThrallUtils {
         Pathfinder pathfinder = entity.getPathfinder();
         PathResult path = pathfinder.findPath(goal);
 
+        if (path == null) {
+            return entity.getLocation().distance(goal);
+        }
+
         double total = 0;
         for (int i = 0; i < path.getPoints().size(); i++) {
             Location prev;
