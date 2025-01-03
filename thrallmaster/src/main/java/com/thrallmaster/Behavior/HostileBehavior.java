@@ -5,7 +5,9 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Settings;
@@ -50,6 +52,14 @@ public class HostileBehavior extends Behavior {
                 || (currentTime - startTime > Settings.THRALL_AGGRO_COOLDOWN * 1000)) {
             returnToPreviousState();
             this.startTime = currentTime;
+        }
+
+        if (state.target instanceof Creeper) {
+            Creeper creeper = (Creeper) state.target;
+            if (creeper.isIgnited()) {
+                Vector direction = entity.getLocation().subtract(creeper.getLocation()).toVector();
+                entity.getPathfinder().moveTo(entity.getLocation().add(direction), Settings.RUN_SPEED_MUL);
+            }
         }
 
         Player owner = state.getOwner();
