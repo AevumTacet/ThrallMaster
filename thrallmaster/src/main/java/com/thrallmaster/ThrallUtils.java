@@ -280,4 +280,14 @@ public class ThrallUtils {
         }
         return total;
     }
+
+    public static double getTargetScore(ThrallState state, LivingEntity target) {
+        Entity entity = state.getEntity();
+        double distance = target.getLocation().distance(entity.getLocation());
+
+        boolean isVisible = isTargetVisibleFor(state, target);
+        double visibleScore = isVisible ? 0 : 10;
+
+        return distance + visibleScore + state.selectionBias;
+    }
 }

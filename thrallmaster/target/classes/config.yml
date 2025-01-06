@@ -42,9 +42,9 @@ general:
   # Accuracy for arrows shot by Thralls as a number between 0 (blind) to 1 (sharpshooter), set to -1 to use Vanilla settings.
   ranged-accuracy: 0.75
   
-  # Arrow drop distance in blocks, it's interpreted as the amount of blocks an arrow need to travel for its height to drop by one block
+  # Arrow launch speed in blocks per tick (Player max bow speed is 3)
   # Ignored if "ranged-accuracy" is set to -1 (Vanilla)
-  arrow-fall-distance: 10
+  arrow-speed: 3
 
   # Chance for a Thrall to block an incoming attack when a shield is equipped
   shield-block-chance: 0.5

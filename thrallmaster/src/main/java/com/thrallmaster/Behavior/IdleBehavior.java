@@ -2,6 +2,8 @@ package com.thrallmaster.Behavior;
 
 import java.util.Comparator;
 import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -68,9 +70,7 @@ public class IdleBehavior extends Behavior {
         }
 
         double distance = ThrallUtils.getPathDistance(entity, startLocation);
-        if (distance > Settings.THRALL_FOLLOW_MAX) {
-            entity.teleport(startLocation);
-        } else if (distance > Settings.THRALL_WANDER_MAX) {
+        if (distance > Settings.THRALL_WANDER_MAX) {
             double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
             entity.getPathfinder().moveTo(startLocation, speed);
         }
@@ -82,10 +82,14 @@ public class IdleBehavior extends Behavior {
         }
 
         if (state.aggressionState == AggressionState.HOSTILE && elapsedTicks % 4 == 0) {
-            LivingEntity nearestEntity = ThrallUtils.findNearestEntities(entity, Enemy.class)
-                    .filter(x -> !ThrallUtils.isFriendly(state, x))
-                    .min(Comparator
-                            .comparingDouble(x -> x.getLocation().distance(entity.getLocation()) + state.selectionBias))
+            Stream<LivingEntity> entities = ThrallUtils.findNearestEntities(entity, Enemy.class)
+                    .filter(x -> !ThrallUtils.isFriendly(state, x));
+
+            if (!MaterialUtils.isRanged(entity.getEquipment().getItemInMainHand().getType())) {
+                entities = entities.filter(x -> !(x instanceof Creeper));
+            }
+            LivingEntity nearestEntity = entities
+                    .min(Comparator.comparingDouble(x -> ThrallUtils.getTargetScore(state, x)))
                     .orElse(null);
             ;
             if (nearestEntity != null) {

@@ -409,36 +409,54 @@ public class ThrallManager implements Listener {
             return;
         }
 
-        // Remove fire effects from Thralls if they are not carrying a bow with
-        // enchanments
         if (ThrallUtils.isThrall(shooter)) {
-            // use custom accuracy algorith if enabled.
-            if (Settings.THRALL_ACCURACY != -1) {
-                ThrallState state = getThrall(shooter.getUniqueId());
-                LivingEntity target = state.target;
 
-                if (target != null) {
-                    double scale = 1.0 - Settings.THRALL_ACCURACY;
-                    double speed = arrow.getVelocity().length() * 1.5;
-                    double distance = ThrallUtils.getBaseline(target.getEyeLocation(), shooter.getLocation());
-                    double time = distance / speed;
-
-                    double yCorrection = distance / Settings.ARROWFALL_MULTIPLIER;
-                    var vCorrection = target.getVelocity().multiply(time);
-
-                    final Vector velocity = target.getEyeLocation().subtract(arrow.getLocation()).toVector()
-                            .add(vCorrection).add(new Vector(0, yCorrection, 0));
-
-                    velocity.add(Vector.getRandom().multiply(scale));
-                    arrow.setVelocity(velocity.normalize().multiply(speed));
-                }
-            }
-
+            // Remove fire effects from Thralls if they are not carrying a bow with
+            // enchanments
             if (!bow.containsEnchantment(Enchantment.FLAME)) {
                 if (arrow.getFireTicks() != 0) {
                     arrow.setFireTicks(0);
                 }
             }
+
+            // use custom accuracy algorith if enabled.
+            if (Settings.THRALL_ACCURACY != -1) {
+                ThrallState state = getThrall(shooter.getUniqueId());
+                double scale = 1.0 - Settings.THRALL_ACCURACY;
+                double initialSpeed = Settings.ARROW_SPEED;
+                LivingEntity target = state.target;
+
+                final double g = 0.05; // Blocks per Tick per Tick
+                double travelDistance = shooter.getLocation().distance(target.getLocation());
+
+                if (target != null) {
+                    final Vector targetVelocity = target.getVelocity();
+                    double travelTime = travelDistance / initialSpeed; // Ticks
+
+                    Location targetPos = target.getEyeLocation().add(targetVelocity.multiply(travelTime));
+                    final Vector relativePos = targetPos.subtract(arrow.getLocation()).toVector();
+
+                    double x = relativePos.getX();
+                    double y = relativePos.getY();
+                    double z = relativePos.getZ();
+                    double r = Math.sqrt(x * x + z * z);
+
+                    double u = initialSpeed * initialSpeed;
+
+                    double delta = u * u - g * (g * (r * r) + 2 * y * u);
+                    if (delta < 0) {
+                        return;
+                    }
+
+                    double theta = Math.atan((u - Math.sqrt(delta)) / (g * r));
+                    Vector finalVelocity = new Vector(Math.cos(theta) * x / r, Math.sin(theta),
+                            Math.cos(theta) * z / r);
+
+                    finalVelocity = finalVelocity.add(Vector.getRandom().multiply(scale));
+                    arrow.setVelocity(finalVelocity.multiply(initialSpeed));
+                }
+            }
+
         }
     }
 

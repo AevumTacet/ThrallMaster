@@ -82,7 +82,7 @@ public class ThrallCommander {
 
             else if (block != null) {
                 selected.forEach(state -> {
-                    state.setBehavior(new IdleBehavior(state.getEntityID(), state, block.getLocation()));
+                    state.setBehavior(new IdleBehavior(state.getEntityID(), state, block.getLocation().add(0, 1, 0)));
                     player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
                     state.setSelected(true);
                 });
