@@ -432,10 +432,9 @@ public class ThrallManager implements Listener {
                 if (target != null) {
                     double travelDistance = shooter.getLocation().distance(target.getLocation());
                     final Vector targetVelocity = target.getVelocity();
+
                     double travelTime = travelDistance / initialSpeed; // Ticks
                     double drag = Math.pow(d, travelTime);
-
-                    initialSpeed *= drag;
                     travelTime /= drag;
 
                     Location targetPos = target.getEyeLocation().add(targetVelocity.multiply(travelTime));
@@ -446,7 +445,7 @@ public class ThrallManager implements Listener {
                     double z = relativePos.getZ();
                     double r = Math.sqrt(x * x + z * z);
 
-                    double u = initialSpeed * initialSpeed;
+                    double u = (initialSpeed * initialSpeed) * (drag * drag);
 
                     double delta = u * u - g * (g * (r * r) + 2 * y * u);
                     if (delta < 0) {
