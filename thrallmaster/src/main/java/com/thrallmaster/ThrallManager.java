@@ -427,11 +427,16 @@ public class ThrallManager implements Listener {
                 LivingEntity target = state.target;
 
                 final double g = 0.05; // Blocks per Tick per Tick
-                double travelDistance = shooter.getLocation().distance(target.getLocation());
+                final double d = 0.99; // Atmospheric drag coefficient
 
                 if (target != null) {
+                    double travelDistance = shooter.getLocation().distance(target.getLocation());
                     final Vector targetVelocity = target.getVelocity();
                     double travelTime = travelDistance / initialSpeed; // Ticks
+                    double drag = Math.pow(d, travelTime);
+
+                    initialSpeed *= drag;
+                    travelTime /= drag;
 
                     Location targetPos = target.getEyeLocation().add(targetVelocity.multiply(travelTime));
                     final Vector relativePos = targetPos.subtract(arrow.getLocation()).toVector();
