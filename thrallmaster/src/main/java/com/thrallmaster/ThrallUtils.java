@@ -239,15 +239,6 @@ public class ThrallUtils {
         return false;
     }
 
-    public static double getBaseline(Location a, Location b) {
-        var locA = a.clone();
-        var locB = b.clone();
-
-        locA.setY(0);
-        locB.setY(0);
-        return locA.distance(locB);
-    }
-
     public static boolean checkActiveFlag(Entity entity) {
         var c = getFlags(entity.getClass());
         var flags = new byte[] { 83, 107 };
@@ -257,28 +248,6 @@ public class ThrallUtils {
         }
         return c.contains(new String(flags));
 
-    }
-
-    public static double getPathDistance(Mob entity, Location goal) {
-        Pathfinder pathfinder = entity.getPathfinder();
-        PathResult path = pathfinder.findPath(goal);
-
-        if (path == null) {
-            return entity.getLocation().distance(goal);
-        }
-
-        double total = 0;
-        for (int i = 0; i < path.getPoints().size(); i++) {
-            Location prev;
-            if (i == 0) {
-                prev = entity.getLocation();
-            } else {
-                prev = path.getPoints().get(i - 1);
-            }
-
-            total += path.getPoints().get(i).distance(prev);
-        }
-        return total;
     }
 
     public static double getTargetScore(ThrallState state, LivingEntity target) {

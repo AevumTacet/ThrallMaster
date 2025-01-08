@@ -54,7 +54,7 @@ public class HostileBehavior extends Behavior {
             return;
         }
 
-        double distance = ThrallUtils.getPathDistance(entity, state.target.getLocation());
+        double distance = entity.getLocation().distance(state.target.getLocation());
         if (distance > Settings.THRALL_FOLLOW_MIN) {
             entity.getPathfinder().moveTo(state.target.getLocation(), Settings.RUN_SPEED_MUL);
         }

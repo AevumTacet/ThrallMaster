@@ -445,7 +445,7 @@ public class ThrallManager implements Listener {
                     double z = relativePos.getZ();
                     double r = Math.sqrt(x * x + z * z);
 
-                    double u = (initialSpeed * initialSpeed) * (drag * drag);
+                    double u = (initialSpeed * initialSpeed) * drag;
 
                     double delta = u * u - g * (g * (r * r) + 2 * y * u);
                     if (delta < 0) {
