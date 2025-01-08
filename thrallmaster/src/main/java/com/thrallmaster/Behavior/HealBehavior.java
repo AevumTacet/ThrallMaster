@@ -12,8 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
-import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
+import com.thrallmaster.Utils.ThrallUtils;
+
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class HealBehavior extends Behavior {

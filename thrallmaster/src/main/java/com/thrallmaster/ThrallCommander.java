@@ -21,6 +21,7 @@ import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
 import com.thrallmaster.States.ThrallState;
+import com.thrallmaster.Utils.ThrallUtils;
 
 public class ThrallCommander {
     private static ThrallManager manager = Main.manager;

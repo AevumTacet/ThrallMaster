@@ -39,6 +39,10 @@ import com.thrallmaster.IO.Deserializer;
 import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.States.PlayerState;
 import com.thrallmaster.States.ThrallState;
+import com.thrallmaster.Utils.InteractionUtils;
+import com.thrallmaster.Utils.TargetUtils;
+import com.thrallmaster.Utils.ThrallUtils;
+
 import net.kyori.adventure.text.Component;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -284,7 +288,7 @@ public class ThrallManager implements Listener {
         }
 
         if (player.isSneaking()) {
-            boolean equipped = ThrallUtils.equipThrall(entity, playerItem);
+            boolean equipped = InteractionUtils.equipThrall(entity, playerItem);
             if (equipped) {
                 player.getInventory().setItemInMainHand(null);
             }
@@ -415,7 +419,7 @@ public class ThrallManager implements Listener {
 
             // use custom accuracy algorith if enabled.
             if (Settings.THRALL_ACCURACY != -1) {
-                ThrallUtils.calculateArrowTrajectory(shooter, arrow);
+                TargetUtils.calculateArrowTrajectory(shooter, arrow);
             }
 
         }

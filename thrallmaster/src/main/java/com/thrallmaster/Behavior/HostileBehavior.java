@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Settings;
-import com.thrallmaster.ThrallUtils;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
