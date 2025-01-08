@@ -7,7 +7,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.damage.DamageSource;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -30,14 +29,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
-
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
@@ -421,44 +415,7 @@ public class ThrallManager implements Listener {
 
             // use custom accuracy algorith if enabled.
             if (Settings.THRALL_ACCURACY != -1) {
-                ThrallState state = getThrall(shooter.getUniqueId());
-                double scale = 1.0 - Settings.THRALL_ACCURACY;
-                double initialSpeed = Settings.ARROW_SPEED;
-                LivingEntity target = state.target;
-
-                final double g = 0.05; // Blocks per Tick per Tick
-                final double d = 0.99; // Atmospheric drag coefficient
-
-                if (target != null) {
-                    double travelDistance = shooter.getLocation().distance(target.getLocation());
-                    final Vector targetVelocity = target.getVelocity();
-
-                    double travelTime = travelDistance / initialSpeed; // Ticks
-                    double drag = Math.pow(d, travelTime);
-                    travelTime /= drag;
-
-                    Location targetPos = target.getEyeLocation().add(targetVelocity.multiply(travelTime));
-                    final Vector relativePos = targetPos.subtract(arrow.getLocation()).toVector();
-
-                    double x = relativePos.getX();
-                    double y = relativePos.getY();
-                    double z = relativePos.getZ();
-                    double r = Math.sqrt(x * x + z * z);
-
-                    double u = (initialSpeed * initialSpeed) * drag;
-
-                    double delta = u * u - g * (g * (r * r) + 2 * y * u);
-                    if (delta < 0) {
-                        return;
-                    }
-
-                    double theta = Math.atan((u - Math.sqrt(delta)) / (g * r));
-                    Vector finalVelocity = new Vector(Math.cos(theta) * x / r, Math.sin(theta),
-                            Math.cos(theta) * z / r);
-
-                    finalVelocity = finalVelocity.add(Vector.getRandom().multiply(scale));
-                    arrow.setVelocity(finalVelocity.multiply(initialSpeed));
-                }
+                ThrallUtils.calculateArrowTrajectory(shooter, arrow);
             }
 
         }

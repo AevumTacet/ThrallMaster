@@ -14,6 +14,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.AbstractSkeleton;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +25,7 @@ import com.destroystokyo.paper.entity.Pathfinder;
 import com.destroystokyo.paper.entity.Pathfinder.PathResult;
 import com.thrallmaster.States.ThrallState;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 
 public class ThrallUtils {
     private static ThrallManager manager = Main.manager;
@@ -258,5 +260,46 @@ public class ThrallUtils {
         double visibleScore = isVisible ? 0 : 10;
 
         return distance + visibleScore + state.selectionBias;
+    }
+
+    public static void calculateArrowTrajectory(LivingEntity shooter, Entity arrow) {
+        ThrallState state = manager.getThrall(shooter.getUniqueId());
+        double scale = 1.0 - Settings.THRALL_ACCURACY;
+        double initialSpeed = Settings.ARROW_SPEED;
+        LivingEntity target = state.target;
+
+        final double g = 0.05; // Blocks per Tick per Tick
+        final double d = 0.99; // Atmospheric drag coefficient
+
+        if (target != null) {
+            double travelDistance = shooter.getLocation().distance(target.getLocation());
+            final Vector targetVelocity = target.getVelocity();
+
+            double travelTime = travelDistance / initialSpeed; // Ticks
+            double drag = Math.pow(d, travelTime);
+            travelTime /= drag;
+
+            Location targetPos = target.getEyeLocation().add(targetVelocity.multiply(travelTime));
+            final Vector relativePos = targetPos.subtract(arrow.getLocation()).toVector();
+
+            double x = relativePos.getX();
+            double y = relativePos.getY();
+            double z = relativePos.getZ();
+            double r = Math.sqrt(x * x + z * z);
+
+            double u = (initialSpeed * initialSpeed) * drag;
+
+            double delta = u * u - g * (g * (r * r) + 2 * y * u);
+            if (delta < 0) {
+                return;
+            }
+
+            double theta = Math.atan((u - Math.sqrt(delta)) / (g * r));
+            Vector finalVelocity = new Vector(Math.cos(theta) * x / r, Math.sin(theta),
+                    Math.cos(theta) * z / r);
+
+            finalVelocity = finalVelocity.add(Vector.getRandom().multiply(scale));
+            arrow.setVelocity(finalVelocity.multiply(initialSpeed));
+        }
     }
 }
