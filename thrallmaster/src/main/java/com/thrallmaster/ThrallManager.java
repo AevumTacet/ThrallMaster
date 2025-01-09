@@ -219,7 +219,7 @@ public class ThrallManager implements Listener {
                                     && elapsedTicks % 5 == state.phaseOffset) {
 
                                 behavior.onBehaviorTick();
-                                if (entity.isUnderWater()) {
+                                if (entity.isUnderWater() || entity.isInPowderedSnow()) {
                                     behavior.onBehaviorStuck();
                                 }
                             }
