@@ -10,6 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.Nullable;
 
 public class Settings {
 	public static String THRALL_NAME;
@@ -49,6 +50,8 @@ public class Settings {
 	public static String AGGRESSIVE_NAME;
 	public static HashMap<AggressionState, String> AGGRESSION_MAP;
 
+	public static boolean DEBUG_ENABLED;
+
 	private Settings() {
 	}
 
@@ -60,6 +63,11 @@ public class Settings {
 		loadRitualSettings(config.getConfigurationSection("ritual-action"));
 		loadSpawnSettings(config.getConfigurationSection("thrall-spawn"));
 		loadDeathSettings(config.getConfigurationSection("thrall-death"));
+		loadMiscSettings(config.getConfigurationSection("misc"));
+	}
+
+	private static void loadMiscSettings(ConfigurationSection section) {
+		DEBUG_ENABLED = section.getBoolean("debug-mode", false);
 	}
 
 	private static void loadGeneralSettings(ConfigurationSection section) {

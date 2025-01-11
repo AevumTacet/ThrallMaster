@@ -131,3 +131,6 @@ thrall-death:
     type: ENTITY_DONKEY_DEATH
     volume: 1.0
     pitch: 0.5
+
+misc:
+  debug-mode: false
