@@ -51,7 +51,9 @@ public class IdleBehavior extends Behavior {
             entity.setAI(true);
             entity.setTarget(null);
 
-            entity.getPathfinder().moveTo(startLocation, 1);
+            double distance = BehaviorUtils.distance(entity, startLocation);
+            double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
+            entity.getPathfinder().moveTo(startLocation, speed);
         }
     }
 
@@ -86,19 +88,18 @@ public class IdleBehavior extends Behavior {
             entity.lookAt(state.getOwner().getEyeLocation());
             return;
         }
-        double distance = BehaviorUtils.distance(entity, startLocation);
-        if (distance > Settings.THRALL_WANDER_MAX) {
-            double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
-            entity.getPathfinder().moveTo(startLocation, speed);
-            return;
-        }
+        if (elapsedTicks % 100 == 0) {
+            double distance = BehaviorUtils.distance(entity, startLocation);
+            if (distance > Settings.THRALL_WANDER_MAX * 2) {
+                double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
+                entity.getPathfinder().moveTo(startLocation, speed);
+                return;
+            }
 
-        if (elapsedTicks % 30 == 0) {
-            Bukkit.getMobGoals().removeGoal(entity, VanillaGoal.RANDOM_STROLL);
             randomWalk(entity);
         }
 
-        if (elapsedTicks % 4 == 0) {
+        if (elapsedTicks % 10 == 0) {
             if (state.aggressionState == AggressionState.HOSTILE) {
                 BehaviorUtils.findClosestEnemy(state, this);
             } else if (state.aggressionState == AggressionState.HEALER) {
@@ -137,6 +138,7 @@ public class IdleBehavior extends Behavior {
                 relative = relativeUp;
             }
         }
+
         entity.getPathfinder().moveTo(block.getLocation().add(0, 1, 0), 1);
 
     }

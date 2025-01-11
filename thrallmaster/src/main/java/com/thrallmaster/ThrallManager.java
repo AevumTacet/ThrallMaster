@@ -150,6 +150,9 @@ public class ThrallManager implements Listener {
         thrall.setHealth(Settings.THRALL_HEALTH);
 
         Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.WATER_AVOIDING_RANDOM_STROLL);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.FLEE_SUN);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.RESTRICT_SUN);
 
         for (var particle : Settings.SPAWN_PARTICLES) {
             world.spawnParticle(particle.type, thrall.getLocation(), particle.count, particle.bx, particle.by,

@@ -66,7 +66,7 @@ public class FollowBehavior extends Behavior {
             entity.getPathfinder().moveTo(owner.getLocation(), speed);
         }
 
-        if (elapsedTicks % 4 == 0) {
+        if (elapsedTicks % 10 == 0) {
             if (state.aggressionState == AggressionState.HOSTILE) {
                 BehaviorUtils.findClosestEnemy(state, this);
             } else if (state.aggressionState == AggressionState.HEALER) {
