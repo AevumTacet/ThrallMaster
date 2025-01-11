@@ -46,7 +46,7 @@ public class HealBehavior extends Behavior {
         if (state.target != null && state.target.isValid() && ThrallUtils.isThrall(state.target)) {
             double distance = entity.getLocation().distance(state.target.getLocation());
 
-            if (state.target.getHealth() >= state.target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()
+            if (state.target.getHealth() >= Settings.THRALL_HEALTH
                     || state.getBehavior() instanceof HostileBehavior) {
                 state.target = null;
                 return;

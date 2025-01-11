@@ -68,6 +68,10 @@ public class Settings {
 
 	private static void loadMiscSettings(ConfigurationSection section) {
 		DEBUG_ENABLED = section.getBoolean("debug-mode", false);
+
+		if (DEBUG_ENABLED) {
+			System.out.println("[ DEBUG MODE ENABLED ]");
+		}
 	}
 
 	private static void loadGeneralSettings(ConfigurationSection section) {

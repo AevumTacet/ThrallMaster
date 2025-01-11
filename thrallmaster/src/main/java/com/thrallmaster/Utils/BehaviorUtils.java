@@ -13,6 +13,7 @@ import org.bukkit.entity.LivingEntity;
 
 import com.thrallmaster.Main;
 import com.thrallmaster.MaterialUtils;
+import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallManager;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HealBehavior;
@@ -34,7 +35,7 @@ public final class BehaviorUtils {
 
 		LivingEntity nearestEntity = TargetUtils.getNearby(entity, AbstractSkeleton.class)
 				.filter(x -> ThrallUtils.isFriendly(state, x))
-				.filter(x -> x.getHealth() < x.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue())
+				.filter(x -> x.getHealth() < Settings.THRALL_HEALTH)
 				.filter(x -> !(manager.getThrall(x.getUniqueId()).getBehavior() instanceof HostileBehavior))
 				.min(Comparator
 						.comparingDouble(x -> (x.getLocation().distance(entity.getLocation()) + state.selectionBias)

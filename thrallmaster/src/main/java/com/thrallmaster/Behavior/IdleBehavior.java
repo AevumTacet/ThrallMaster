@@ -4,6 +4,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -11,7 +12,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
@@ -122,6 +122,12 @@ public class IdleBehavior extends Behavior {
                 Block relativeDown = relative.getRelative(BlockFace.DOWN);
                 if (relativeDown.isSolid()) {
                     block = relativeDown;
+
+                    if (Settings.DEBUG_ENABLED) {
+                        entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+                                block.getLocation().add(0.5, 1, 0.5),
+                                1, 0, 0, 0, 0);
+                    }
                 } else {
                     break;
                 }
@@ -129,18 +135,22 @@ public class IdleBehavior extends Behavior {
                 break;
             }
 
-            for (int j = 0; j < 2; j++) {
-                Block relativeUp = relative.getRelative(BlockFace.UP);
-                if (relativeUp.getType() == Material.AIR) {
-                    block = relative;
-                    break;
+            Block relativeUp = relative.getRelative(BlockFace.UP);
+            if (relativeUp.getType() == Material.AIR) {
+                block = relative;
+
+                if (Settings.DEBUG_ENABLED) {
+                    entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+                            block.getLocation().add(0.5, 1, 0.5), 0);
                 }
-                relative = relativeUp;
+            } else {
+                block = relativeUp;
             }
         }
-
+        if (Settings.DEBUG_ENABLED) {
+            entity.getWorld().spawnParticle(Particle.SOUL, block.getLocation().add(0.5, 1, 0.5), 1, 0, 0, 0, 0);
+        }
         entity.getPathfinder().moveTo(block.getLocation().add(0, 1, 0), 1);
-
     }
 
     @Override

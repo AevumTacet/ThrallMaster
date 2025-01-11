@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -148,11 +149,7 @@ public class ThrallManager implements Listener {
         thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.8);
         thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
         thrall.setHealth(Settings.THRALL_HEALTH);
-
-        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
-        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.WATER_AVOIDING_RANDOM_STROLL);
-        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.FLEE_SUN);
-        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.RESTRICT_SUN);
+        clearMobGoals(thrall);
 
         for (var particle : Settings.SPAWN_PARTICLES) {
             world.spawnParticle(particle.type, thrall.getLocation(), particle.count, particle.bx, particle.by,
@@ -166,6 +163,18 @@ public class ThrallManager implements Listener {
 
         updateBoard(owner.getUniqueId());
 
+    }
+
+    private void clearMobGoals(AbstractSkeleton thrall) {
+        if (Settings.DEBUG_ENABLED) {
+            logger.info("Attempting to remove selected PathFinderGoals from thrall: " + thrall.getUniqueId());
+        }
+
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.PANIC);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.RANDOM_STROLL);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.WATER_AVOIDING_RANDOM_STROLL);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.FLEE_SUN);
+        Bukkit.getMobGoals().removeGoal(thrall, VanillaGoal.RESTRICT_SUN);
     }
 
     public ThrallState getThrall(Player owner, UUID entityID) {
@@ -222,6 +231,7 @@ public class ThrallManager implements Listener {
                                     && elapsedTicks % 5 == state.phaseOffset) {
 
                                 behavior.onBehaviorTick();
+
                                 if (entity.isUnderWater() || entity.isInPowderedSnow()) {
                                     behavior.onBehaviorStuck();
                                 }
@@ -350,6 +360,11 @@ public class ThrallManager implements Listener {
                 if (MaterialUtils.isAir(owner.getInventory().getItemInMainHand().getType())) {
                     state.setSelected(!state.isSelected());
                     event.setCancelled(true);
+
+                    if (Settings.DEBUG_ENABLED) {
+                        logger.info("Thrall PathFinderGoals: ");
+                        Bukkit.getMobGoals().getAllGoals(entity).forEach(x -> logger.info(x.getKey().toString()));
+                    }
                 }
             } else if (ThrallUtils.isThrall(attacker) && ThrallUtils.isFriendly(attacker, owner)) {
                 event.setCancelled(true);
@@ -574,6 +589,20 @@ public class ThrallManager implements Listener {
 
         if (trackedBoards.containsKey(playerID)) {
             trackedBoards.remove(playerID);
+        }
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent event) {
+        for (Entity entity : event.getChunk().getEntities()) {
+            if (ThrallUtils.isThrall(entity)) {
+                AbstractSkeleton thrall = (AbstractSkeleton) entity;
+                // ThrallState state = getThrall(thrall.getUniqueId());
+
+                if (entity != null) {
+                    clearMobGoals(thrall);
+                }
+            }
         }
     }
 }
