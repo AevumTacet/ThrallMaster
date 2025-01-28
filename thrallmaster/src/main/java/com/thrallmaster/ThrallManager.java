@@ -146,8 +146,8 @@ public class ThrallManager implements Listener {
         thrall.customName(Component.text(Settings.THRALL_NAME));
         thrall.setCustomNameVisible(true);
 
-        thrall.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.8);
-        thrall.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
+        thrall.getAttribute(Attribute.SCALE).setBaseValue(0.8);
+        thrall.getAttribute(Attribute.MAX_HEALTH).setBaseValue(Settings.THRALL_MAX_HEALTH);
         thrall.setHealth(Settings.THRALL_HEALTH);
         clearMobGoals(thrall);
 
@@ -307,7 +307,7 @@ public class ThrallManager implements Listener {
             }
         } else {
             if (MaterialUtils.isBone(playerItem.getType())
-                    && entity.getHealth() < entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()) {
+                    && entity.getHealth() < entity.getAttribute(Attribute.MAX_HEALTH).getValue()) {
 
                 playerItem.setAmount(playerItem.getAmount() - 1);
                 player.getInventory().setItemInMainHand(playerItem);
