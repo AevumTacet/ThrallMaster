@@ -60,6 +60,7 @@ public class FollowBehavior extends Behavior {
         } else if (distance > Settings.THRALL_FOLLOW_MAX) {
             if (!MaterialUtils.isAir(owner.getLocation().getBlock().getType())) {
                 entity.teleport(owner.getLocation());
+                return;
             }
         } else {
             entity.lookAt(owner);

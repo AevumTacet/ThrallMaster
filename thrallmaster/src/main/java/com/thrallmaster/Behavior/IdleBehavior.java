@@ -6,13 +6,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
-import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
@@ -82,12 +78,16 @@ public class IdleBehavior extends Behavior {
             startLocation = entity.getLocation();
         }
 
-        double distancePlayer = BehaviorUtils.distance(entity, state.getOwner().getLocation());
-        if (distancePlayer < Settings.THRALL_FOLLOW_MIN / 2) {
-            entity.getPathfinder().stopPathfinding();
-            entity.lookAt(state.getOwner().getEyeLocation());
-            return;
+        Player owner = state.getOwner();
+        if (owner != null) {
+            double distancePlayer = BehaviorUtils.distance(entity, owner.getLocation());
+            if (distancePlayer < Settings.THRALL_FOLLOW_MIN / 2) {
+                entity.getPathfinder().stopPathfinding();
+                entity.lookAt(state.getOwner().getEyeLocation());
+                return;
+            }
         }
+
         if (elapsedTicks % 100 == 0) {
             double distance = BehaviorUtils.distance(entity, startLocation);
             if (distance > Settings.THRALL_WANDER_MAX * 2) {
@@ -95,7 +95,6 @@ public class IdleBehavior extends Behavior {
                 entity.getPathfinder().moveTo(startLocation, speed);
                 return;
             }
-
             randomWalk(entity);
         }
 

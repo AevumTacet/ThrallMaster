@@ -3,4 +3,4 @@ version: 1.0.0
 description: Bring back a AbstractSkeleton and he will serve you till death.
 author: Telwa
 main: com.thrallmaster.Main
-api-version: 1.21.4
+api-version: "1.21.4"

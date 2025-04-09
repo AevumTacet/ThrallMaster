@@ -59,10 +59,11 @@ public class HostileBehavior extends Behavior {
         }
 
         Player owner = state.getOwner();
-        double ownerDistance = entity.getLocation().distance(owner.getLocation());
-
-        if (prevBehavior instanceof FollowBehavior && ownerDistance > Settings.THRALL_FOLLOW_MAX) {
-            returnToPreviousState();
+        if (owner != null) {
+            double ownerDistance = entity.getLocation().distance(owner.getLocation());
+            if (prevBehavior instanceof FollowBehavior && ownerDistance > Settings.THRALL_FOLLOW_MAX) {
+                returnToPreviousState();
+            }
         }
     }
 
