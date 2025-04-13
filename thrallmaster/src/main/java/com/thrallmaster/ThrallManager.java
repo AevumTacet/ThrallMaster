@@ -426,7 +426,6 @@ public class ThrallManager implements Listener {
         }
 
         if (ThrallUtils.isThrall(shooter)) {
-
             // Remove fire effects from Thralls if they are not carrying a bow with
             // enchanments
             if (!bow.containsEnchantment(Enchantment.FLAME)) {
@@ -439,7 +438,6 @@ public class ThrallManager implements Listener {
             if (Settings.THRALL_ACCURACY != -1) {
                 TargetUtils.calculateArrowTrajectory(shooter, arrow);
             }
-
         }
     }
 

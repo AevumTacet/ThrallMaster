@@ -86,8 +86,7 @@ public class FollowBehavior extends Behavior {
     @Override
     public void onBehaviorStuck() {
         AbstractSkeleton entity = this.getEntity();
-        Player owner = Bukkit.getPlayer(state.getOwnerID());
-
+        Player owner = state.getOwner();
         if (entity == null || owner == null) {
             return;
         }

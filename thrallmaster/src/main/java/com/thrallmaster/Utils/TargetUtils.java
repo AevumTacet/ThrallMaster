@@ -81,7 +81,7 @@ public final class TargetUtils {
 		return distance + visibleScore + state.selectionBias;
 	}
 
-	public static void calculateArrowTrajectory(final LivingEntity shooter, final Entity arrow) {
+	public static void calculateArrowTrajectory(final LivingEntity shooter, Entity arrow) {
 		final ThrallState state = manager.getThrall(shooter.getUniqueId());
 		final double scale = 1.0 - Settings.THRALL_ACCURACY;
 		final double initialSpeed = Settings.ARROW_SPEED;
