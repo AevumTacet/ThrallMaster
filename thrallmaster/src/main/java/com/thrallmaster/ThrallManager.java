@@ -61,7 +61,6 @@ public class ThrallManager implements Listener {
     private HashMap<UUID, PlayerState> playerData = new HashMap<>();
     private HashSet<UUID> trackedEntities = new HashSet<>();
     private HashMap<UUID, Integer> trackedTamingLevel = new HashMap<>();
-    private HashMap<UUID, ThrallBoard> trackedBoards = new HashMap<>();
 
     public ThrallManager() {
         Update();
@@ -161,8 +160,6 @@ public class ThrallManager implements Listener {
         registerThrall(thrall, owner);
         owner.sendMessage(String.format(Settings.SPAWN_MESSAGE, thrall.getName()));
 
-        updateBoard(owner.getUniqueId());
-
     }
 
     private void clearMobGoals(AbstractSkeleton thrall) {
@@ -248,15 +245,6 @@ public class ThrallManager implements Listener {
                             }
                         });
 
-                if (elapsedTicks % 10 == 0) {
-                    for (UUID id : playerData.keySet()) {
-                        Player player = Bukkit.getPlayer(id);
-                        if (player != null && player.isOnline()) {
-                            updateBoard(id);
-                        }
-                    }
-                }
-
                 if (elapsedTicks % 600 == 0) {
                     savePlayers(false);
                 }
@@ -264,22 +252,6 @@ public class ThrallManager implements Listener {
                 elapsedTicks += 1;
             }
         }.runTaskTimer(Main.plugin, 0, 1);
-    }
-
-    public void updateBoard(UUID playerID) {
-        PlayerState stats = getOwnerData(playerID);
-        if (stats == null) {
-            return;
-        }
-
-        if (!trackedBoards.containsKey(playerID)) {
-            ThrallBoard board = new ThrallBoard(stats);
-            trackedBoards.put(playerID, board);
-        }
-
-        ThrallBoard board = trackedBoards.get(playerID);
-        board.clearBoard();
-        board.updateBoard(stats);
     }
 
     @EventHandler
@@ -327,7 +299,6 @@ public class ThrallManager implements Listener {
             }
         }
         world.spawnParticle(Particle.HAPPY_VILLAGER, entity.getEyeLocation(), 10, 0.1, 0.1, 0.1, 0.01);
-        updateBoard(state.getOwnerID());
     }
 
     @EventHandler
@@ -384,8 +355,6 @@ public class ThrallManager implements Listener {
                     }
                 }
             }
-
-            updateBoard(state.getOwnerID());
         }
 
         // Attacker is a Thrall
@@ -453,13 +422,11 @@ public class ThrallManager implements Listener {
         if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
             if (MaterialUtils.isAir(material)) {
                 ThrallCommander.ToggleSelection(player);
-                updateBoard(player.getUniqueId());
                 // event.setCancelled(true);
             }
 
             else if (MaterialUtils.isHorn(material)) {
                 ThrallCommander.MultiSelect(player);
-                updateBoard(player.getUniqueId());
                 event.setCancelled(true);
             }
         }
@@ -473,7 +440,6 @@ public class ThrallManager implements Listener {
                 if (player.hasCooldown(Material.GOAT_HORN))
                     return;
                 ThrallCommander.HornCommand(player);
-                updateBoard(player.getUniqueId());
             }
         }
 
@@ -498,7 +464,6 @@ public class ThrallManager implements Listener {
                 state.getOwner().sendMessage(String.format(Settings.DEATH_MESSAGE, entity.getName()));
             }
 
-            updateBoard(state.getOwnerID());
         }
     }
 
@@ -573,21 +538,6 @@ public class ThrallManager implements Listener {
             return;
         }
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                updateBoard(player.getUniqueId());
-            }
-        }.runTaskLater(Main.plugin, 20);
-    }
-
-    @EventHandler
-    public void onPlayerDisconnect(PlayerQuitEvent event) {
-        UUID playerID = event.getPlayer().getUniqueId();
-
-        if (trackedBoards.containsKey(playerID)) {
-            trackedBoards.remove(playerID);
-        }
     }
 
     @EventHandler
