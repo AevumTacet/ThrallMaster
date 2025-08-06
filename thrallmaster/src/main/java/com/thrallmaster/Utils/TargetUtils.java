@@ -46,7 +46,7 @@ public final class TargetUtils {
 				.stream()
 				.map(x -> (LivingEntity) x)
 				.filter(x -> !x.equals(from) && !x.equals(owner))
-				.filter(x -> filterClass.isAssignableFrom(x.getClass()));
+				.filter(x -> filterClass.isAssignableFrom(x.getClass()) || x instanceof Player);
 	}
 
 	public static boolean targetVisible(final ThrallState state, final LivingEntity target) {
