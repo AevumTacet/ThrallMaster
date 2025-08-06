@@ -19,37 +19,26 @@ public class PlayerOptions implements Serializable {
 
 	public PlayerOptions(UUID playerID) {
 		this.playerID = playerID;
-		this.options = new HashMap<>();
+		this.options = new HashMap<>(defaultOptions);
 	}
 
 	@Override
 	public void export(NBTCompound nbt) {
-		var comp = nbt.addCompound("Settings");
-
-		options.forEach((key, value) -> comp.setString(key, value.toString()));
+		options.forEach((key, value) -> nbt.setString(key, value.toString()));
 	}
 
-	public void load(NBTCompound nbt) {
-		var comp = nbt.getCompound("Settings");
-		if (comp == null) {
-			this.options = defaultOptions;
+	public void setConfig(String key, String value) {
+		if (!defaultOptions.containsKey(key)) {
+			System.err.println("Unknown player setting: " + key);
 			return;
 		}
 
-		for (String key : defaultOptions.keySet()) {
-			if (comp.hasTag(key)) {
-				String value = comp.getString(key);
-
-				Object defaultValue = defaultOptions.get(key);
-				if (defaultValue instanceof Integer) {
-					this.options.put(key, Integer.parseInt(value));
-				} else {
-					this.options.put(key, value);
-				}
-
-			} else {
-				this.options.put(key, defaultOptions.get(key));
-			}
+		Object defaultValue = defaultOptions.get(key);
+		if (defaultValue instanceof Integer) {
+			this.options.put(key, Integer.parseInt(value));
+		} else {
+			this.options.put(key, value);
 		}
 	}
+
 }

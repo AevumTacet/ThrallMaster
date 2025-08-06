@@ -15,30 +15,33 @@ import com.thrallmaster.States.ThrallState;
 
 import de.tr7zw.nbtapi.NBTCompound;
 
-public interface Deserializer 
-{
-    public static PlayerState readPlayerState(NBTCompound nbt)
-    {
+public interface Deserializer {
+    public static PlayerState readPlayerState(NBTCompound nbt) {
         UUID playerID = UUID.fromString(nbt.getString("PlayerID"));
         NBTCompound thralls = nbt.getCompound("Thralls");
         NBTCompound allies = nbt.getCompound("Allies");
+        NBTCompound settings = nbt.getCompound("Settings");
 
         PlayerState state = new PlayerState(playerID);
-        
+
         thralls.getKeys().stream()
-            .map(key -> thralls.getCompound(key))
-            .map(comp -> readThrallState(comp))
-            .forEach(thrall -> state.addThrall(thrall));
+                .map(key -> thralls.getCompound(key))
+                .map(comp -> readThrallState(comp))
+                .forEach(thrall -> state.addThrall(thrall));
 
         allies.getKeys().stream()
-            .map(key -> UUID.fromString(key))
-            .forEach(id -> state.addAlly(id));
+                .map(key -> UUID.fromString(key))
+                .forEach(id -> state.addAlly(id));
+
+        if (settings != null) {
+            settings.getKeys().stream()
+                    .forEach(key -> state.setConfig(key, settings.getString(key)));
+        }
 
         return state;
     }
 
-    public static ThrallState readThrallState(NBTCompound nbt)
-    {
+    public static ThrallState readThrallState(NBTCompound nbt) {
         UUID entityID = UUID.fromString(nbt.getString("EntityID"));
         UUID ownerID = UUID.fromString(nbt.getString("OwnerID"));
         AggressionState aggressionState = AggressionState.valueOf(nbt.getString("AggressionState"));
@@ -52,33 +55,28 @@ public interface Deserializer
         return state;
     }
 
-    public static Behavior readBehavior(NBTCompound nbt, ThrallState state)
-    {
+    public static Behavior readBehavior(NBTCompound nbt, ThrallState state) {
         NBTCompound comp = nbt.getCompound("Behavior");
         String mode = comp.getString("CurrentBehavior");
-        
-        Behavior behavior = switch(mode)
-        {
+
+        Behavior behavior = switch (mode) {
             case "IDLE":
-            if (comp.hasTag("IdleLocationW") && comp.hasTag("IdleLocationX") && 
-                comp.hasTag("IdleLocationY") && comp.hasTag("IdleLocationZ"))
-            {
-                String locationW = comp.getString("IdleLocationW");
-                double locationX = comp.getDouble("IdleLocationX");
-                double locationY = comp.getDouble("IdleLocationY");
-                double locationZ = comp.getDouble("IdleLocationZ");
-                Location startLocation = new Location(Bukkit.getWorld(locationW), locationX, locationY, locationZ);
-                yield new IdleBehavior(state.getEntityID(), state, startLocation);
-            }
-            else
-            {
-                Main.plugin.getLogger().warning("Warning: Idle state with no IdleLocation tag found.");
-                yield new IdleBehavior(state.getEntityID(), state, null);
-            }
+                if (comp.hasTag("IdleLocationW") && comp.hasTag("IdleLocationX") &&
+                        comp.hasTag("IdleLocationY") && comp.hasTag("IdleLocationZ")) {
+                    String locationW = comp.getString("IdleLocationW");
+                    double locationX = comp.getDouble("IdleLocationX");
+                    double locationY = comp.getDouble("IdleLocationY");
+                    double locationZ = comp.getDouble("IdleLocationZ");
+                    Location startLocation = new Location(Bukkit.getWorld(locationW), locationX, locationY, locationZ);
+                    yield new IdleBehavior(state.getEntityID(), state, startLocation);
+                } else {
+                    Main.plugin.getLogger().warning("Warning: Idle state with no IdleLocation tag found.");
+                    yield new IdleBehavior(state.getEntityID(), state, null);
+                }
 
             case "FOLLOW":
                 yield new FollowBehavior(state.getEntityID(), state);
-            
+
             default:
                 Main.plugin.getLogger().warning("Thrall state is unspecified, defaulting to follow");
                 yield new FollowBehavior(state.getEntityID(), state);
