@@ -22,6 +22,13 @@ import com.thrallmaster.States.ThrallState;
 public final class TargetUtils {
 	private static ThrallManager manager = Main.manager;
 
+	public static int SCORE_THRESHOLD = 15;
+	public static int PLAYER_SCORE = -5;
+	public static int MOB_SCORE = 2;
+	public static int PROXIMITY_FAR_SCORE = 10;
+	public static int VISIBILITY_SOCRE = 10;
+	public static int PLAYER_DANGER_SCORE = -5;
+
 	private TargetUtils() {
 	}
 
@@ -71,14 +78,22 @@ public final class TargetUtils {
 		return false;
 	}
 
-	public static double getTargetScore(final ThrallState state, final LivingEntity target) {
-		final Entity entity = state.getEntity();
-		final double distance = target.getLocation().distance(entity.getLocation());
+	public static int getTargetScore(final ThrallState state, final LivingEntity target) {
+		Entity thrall = state.getEntity();
+		double distance = thrall.getLocation().distance(target.getLocation());
 
-		final boolean isVisible = targetVisible(state, target);
-		final double visibleScore = isVisible ? 0 : 10;
+		double playerDistance = 999;
+		if (state.getOwner() != null) {
+			playerDistance = state.getOwner().getLocation().distance(target.getLocation());
+		}
 
-		return distance + visibleScore + state.selectionBias;
+		int score = (int) distance
+				+ (distance > Settings.THRALL_DETECTION_RANGE ? PROXIMITY_FAR_SCORE : 0)
+				+ (targetVisible(state, target) ? 0 : VISIBILITY_SOCRE)
+				+ (playerDistance < Settings.THRALL_FOLLOW_MIN * 2 ? PLAYER_DANGER_SCORE : 0)
+				+ (target instanceof Player ? PLAYER_SCORE : MOB_SCORE);
+
+		return score;
 	}
 
 	public static void calculateArrowTrajectory(final LivingEntity shooter, Entity arrow) {

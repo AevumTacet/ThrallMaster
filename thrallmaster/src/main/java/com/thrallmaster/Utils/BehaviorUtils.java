@@ -1,6 +1,8 @@
 package com.thrallmaster.Utils;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.bukkit.Location;
@@ -58,9 +60,12 @@ public final class BehaviorUtils {
 			entities = entities.filter(x -> !(x instanceof Creeper));
 		}
 		LivingEntity nearestEntity = entities
-				.min(Comparator.comparingDouble(x -> TargetUtils.getTargetScore(state, x)))
+				.map(x -> new SimpleEntry<>(x, TargetUtils.getTargetScore(state, x)))
+				.filter(entry -> entry.getValue() < TargetUtils.SCORE_THRESHOLD)
+				.min(Comparator.comparingDouble(entry -> entry.getValue() + state.selectionBias))
+				.map(Map.Entry::getKey)
 				.orElse(null);
-		;
+
 		if (nearestEntity != null) {
 			state.target = nearestEntity;
 			state.setBehavior(new HostileBehavior(state.getEntityID(), state, behavior));
