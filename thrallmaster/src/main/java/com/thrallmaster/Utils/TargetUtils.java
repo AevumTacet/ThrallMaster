@@ -25,9 +25,10 @@ public final class TargetUtils {
 	public static int SCORE_THRESHOLD = 15;
 	public static int PLAYER_SCORE = -5;
 	public static int MOB_SCORE = 2;
-	public static int PROXIMITY_FAR_SCORE = 10;
+	public static int PROXIMITY_FAR_SCORE = 5;
 	public static int VISIBILITY_SOCRE = 10;
 	public static int PLAYER_DANGER_SCORE = -5;
+	public static int HEALTH_SCORE_DIV = -10;
 
 	private TargetUtils() {
 	}
@@ -62,7 +63,7 @@ public final class TargetUtils {
 			return false;
 		}
 
-		final Location eyeLocation = entity.getEyeLocation().subtract(0, 0.5, 0);
+		final Location eyeLocation = entity.getEyeLocation().subtract(0, 0.1, 0);
 
 		final Vector direction = target.getEyeLocation().subtract(eyeLocation).toVector();
 		final RayTraceResult result = entity.getWorld()
@@ -87,11 +88,11 @@ public final class TargetUtils {
 			playerDistance = state.getOwner().getLocation().distance(target.getLocation());
 		}
 
-		int score = (int) distance
-				+ (distance > Settings.THRALL_DETECTION_RANGE ? PROXIMITY_FAR_SCORE : 0)
+		int score = (distance > Settings.THRALL_DETECTION_RANGE ? PROXIMITY_FAR_SCORE : 0)
 				+ (targetVisible(state, target) ? 0 : VISIBILITY_SOCRE)
 				+ (playerDistance < Settings.THRALL_FOLLOW_MIN * 2 ? PLAYER_DANGER_SCORE : 0)
-				+ (target instanceof Player ? PLAYER_SCORE : MOB_SCORE);
+				+ (target instanceof Player ? PLAYER_SCORE : MOB_SCORE)
+				+ (int) (target.getHealth() / HEALTH_SCORE_DIV);
 
 		return score;
 	}
