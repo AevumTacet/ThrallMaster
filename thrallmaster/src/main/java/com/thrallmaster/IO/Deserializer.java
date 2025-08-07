@@ -12,26 +12,29 @@ import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
 import com.thrallmaster.States.PlayerState;
 import com.thrallmaster.States.ThrallState;
-
-import de.tr7zw.nbtapi.NBTCompound;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public interface Deserializer {
-    public static PlayerState readPlayerState(NBTCompound nbt) {
+    public static PlayerState readPlayerState(ReadWriteNBT nbt) {
         UUID playerID = UUID.fromString(nbt.getString("PlayerID"));
-        NBTCompound thralls = nbt.getCompound("Thralls");
-        NBTCompound allies = nbt.getCompound("Allies");
-        NBTCompound settings = nbt.getCompound("Settings");
+        ReadWriteNBT thralls = nbt.getCompound("Thralls");
+        ReadWriteNBT allies = nbt.getCompound("Allies");
+        ReadWriteNBT settings = nbt.getCompound("Settings");
 
         PlayerState state = new PlayerState(playerID);
 
-        thralls.getKeys().stream()
-                .map(key -> thralls.getCompound(key))
-                .map(comp -> readThrallState(comp))
-                .forEach(thrall -> state.addThrall(thrall));
+        if (thralls != null) {
+            thralls.getKeys().stream()
+                    .map(key -> thralls.getCompound(key))
+                    .map(comp -> readThrallState(comp))
+                    .forEach(thrall -> state.addThrall(thrall));
+        }
 
-        allies.getKeys().stream()
-                .map(key -> UUID.fromString(key))
-                .forEach(id -> state.addAlly(id));
+        if (allies != null) {
+            allies.getKeys().stream()
+                    .map(key -> UUID.fromString(key))
+                    .forEach(id -> state.addAlly(id));
+        }
 
         if (settings != null) {
             settings.getKeys().stream()
@@ -41,7 +44,7 @@ public interface Deserializer {
         return state;
     }
 
-    public static ThrallState readThrallState(NBTCompound nbt) {
+    public static ThrallState readThrallState(ReadWriteNBT nbt) {
         UUID entityID = UUID.fromString(nbt.getString("EntityID"));
         UUID ownerID = UUID.fromString(nbt.getString("OwnerID"));
         AggressionState aggressionState = AggressionState.valueOf(nbt.getString("AggressionState"));
@@ -55,10 +58,14 @@ public interface Deserializer {
         return state;
     }
 
-    public static Behavior readBehavior(NBTCompound nbt, ThrallState state) {
-        NBTCompound comp = nbt.getCompound("Behavior");
-        String mode = comp.getString("CurrentBehavior");
+    public static Behavior readBehavior(ReadWriteNBT nbt, ThrallState state) {
+        ReadWriteNBT comp = nbt.getCompound("Behavior");
+        if (comp == null) {
+            Main.plugin.getLogger().warning("Thrall behavior block is undefined");
+            return new FollowBehavior(state.getEntityID(), state);
+        }
 
+        String mode = comp.getString("CurrentBehavior");
         Behavior behavior = switch (mode) {
             case "IDLE":
                 if (comp.hasTag("IdleLocationW") && comp.hasTag("IdleLocationX") &&

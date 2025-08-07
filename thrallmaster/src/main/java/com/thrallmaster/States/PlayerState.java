@@ -3,9 +3,8 @@ package com.thrallmaster.States;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import com.thrallmaster.IO.Serializable;
-import de.tr7zw.nbtapi.NBTCompound;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class PlayerState implements Serializable {
     private UUID playerID;
@@ -68,13 +67,13 @@ public class PlayerState implements Serializable {
     }
 
     @Override
-    public void export(NBTCompound nbt) {
-        var comp = nbt.addCompound(playerID.toString());
+    public void export(ReadWriteNBT nbt) {
+        var comp = nbt.getOrCreateCompound(playerID.toString());
         comp.setString("PlayerID", playerID.toString());
 
-        var thrallComp = comp.addCompound("Thralls");
-        var alliesComp = comp.addCompound("Allies");
-        var settingsComp = comp.addCompound("Settings");
+        var thrallComp = comp.getOrCreateCompound("Thralls");
+        var alliesComp = comp.getOrCreateCompound("Allies");
+        var settingsComp = comp.getOrCreateCompound("Settings");
 
         getThralls().forEach(state -> state.export(thrallComp));
         getAllies().forEach(ally -> alliesComp.setInteger(ally.toString(), 0));

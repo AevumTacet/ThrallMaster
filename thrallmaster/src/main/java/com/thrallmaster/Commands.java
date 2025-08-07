@@ -7,8 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.plugin.Plugin;
 
-import com.thrallmaster.States.ThrallState;
-
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LocationArgument;

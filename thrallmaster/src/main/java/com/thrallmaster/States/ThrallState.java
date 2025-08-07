@@ -7,17 +7,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.joml.Random;
-
 import java.util.UUID;
-
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Settings;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.Protocols.SelectionOutlineProtocol;
-
-import de.tr7zw.nbtapi.NBTCompound;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class ThrallState implements Serializable {
     private UUID entityID;
@@ -181,8 +178,8 @@ public class ThrallState implements Serializable {
     }
 
     @Override
-    public void export(NBTCompound nbt) {
-        var comp = nbt.addCompound(entityID.toString());
+    public void export(ReadWriteNBT nbt) {
+        var comp = nbt.getOrCreateCompound(entityID.toString());
 
         comp.setString("EntityID", entityID.toString());
         comp.setString("OwnerID", ownerID.toString());

@@ -13,7 +13,6 @@ import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallManager;
 import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.States.ThrallState;
-import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public abstract class Behavior implements Serializable {
@@ -73,8 +72,8 @@ public abstract class Behavior implements Serializable {
     }
 
     @Override
-    public void export(NBTCompound nbt) {
-        var comp = nbt.addCompound("Behavior");
+    public void export(ReadWriteNBT nbt) {
+        var comp = nbt.getOrCreateCompound("Behavior");
         this.onSetPersistentData(comp);
     }
 

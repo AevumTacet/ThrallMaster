@@ -7,51 +7,41 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
-import de.tr7zw.nbtapi.NBTCompound;
-import de.tr7zw.nbtapi.NBTFile;
+import de.tr7zw.nbtapi.iface.NBTFileHandle;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
+import de.tr7zw.nbtapi.NBT;
 
-public class NBTExporter
-{   
+public class NBTExporter {
     private Logger logger;
-    private NBTFile file;
+    private NBTFileHandle file;
 
-    public NBTExporter(Plugin plugin)
-    {   
+    public NBTExporter(Plugin plugin) {
         this.logger = plugin.getLogger();
         File worldDir = Bukkit.getWorlds().get(0).getWorldFolder();
 
-        try 
-        {
-            file = new NBTFile(new File(worldDir, "thrall.dat"));
+        try {
+            file = NBT.getFileHandle(new File(worldDir, "thrall.dat"));
             this.getDataContainer();
-        } 
-        catch (IOException e) 
-        {
+        } catch (IOException e) {
             logger.warning("Thrall master NBT IO could not be initialized!");
             e.printStackTrace();
         }
     }
 
-    public NBTCompound getDataContainer()
-    {
-        var nbt = file.addCompound("PlayerData");
+    public ReadWriteNBT getDataContainer() {
+        var nbt = file.getOrCreateCompound("PlayerData");
         return nbt;
     }
 
-    public void writePlayer(Serializable player)
-    {
+    public void writePlayer(Serializable player) {
         var nbt = getDataContainer();
         player.export(nbt);
     }
 
-    public void save()
-    {
-        try 
-        {
+    public void save() {
+        try {
             file.save();
-        } 
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

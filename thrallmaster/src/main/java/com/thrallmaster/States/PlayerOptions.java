@@ -3,8 +3,7 @@ package com.thrallmaster.States;
 import java.util.HashMap;
 import java.util.UUID;
 import com.thrallmaster.IO.Serializable;
-
-import de.tr7zw.nbtapi.NBTCompound;
+import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class PlayerOptions implements Serializable {
 	public UUID playerID;
@@ -23,7 +22,7 @@ public class PlayerOptions implements Serializable {
 	}
 
 	@Override
-	public void export(NBTCompound nbt) {
+	public void export(ReadWriteNBT nbt) {
 		options.forEach((key, value) -> nbt.setString(key, value.toString()));
 	}
 

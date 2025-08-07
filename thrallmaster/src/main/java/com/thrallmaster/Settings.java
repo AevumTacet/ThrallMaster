@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.Nullable;
 
 public class Settings {
 	public static String THRALL_NAME;
@@ -206,7 +207,7 @@ public class Settings {
 		public static SoundInfo fromConfig(ConfigurationSection section) {
 			SoundInfo sound = new SoundInfo();
 			sound.type = validate(section.getString("type", "None"),
-					Sound.BLOCK_ANVIL_HIT, x -> Sound.valueOf(x.toUpperCase()));
+					Sound.BLOCK_ANVIL_HIT, x -> Registry.SOUNDS.get(NamespacedKey.fromString(x.toUpperCase())));
 			sound.volume = (float) section.getDouble("volume", 1.0);
 			sound.pitch = (float) section.getDouble("pitch", 1.0);
 

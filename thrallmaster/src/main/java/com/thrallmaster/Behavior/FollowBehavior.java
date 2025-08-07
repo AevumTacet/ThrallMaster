@@ -1,7 +1,6 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
