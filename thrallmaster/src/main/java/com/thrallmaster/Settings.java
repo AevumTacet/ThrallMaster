@@ -165,7 +165,8 @@ public class Settings {
 			return result;
 		} catch (Exception e) {
 			System.err.println(
-					"[Settings] Invalid parameter \"" + key.toString() + "\". Defaulting to \"" + def.toString() + "\".");
+					"[Settings] Invalid parameter \"" + key.toString() + "\". Defaulting to \"" + def.toString() + "\"."
+							+ e);
 			return def;
 		}
 	}
@@ -204,10 +205,14 @@ public class Settings {
 		public float volume;
 		public float pitch;
 
+		// TODO: Fix deprecation issue: Sound ID must change from Sound entries to
+		// Registry entries
+		// Sound.valueOf -> Registry.SOUNDS.get(), see Sound.getSound for more ifno.
+		@SuppressWarnings("removal")
 		public static SoundInfo fromConfig(ConfigurationSection section) {
 			SoundInfo sound = new SoundInfo();
 			sound.type = validate(section.getString("type", "None"),
-					Sound.BLOCK_ANVIL_HIT, x -> Registry.SOUNDS.get(NamespacedKey.fromString(x.toUpperCase())));
+					Sound.BLOCK_ANVIL_HIT, x -> Sound.valueOf(x.toUpperCase()));
 			sound.volume = (float) section.getDouble("volume", 1.0);
 			sound.pitch = (float) section.getDouble("pitch", 1.0);
 
