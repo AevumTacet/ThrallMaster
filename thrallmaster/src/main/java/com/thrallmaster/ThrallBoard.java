@@ -21,62 +21,50 @@ import com.thrallmaster.States.ThrallState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public final class ThrallBoard 
-{
+public final class ThrallBoard {
     private UUID playerID;
     private Scoreboard scoreboard;
     private Objective healthList;
 
-    public ThrallBoard(PlayerState player)
-    {
+    public ThrallBoard(PlayerState player) {
         playerID = player.getPlayerID();
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        
+
         generateObjectives();
         updateBoard(player);
         registerBoard();
     }
 
-    public void registerBoard()
-    {
+    public void registerBoard() {
         Player player = Bukkit.getPlayer(playerID);
-        if (player == null)
-        {
+        if (player == null) {
             return;
         }
 
-        if (scoreboard != null)
-        {
+        if (scoreboard != null) {
             player.setScoreboard(scoreboard);
         }
     }
 
-    public void updateBoard(PlayerState player)
-    {
+    public void updateBoard(PlayerState player) {
         List<ThrallState> thralls = player.getThralls().collect(Collectors.toList());
-        if (thralls.size() == 0 || scoreboard == null)
-        {
+        if (thralls.size() == 0 || scoreboard == null) {
             return;
         }
 
         Objective healthList = scoreboard.getObjective("health");
         Team team_hostile = scoreboard.getTeam("Hostile");
         Team team_defensive = scoreboard.getTeam("Defensive");
-        
-        thralls.forEach(state -> 
-        {
-            if (state.isValidEntity())
-           {
+
+        thralls.forEach(state -> {
+            if (state.isValidEntity()) {
                 LivingEntity entity = (LivingEntity) state.getEntity();
                 int health = (int) entity.getHealth();
 
-                if (state.aggressionState == AggressionState.HOSTILE)
-                {
+                if (state.aggressionState == AggressionState.HOSTILE) {
                     team_defensive.removeEntity(entity);
                     team_hostile.addEntity(entity);
-                }
-                else if (state.aggressionState == AggressionState.DEFENSIVE)
-                {
+                } else if (state.aggressionState == AggressionState.DEFENSIVE) {
                     team_hostile.removeEntity(entity);
                     team_defensive.addEntity(entity);
                 }
@@ -85,34 +73,30 @@ public final class ThrallBoard
 
                 score.setScore(health);
                 score.customName(Component.text(entity.getName())
-                    .append(Component.text("[ " + state.getBehavior().getBehaviorName() + "]")
-                    .color(NamedTextColor.WHITE))
-                    .append( Component.text(state.isSelected() ? "*" : "")));
+                        .append(Component.text("[ " + state.getBehavior().getBehaviorName() + "]")
+                                .color(NamedTextColor.WHITE))
+                        .append(Component.text(state.isSelected() ? "*" : "")));
             }
         });
     }
 
-    private void generateObjectives()
-    {
+    private void generateObjectives() {
         Team team_hostile = scoreboard.registerNewTeam("Hostile");
         Team team_defensive = scoreboard.registerNewTeam("Defensive");
         team_hostile.color(NamedTextColor.RED);
         team_defensive.color(NamedTextColor.GREEN);
 
         healthList = scoreboard.registerNewObjective("health", Criteria.DUMMY, Component.text("Thralls"));
-        healthList.setDisplaySlot(DisplaySlot.SIDEBAR);
+        healthList.setDisplaySlot(null);
         healthList.setRenderType(RenderType.HEARTS);
     }
 
-    public void clearBoard() 
-    {
-        for(Objective obj : scoreboard.getObjectives())
-        {
+    public void clearBoard() {
+        for (Objective obj : scoreboard.getObjectives()) {
             obj.unregister();
         }
 
-        for(Team team : scoreboard.getTeams())
-        {
+        for (Team team : scoreboard.getTeams()) {
             team.unregister();
         }
 
