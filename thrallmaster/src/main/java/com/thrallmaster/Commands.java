@@ -23,7 +23,8 @@ public class Commands {
                 .withSubcommand(spawnCommand())
                 .withSubcommand(allyCommand())
                 .withSubcommand(transferCommand())
-                .withSubcommand(selectAllCommand());
+                .withSubcommand(selectAllCommand())
+                .withSubcommand(listCommand());
 
         base.register();
     }
