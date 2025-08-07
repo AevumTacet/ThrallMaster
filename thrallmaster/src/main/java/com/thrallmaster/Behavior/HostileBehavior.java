@@ -73,6 +73,9 @@ public class HostileBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
+        if (state.target != null) {
+            return Settings.ATTACK_NAME + " " + state.target.getName();
+        }
         return Settings.ATTACK_NAME;
     }
 
