@@ -91,14 +91,14 @@ public final class TargetUtils {
 		final double d = 0.99; // Atmospheric drag coefficient
 
 		if (target != null) {
-			final double travelDistance = shooter.getLocation().distance(target.getLocation());
+			final double travelDistance = arrow.getLocation().distance(target.getLocation());
 			final Vector targetVelocity = target.getVelocity();
 
 			double travelTime = travelDistance / initialSpeed; // Ticks
 			final double drag = Math.pow(d, travelTime);
 			travelTime /= drag;
 
-			final Location targetPos = target.getEyeLocation().add(targetVelocity.multiply(travelTime));
+			final Location targetPos = target.getLocation().add(targetVelocity.multiply(travelTime));
 			final Vector relativePos = targetPos.subtract(arrow.getLocation()).toVector();
 
 			final double x = relativePos.getX();
