@@ -43,14 +43,15 @@ public class IdleBehavior extends Behavior {
     @Override
     public void onBehaviorStart() {
         AbstractSkeleton entity = this.getEntity();
-        if (entity != null) {
-            entity.setAI(true);
-            entity.setTarget(null);
-
-            double distance = BehaviorUtils.distance(entity, startLocation);
-            double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
-            entity.getPathfinder().moveTo(startLocation, speed);
+        if (entity == null) {
+            return;
         }
+        entity.setAI(true);
+        entity.setTarget(null);
+
+        double distance = BehaviorUtils.distance(entity, startLocation);
+        double speed = distance < Settings.THRALL_FOLLOW_MAX / 2 ? 1.0 : Settings.RUN_SPEED_MUL;
+        entity.getPathfinder().moveTo(startLocation, speed);
     }
 
     @Override

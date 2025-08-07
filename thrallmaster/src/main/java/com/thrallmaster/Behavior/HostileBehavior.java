@@ -25,6 +25,10 @@ public class HostileBehavior extends Behavior {
     @Override
     public void onBehaviorStart() {
         AbstractSkeleton entity = this.getEntity();
+        if (entity == null) {
+            return;
+        }
+
         this.startTime = System.currentTimeMillis();
         entity.setAI(true);
 

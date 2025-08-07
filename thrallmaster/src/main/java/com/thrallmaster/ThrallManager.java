@@ -315,9 +315,11 @@ public class ThrallManager implements Listener {
             if (ThrallUtils.isThrall(attacker) && ThrallUtils.isFriendly(attacker, player)) {
                 event.setCancelled(true);
             } else {
-                getThralls(player.getUniqueId()).forEach(state -> {
-                    state.setAttackMode(attacker);
-                });
+                getThralls(player.getUniqueId())
+                        .filter(state -> state.isValidEntity())
+                        .forEach(state -> {
+                            state.setAttackMode(attacker);
+                        });
             }
         }
 
