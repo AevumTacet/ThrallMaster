@@ -79,6 +79,14 @@ public class IdleBehavior extends Behavior {
             startLocation = entity.getLocation();
         }
 
+        if (elapsedTicks % 10 == 0) {
+            if (state.aggressionState == AggressionState.HOSTILE) {
+                BehaviorUtils.findClosestEnemy(state, this);
+            } else if (state.aggressionState == AggressionState.HEALER) {
+                BehaviorUtils.findClosestAlly(state, this);
+            }
+        }
+
         Player owner = state.getOwner();
         if (owner != null) {
             double distancePlayer = BehaviorUtils.distance(entity, owner.getLocation());
@@ -97,14 +105,6 @@ public class IdleBehavior extends Behavior {
                 return;
             }
             randomWalk(entity);
-        }
-
-        if (elapsedTicks % 10 == 0) {
-            if (state.aggressionState == AggressionState.HOSTILE) {
-                BehaviorUtils.findClosestEnemy(state, this);
-            } else if (state.aggressionState == AggressionState.HEALER) {
-                BehaviorUtils.findClosestAlly(state, this);
-            }
         }
 
         elapsedTicks++;
