@@ -107,4 +107,12 @@ public final class ThrallUtils {
         return false;
     }
 
+    public static double distanceToOwner(final ThrallState thrall) {
+        if (!thrall.isValidEntity() || thrall.getOwner() == null) {
+            return 999;
+        }
+
+        return thrall.getEntity().getLocation().distance(thrall.getOwner().getLocation());
+    }
+
 }

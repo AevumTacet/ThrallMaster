@@ -1,5 +1,6 @@
 package com.thrallmaster;
 
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.bukkit.Location;
@@ -7,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.Plugin;
+
+import com.thrallmaster.Utils.ThrallUtils;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -146,14 +149,15 @@ public class Commands {
     private static CommandAPICommand listCommand() {
         return new CommandAPICommand("list")
                 .executesPlayer((player, args) -> {
+                    player.sendMessage(" ");
                     manager.getThralls(player.getUniqueId())
                             .filter(state -> state.isValidEntity())
+                            .sorted(Comparator.comparingDouble(state -> ThrallUtils.distanceToOwner(state)))
                             .forEach(state -> {
                                 LivingEntity entity = (LivingEntity) state.getEntity();
-                                int distance = (int) entity.getLocation().distance(state.getOwner().getLocation());
+                                int distance = (int) ThrallUtils.distanceToOwner(state);
 
-                                player.sendMessage(entity.getName() + ": ");
-                                player.sendMessage("- " + entity.getHealth() + "❤");
+                                player.sendMessage(entity.getName() + " " + (int) entity.getHealth() + " ❤" + ":");
                                 player.sendMessage("- " + state.getBehavior().getBehaviorName());
                                 player.sendMessage("- " + distance + " m");
 

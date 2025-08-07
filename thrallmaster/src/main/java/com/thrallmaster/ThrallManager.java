@@ -36,6 +36,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
+import com.thrallmaster.Behavior.IdleBehavior;
 import com.thrallmaster.IO.Deserializer;
 import com.thrallmaster.IO.NBTExporter;
 import com.thrallmaster.States.PlayerState;
@@ -597,7 +598,12 @@ public class ThrallManager implements Listener {
         for (Entity entity : event.getChunk().getEntities()) {
             if (ThrallUtils.isThrall(entity)) {
                 AbstractSkeleton thrall = (AbstractSkeleton) entity;
-                // ThrallState state = getThrall(thrall.getUniqueId());
+                ThrallState state = getThrall(thrall.getUniqueId());
+
+                if (state.getBehavior() instanceof IdleBehavior) {
+                    IdleBehavior behavior = (IdleBehavior) state.getBehavior();
+                    thrall.teleport(behavior.startLocation);
+                }
 
                 if (entity != null) {
                     clearMobGoals(thrall);
