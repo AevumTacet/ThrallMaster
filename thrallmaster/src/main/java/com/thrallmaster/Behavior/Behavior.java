@@ -14,10 +14,7 @@ import com.thrallmaster.ThrallManager;
 import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.ThrallUtils;
-
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 
 public abstract class Behavior implements Serializable {
     protected static ThrallManager manager = Main.manager;
@@ -66,7 +63,7 @@ public abstract class Behavior implements Serializable {
             }
 
             ThrallUtils.notifyOwner(state,
-                    String.format(Settings.AGGRESSION_CHANGED_MSG, entity.getName(),
+                    String.format(Settings.BEHAVIOR_CHANGED_MSG, entity.getName(),
                             Settings.AGGRESSION_MAP.get(state.aggressionState)));
         }
     }

@@ -37,15 +37,18 @@ public class Settings {
 	public static ArrayList<ParticleInfo> RITUAL_PARTICLES;
 	public static ArrayList<ParticleInfo> SPAWN_PARTICLES;
 	public static ArrayList<ParticleInfo> DEATH_PARTICLES;
-	public static String AGGRESSION_CHANGED_MSG;
-	public static String AGGRESSION_CHANGED_MSG_MULTI;
+	public static String BEHAVIOR_CHANGED_MSG;
+	public static String BEHAVIOR_CHANGED_MSG_MULTI;
 
 	public static String IDLE_NAME;
 	public static String FOLLOW_NAME;
 	public static String ATTACK_NAME;
 	public static String HEAL_NAME;
-	public static String DEFENSIVE_NAME;
-	public static String AGGRESSIVE_NAME;
+
+	public static String IDLE_VERB;
+	public static String FOLLOW_VERB;
+	public static String DEFEND_VERB;
+	public static String AGGRESIVE_VERB;
 	public static HashMap<AggressionState, String> AGGRESSION_MAP;
 
 	public static boolean DEBUG_ENABLED;
@@ -83,8 +86,6 @@ public class Settings {
 		THRALL_DETECTION_RANGE = section.getDouble("detection-range", 10);
 		THRALL_DETECTION_MUL = section.getDouble("ranged-detection-multiplier", 1.5);
 		RUN_SPEED_MUL = section.getDouble("run-speed-multiplier", 1.5);
-		AGGRESSION_CHANGED_MSG = section.getString("aggression-state-message", "");
-		AGGRESSION_CHANGED_MSG_MULTI = section.getString("horn-command-message", "");
 
 		THRALL_WANDER_MAX = section.getDouble("idle-wander-max-distance", 4);
 		THRALL_FOLLOW_MIN = section.getDouble("follow-min-distance", 3);
@@ -108,17 +109,23 @@ public class Settings {
 	}
 
 	private static void loadStateSettings(ConfigurationSection section) {
+		BEHAVIOR_CHANGED_MSG = section.getString("behavior-state-message", "");
+		BEHAVIOR_CHANGED_MSG_MULTI = section.getString("horn-command-message", "");
+
 		IDLE_NAME = section.getString("idle", "Guarding");
 		FOLLOW_NAME = section.getString("follow", "Following");
 		ATTACK_NAME = section.getString("attack", "Attacking");
 		HEAL_NAME = section.getString("heal", "Healing");
-		DEFENSIVE_NAME = section.getString("defensive", "Defending");
-		AGGRESSIVE_NAME = section.getString("aggressive", "Aggressive");
+
+		IDLE_VERB = section.getString("idle-verb", "Idle");
+		FOLLOW_VERB = section.getString("follow-verb", "Following");
+		DEFEND_VERB = section.getString("defend-verb", "Defending");
+		AGGRESIVE_VERB = section.getString("aggressive-verb", "Aggresive");
 
 		AGGRESSION_MAP = new HashMap<AggressionState, String>() {
 			{
-				put(AggressionState.DEFENSIVE, DEFENSIVE_NAME);
-				put(AggressionState.HOSTILE, AGGRESSIVE_NAME);
+				put(AggressionState.DEFENSIVE, DEFEND_VERB);
+				put(AggressionState.HOSTILE, AGGRESIVE_VERB);
 				put(AggressionState.HEALER, HEAL_NAME);
 			}
 		};

@@ -111,11 +111,11 @@ public class ThrallCommander {
                 boolean allFollow = selected.stream().allMatch(state -> state.getBehavior() instanceof FollowBehavior);
                 if (allFollow) {
                     ThrallUtils.notifyPlayer(player,
-                            String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(), Settings.IDLE_NAME));
+                            String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selected.size(), Settings.IDLE_NAME));
                     selected.forEach(state -> state.setBehavior(new IdleBehavior(state.getEntityID(), state)));
                 } else {
                     ThrallUtils.notifyPlayer(player,
-                            String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(),
+                            String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selected.size(),
                                     Settings.FOLLOW_NAME));
                     selected.forEach(state -> state.setBehavior(new FollowBehavior(state.getEntityID(), state)));
                 }
@@ -124,13 +124,13 @@ public class ThrallCommander {
                         .allMatch(state -> state.aggressionState == AggressionState.HOSTILE);
                 if (allHostile) {
                     ThrallUtils.notifyPlayer(player,
-                            String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(),
-                                    Settings.DEFENSIVE_NAME));
+                            String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selected.size(),
+                                    Settings.DEFEND_VERB));
                     selected.forEach(state -> state.aggressionState = AggressionState.DEFENSIVE);
                 } else {
                     ThrallUtils.notifyPlayer(player,
-                            String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(),
-                                    Settings.AGGRESSIVE_NAME));
+                            String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selected.size(),
+                                    Settings.AGGRESIVE_VERB));
                     selected.forEach(state -> state.aggressionState = AggressionState.HOSTILE);
                 }
             }

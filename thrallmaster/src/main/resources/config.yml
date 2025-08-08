@@ -21,12 +21,6 @@ general:
   # Thralls that haven't been commanded by this period of time are removed from the selection. (seconds)
   selection-release-cooldown: 20            
   
-  # Message sent to the owner when the Aggression mode changes. The two placeholders %s are 1) Name of the Thrall, 2) Aggression mode.
-  aggression-state-message: "%s is now %s"  
-  
-  # Message sent when the mode changes for many Thralls (e.g. Horn commands). The two placeholders %d %s are 1) Number of Thralls, 2) Aggression mode.
-  horn-command-message: "Changing %d Thralls to %s" 
-  
   # Maximum distance in blocks for Thralls in Idle to wander before they return to their starting point.
   idle-wander-max-distance: 4               
   
@@ -55,12 +49,20 @@ general:
 
 # Thrall Behavior names and States, State names should be typed taking "aggression-state-message" into consideration. Behavior names should be in present continous.
 states:
+  # Message sent to the owner when the Aggression mode changes. The two placeholders %s are 1) Name of the Thrall, 2) Aggression mode.
+  behavior-state-message: "%s is now %s"  
+  
+  # Message sent when the mode changes for many Thralls (e.g. Horn commands). The two placeholders %d %s are 1) Number of Thralls, 2) Aggression mode.
+  horn-command-message: "Changing %d Thralls to %s" 
+
   idle: "Guarding"
   follow: "Following"
   attack: "Attacking"
   heal: "Healing"
-  defensive: "Defending"
-  aggressive: "Aggressive"
+  idle-verb: "idle"
+  follow-verb: "following you"
+  defend-verb: "defending you"
+  aggressive-verb: "aggresive"
 
 
 # Thrall regeneration ritual settings that controls the amount of potions to be used and the effects that will play each time a potion is applied.

@@ -39,8 +39,8 @@ public class FollowBehavior extends Behavior {
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
 
             ThrallUtils.notifyOwner(state,
-                    String.format(Settings.AGGRESSION_CHANGED_MSG, entity.getName(),
-                            Settings.IDLE_NAME));
+                    String.format(Settings.BEHAVIOR_CHANGED_MSG, entity.getName(),
+                            Settings.IDLE_VERB));
         }
 
         super.onBehaviorInteract(material);
