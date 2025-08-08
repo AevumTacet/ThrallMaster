@@ -114,7 +114,7 @@ public class Commands {
         return new CommandAPICommand("list")
                 .executesPlayer((player, args) -> {
                     manager.getOwnerData(player.getUniqueId()).getAllies()
-                            .map(id -> Bukkit.getPlayer(id))
+                            .map(id -> Bukkit.getOfflinePlayer(id))
                             .filter(x -> x != null)
                             .forEach(x -> player.sendMessage(x.getName()));
                 });
