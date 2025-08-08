@@ -10,6 +10,7 @@ import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
 import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.BehaviorUtils;
+import com.thrallmaster.Utils.ThrallUtils;
 
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
@@ -36,6 +37,10 @@ public class FollowBehavior extends Behavior {
         if (MaterialUtils.isAir(material)) {
             state.setBehavior(new IdleBehavior(entityID, state));
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1, 0.6f);
+
+            ThrallUtils.notifyOwner(state,
+                    String.format(Settings.AGGRESSION_CHANGED_MSG, entity.getName(),
+                            Settings.IDLE_NAME));
         }
 
         super.onBehaviorInteract(material);

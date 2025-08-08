@@ -110,11 +110,11 @@ public class ThrallCommander {
             if (instrument == MusicInstrument.PONDER_GOAT_HORN) {
                 boolean allFollow = selected.stream().allMatch(state -> state.getBehavior() instanceof FollowBehavior);
                 if (allFollow) {
-                    player.sendMessage(
+                    ThrallUtils.notifyPlayer(player,
                             String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(), Settings.IDLE_NAME));
                     selected.forEach(state -> state.setBehavior(new IdleBehavior(state.getEntityID(), state)));
                 } else {
-                    player.sendMessage(
+                    ThrallUtils.notifyPlayer(player,
                             String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(),
                                     Settings.FOLLOW_NAME));
                     selected.forEach(state -> state.setBehavior(new FollowBehavior(state.getEntityID(), state)));
@@ -123,12 +123,12 @@ public class ThrallCommander {
                 boolean allHostile = selected.stream()
                         .allMatch(state -> state.aggressionState == AggressionState.HOSTILE);
                 if (allHostile) {
-                    player.sendMessage(
+                    ThrallUtils.notifyPlayer(player,
                             String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(),
                                     Settings.DEFENSIVE_NAME));
                     selected.forEach(state -> state.aggressionState = AggressionState.DEFENSIVE);
                 } else {
-                    player.sendMessage(
+                    ThrallUtils.notifyPlayer(player,
                             String.format(Settings.AGGRESSION_CHANGED_MSG_MULTI, selected.size(),
                                     Settings.AGGRESSIVE_NAME));
                     selected.forEach(state -> state.aggressionState = AggressionState.HOSTILE);

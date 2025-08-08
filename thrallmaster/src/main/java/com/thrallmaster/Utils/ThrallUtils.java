@@ -10,8 +10,12 @@ import org.bukkit.entity.Wolf;
 
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
+import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallManager;
 import com.thrallmaster.States.ThrallState;
+
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 
 public final class ThrallUtils {
     private static ThrallManager manager = Main.manager;
@@ -113,6 +117,17 @@ public final class ThrallUtils {
         }
 
         return thrall.getEntity().getLocation().distance(thrall.getOwner().getLocation());
+    }
+
+    public static void notifyPlayer(Player player, String message) {
+        ((Audience) player).sendActionBar(
+                Component.text(message));
+    }
+
+    public static void notifyOwner(ThrallState state, String message) {
+        if (state.getOwner() != null) {
+            notifyPlayer(state.getOwner(), message);
+        }
     }
 
 }
