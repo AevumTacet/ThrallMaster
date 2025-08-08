@@ -598,12 +598,12 @@ public class ThrallManager implements Listener {
         for (Entity entity : event.getChunk().getEntities()) {
             if (ThrallUtils.isThrall(entity)) {
                 AbstractSkeleton thrall = (AbstractSkeleton) entity;
-                ThrallState state = getThrall(thrall.getUniqueId());
+                // ThrallState state = getThrall(thrall.getUniqueId());
 
-                if (state.getBehavior() instanceof IdleBehavior) {
-                    IdleBehavior behavior = (IdleBehavior) state.getBehavior();
-                    thrall.teleport(behavior.startLocation);
-                }
+                // if (state.getBehavior() instanceof IdleBehavior) {
+                // IdleBehavior behavior = (IdleBehavior) state.getBehavior();
+                // thrall.teleport(behavior.startLocation);
+                // }
 
                 if (entity != null) {
                     clearMobGoals(thrall);
