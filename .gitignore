@@ -1,4 +1,4 @@
 /.vscode
 *.jar
 *.class
-target/*
+thrallmaster/target/*

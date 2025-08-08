@@ -3,6 +3,7 @@ package com.thrallmaster;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.AbstractSkeleton;
@@ -75,7 +76,8 @@ public class Commands {
     private static CommandAPICommand allyCommand() {
         return new CommandAPICommand("ally")
                 .withSubcommand(allyAddCommand())
-                .withSubcommand(allyRemoveCommand());
+                .withSubcommand(allyRemoveCommand())
+                .withSubcommand(allyListCommand());
     }
 
     private static CommandAPICommand allyAddCommand() {
@@ -105,6 +107,16 @@ public class Commands {
 
                     manager.getOwnerData(player.getUniqueId()).removeAlly(target.getUniqueId());
                     player.sendMessage(target.getName() + " is no longer an ally.");
+                });
+    }
+
+    private static CommandAPICommand allyListCommand() {
+        return new CommandAPICommand("list")
+                .executesPlayer((player, args) -> {
+                    manager.getOwnerData(player.getUniqueId()).getAllies()
+                            .map(id -> Bukkit.getPlayer(id))
+                            .filter(x -> x != null)
+                            .forEach(x -> player.sendMessage(x.getName()));
                 });
     }
 
