@@ -22,14 +22,6 @@ import com.thrallmaster.States.ThrallState;
 public final class TargetUtils {
 	private static ThrallManager manager = Main.manager;
 
-	public static int SCORE_THRESHOLD = 15;
-	public static int PLAYER_SCORE = -5;
-	public static int MOB_SCORE = 2;
-	public static int PROXIMITY_FAR_SCORE = 5;
-	public static int VISIBILITY_SOCRE = 10;
-	public static int PLAYER_DANGER_SCORE = -5;
-	public static int HEALTH_SCORE_DIV = -10;
-
 	private TargetUtils() {
 	}
 
@@ -88,11 +80,11 @@ public final class TargetUtils {
 			playerDistance = state.getOwner().getLocation().distance(target.getLocation());
 		}
 
-		int score = (distance > Settings.THRALL_DETECTION_RANGE ? PROXIMITY_FAR_SCORE : 0)
-				+ (targetVisible(state, target) ? 0 : VISIBILITY_SOCRE)
-				+ (playerDistance < Settings.THRALL_FOLLOW_MIN * 2 ? PLAYER_DANGER_SCORE : 0)
-				+ (target instanceof Player ? PLAYER_SCORE : MOB_SCORE)
-				+ (int) (target.getHealth() / HEALTH_SCORE_DIV);
+		int score = (distance > Settings.THRALL_DETECTION_RANGE ? Settings.PROXIMITY_FAR_SCORE : 0)
+				+ (targetVisible(state, target) ? 0 : Settings.VISIBILITY_SOCRE)
+				+ (playerDistance < Settings.THRALL_FOLLOW_MIN * 2 ? Settings.PLAYER_DANGER_SCORE : 0)
+				+ (target instanceof Player ? Settings.PLAYER_SCORE : Settings.MOB_SCORE)
+				+ (int) (target.getHealth() / Settings.HEALTH_SCORE_DIV);
 
 		return score;
 	}

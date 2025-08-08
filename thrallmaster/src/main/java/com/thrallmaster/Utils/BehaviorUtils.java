@@ -59,7 +59,7 @@ public final class BehaviorUtils {
 		}
 		LivingEntity nearestEntity = entities
 				.map(x -> new SimpleEntry<>(x, TargetUtils.getTargetScore(state, x)))
-				.filter(entry -> entry.getValue() < TargetUtils.SCORE_THRESHOLD)
+				.filter(entry -> entry.getValue() < Settings.SCORE_THRESHOLD)
 				.min(Comparator.comparingDouble(entry -> entry.getValue() + state.selectionBias))
 				.map(Map.Entry::getKey)
 				.orElse(null);

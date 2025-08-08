@@ -51,6 +51,14 @@ public class Settings {
 	public static String AGGRESIVE_VERB;
 	public static HashMap<AggressionState, String> AGGRESSION_MAP;
 
+	public static int SCORE_THRESHOLD;
+	public static int PLAYER_SCORE;
+	public static int MOB_SCORE;
+	public static int PROXIMITY_FAR_SCORE;
+	public static int VISIBILITY_SOCRE;
+	public static int PLAYER_DANGER_SCORE;
+	public static int HEALTH_SCORE_DIV;
+
 	public static boolean DEBUG_ENABLED;
 
 	private Settings() {
@@ -64,7 +72,18 @@ public class Settings {
 		loadRitualSettings(config.getConfigurationSection("ritual-action"));
 		loadSpawnSettings(config.getConfigurationSection("thrall-spawn"));
 		loadDeathSettings(config.getConfigurationSection("thrall-death"));
+		loadScoreSettings(config.getConfigurationSection("scores"));
 		loadMiscSettings(config.getConfigurationSection("misc"));
+	}
+
+	private static void loadScoreSettings(ConfigurationSection section) {
+		SCORE_THRESHOLD = section.getInt("score-threshold", 15);
+		PLAYER_SCORE = section.getInt("is-player", -5);
+		MOB_SCORE = section.getInt("is-mob", 2);
+		PROXIMITY_FAR_SCORE = section.getInt("is-far", 5);
+		VISIBILITY_SOCRE = section.getInt("is-visible", 10);
+		PLAYER_DANGER_SCORE = section.getInt("player-danger", -5);
+		HEALTH_SCORE_DIV = section.getInt("health-divisor", -10);
 	}
 
 	private static void loadMiscSettings(ConfigurationSection section) {

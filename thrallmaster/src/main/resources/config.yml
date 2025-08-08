@@ -134,5 +134,33 @@ thrall-death:
     volume: 1.0
     pitch: 0.5
 
+# Settings regarding the Target score system used by thralls to determine whcih enemy should attack first
+# The score is a linear sum of the values described below. negative values are subtracted from the score.
+# Enemies with lower score are more likely to be targeted by the thrall.
+scores:
+  # Enemies with a score greater than this value are ignored by the Thrall
+  score-threshold: 15
+
+  # Is the targeted entity a player?. By default this is -5 which gives priority to player entities.
+  is-player: -5
+
+  # Is the targeted entity a mob?. By default this value is +2 which reduces priority to mobs. 
+  is-mob: 2
+
+  # Penalization if the entity is farther than detection-range. By default the value is +5
+  is-far: 5
+
+  # Penalization if the entity is not directly visible to the Thrall. By default the value is +10
+  is-visible: 10
+
+  # Score added if the entity is close to the owner, the limit is defined as 2 x follow-min-distance.
+  # By default, the value is -5, which gives priority to entities closer to the player.
+  player-danger: -5
+
+  # Extra score added for every (health / health-divisor) points of the entity.
+  # By default the value is -10, which prioritizes entities with higher hp
+  health-divisor: -10
+
+
 misc:
   debug-mode: false
