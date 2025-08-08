@@ -4,9 +4,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import org.bukkit.Location;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enemy;

@@ -3,10 +3,7 @@ package com.thrallmaster;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Function;
-
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

@@ -1,19 +1,15 @@
 package com.thrallmaster.Utils;
 
 import java.util.UUID;
-
 import org.bukkit.GameMode;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
-
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
-import com.thrallmaster.Settings;
 import com.thrallmaster.ThrallManager;
 import com.thrallmaster.States.ThrallState;
-
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 

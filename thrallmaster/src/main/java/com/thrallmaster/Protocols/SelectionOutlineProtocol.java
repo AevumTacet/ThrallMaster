@@ -8,27 +8,25 @@ import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Registry;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Serializer;
 
-public class SelectionOutlineProtocol extends ThrallProtocol{
+public class SelectionOutlineProtocol extends ThrallProtocol {
     private boolean enabled;
     private Entity entity;
-    
-    public SelectionOutlineProtocol(Entity entity, boolean enabled) 
-    {
+
+    public SelectionOutlineProtocol(Entity entity, boolean enabled) {
         this.entity = entity;
         this.enabled = enabled;
     }
 
-    public void setEnabled(boolean enabled)
-    {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
+    @SuppressWarnings("removal")
     @Override
-    public PacketContainer getPacket() 
-    {
+    public PacketContainer getPacket() {
         PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
         packet.getIntegers().write(0, entity.getEntityId());
-        
+
         ArrayList<WrappedDataValue> metadata = new ArrayList<>();
 
         Serializer serializer = Registry.get(Byte.class);
@@ -37,8 +35,8 @@ public class SelectionOutlineProtocol extends ThrallProtocol{
         WrappedDataValue entityFlags = new WrappedDataValue(0, serializer, flag);
         metadata.add(entityFlags);
 
-        packet.getDataValueCollectionModifier().write(0, metadata); 
+        packet.getDataValueCollectionModifier().write(0, metadata);
         return packet;
     }
-    
+
 }
