@@ -132,6 +132,10 @@ public class MaterialUtils {
         return material == Material.SHIELD;
     }
 
+    public static boolean isStick(Material material) {
+        return material == Material.STICK;
+    }
+
     public static void applyDamage(ItemStack item, int amount) {
         if (item.getItemMeta() instanceof Damageable) {
             Damageable meta = (Damageable) item.getItemMeta();

@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
@@ -16,10 +16,10 @@ import com.thrallmaster.Utils.ThrallUtils;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class FollowBehavior extends Behavior {
-    public LivingEntity target;
+    public Entity target;
     private int elapsedTicks;
 
-    public FollowBehavior(UUID entityID, ThrallState state, @NotNull LivingEntity target) {
+    public FollowBehavior(UUID entityID, ThrallState state, @NotNull Entity target) {
         super(entityID, state);
         if (target != null) {
             this.target = target;
