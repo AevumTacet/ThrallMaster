@@ -8,12 +8,17 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.joml.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Settings;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.IO.Serializable;
 import com.thrallmaster.Protocols.SelectionOutlineProtocol;
+import com.thrallmaster.Utils.ThrallUtils;
+
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class ThrallState implements Serializable {
@@ -140,6 +145,14 @@ public class ThrallState implements Serializable {
         else if (target instanceof LivingEntity) {
             this.target = (LivingEntity) target;
             setBehavior(new HostileBehavior(entityID, this, behavior));
+
+            var followers = ThrallUtils.getFollowers(this).collect(Collectors.toList());
+            if (followers != null && followers.size() != 0) {
+                followers.forEach(x -> {
+                    var x_behavior = x.getBehavior();
+                    x.setBehavior(new HostileBehavior(x.getEntityID(), x, x_behavior));
+                });
+            }
         }
     }
 

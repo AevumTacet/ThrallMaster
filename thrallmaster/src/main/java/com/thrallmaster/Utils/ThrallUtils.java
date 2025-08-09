@@ -1,6 +1,8 @@
 package com.thrallmaster.Utils;
 
 import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.bukkit.GameMode;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Entity;
@@ -9,6 +11,7 @@ import org.bukkit.entity.Wolf;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
 import com.thrallmaster.ThrallManager;
+import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.States.ThrallState;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -124,6 +127,14 @@ public final class ThrallUtils {
         if (state.getOwner() != null) {
             notifyPlayer(state.getOwner(), message);
         }
+    }
+
+    // Warning; Slow operation!
+    public static Stream<ThrallState> getFollowers(ThrallState state) {
+        return manager.getThralls(state.getOwnerID())
+                .filter(x -> x.isValidEntity())
+                .filter(x -> x.getBehavior() instanceof FollowBehavior)
+                .filter(x -> ((FollowBehavior) x.getBehavior()).target.getUniqueId() == state.getEntityID());
     }
 
 }
