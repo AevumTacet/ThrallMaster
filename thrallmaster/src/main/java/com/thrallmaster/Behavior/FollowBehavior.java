@@ -4,7 +4,8 @@ import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
@@ -15,10 +16,20 @@ import com.thrallmaster.Utils.ThrallUtils;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class FollowBehavior extends Behavior {
+    public LivingEntity target;
     private int elapsedTicks;
 
-    public FollowBehavior(UUID entityID, ThrallState state) {
+    public FollowBehavior(UUID entityID, ThrallState state, @NotNull LivingEntity target) {
         super(entityID, state);
+        if (target != null) {
+            this.target = target;
+        } else {
+            this.target = state.getOwner();
+        }
+    }
+
+    public FollowBehavior(UUID entityID, ThrallState state) {
+        this(entityID, state, state.getOwner());
     }
 
     @Override
@@ -48,27 +59,26 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public void onBehaviorTick() {
-        Player owner = state.getOwner();
         AbstractSkeleton entity = this.getEntity();
 
-        if (owner == null || entity == null) {
+        if (target == null || entity == null) {
             return;
         }
 
-        double distance = BehaviorUtils.distance(entity, owner.getLocation());
+        double distance = BehaviorUtils.distance(entity, target.getLocation());
         double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
 
         if (distance < Settings.THRALL_FOLLOW_MIN) {
             entity.getPathfinder().stopPathfinding();
 
         } else if (distance > Settings.THRALL_FOLLOW_MAX) {
-            if (!MaterialUtils.isAir(owner.getLocation().getBlock().getType())) {
-                entity.teleport(owner.getLocation());
+            if (!MaterialUtils.isAir(target.getLocation().getBlock().getType())) {
+                entity.teleport(target.getLocation());
                 return;
             }
         } else {
-            entity.lookAt(owner);
-            entity.getPathfinder().moveTo(owner.getLocation(), speed);
+            entity.lookAt(target);
+            entity.getPathfinder().moveTo(target.getLocation(), speed);
         }
 
         if (elapsedTicks % 10 == 0) {
@@ -84,17 +94,20 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
+        if (target != null && target != state.getOwner()) {
+            return Settings.FOLLOW_NAME + " " + target.getName();
+        }
+
         return Settings.FOLLOW_NAME;
     }
 
     @Override
     public void onBehaviorStuck() {
         AbstractSkeleton entity = this.getEntity();
-        Player owner = state.getOwner();
-        if (entity == null || owner == null) {
+        if (entity == null || target == null) {
             return;
         }
-        entity.teleport(owner.getLocation());
+        entity.teleport(target.getLocation());
     }
 
     @Override
