@@ -316,8 +316,21 @@ public class ThrallManager implements Listener {
                 world.spawnParticle(Particle.HEART, entity.getEyeLocation(), 1);
                 world.playSound(entity.getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
                 entity.heal(1);
-            } else {
+            } else if (MaterialUtils.isStick(playerItem.getType())) {
+                var selection = getThralls(state.getOwnerID())
+                        .filter(x -> x.getEntityID() != state.getEntityID())
+                        .filter(x -> x.isSelected())
+                        .collect(Collectors.toList());
 
+                if (!selection.isEmpty()) {
+                    selection.forEach(x -> x.setBehavior(new FollowBehavior(x.getEntityID(), x, state.getEntity())));
+                    entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
+                    ThrallUtils.notifyPlayer(state.getOwner(),
+                            String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selection.size(),
+                                    Settings.FOLLOW_NAME + " " + state.getEntity().getName()));
+                }
+                // Empty hand, etc
+            } else {
                 var selected = getThralls(player.getUniqueId()).filter(x -> x.isSelected())
                         .collect(Collectors.toList());
                 if (selected.isEmpty()) {

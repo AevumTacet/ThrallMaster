@@ -67,19 +67,6 @@ public abstract class Behavior implements Serializable {
                     String.format(Settings.BEHAVIOR_CHANGED_MSG, entity.getName(),
                             Settings.AGGRESSION_MAP.get(state.aggressionState)));
 
-        } else if (MaterialUtils.isStick(material)) {
-            var selection = manager.getThralls(state.getOwnerID())
-                    .filter(x -> x.getEntityID() != state.getEntityID())
-                    .filter(x -> x.isSelected())
-                    .collect(Collectors.toList());
-
-            if (!selection.isEmpty()) {
-                selection.forEach(x -> x.setBehavior(new FollowBehavior(x.getEntityID(), x, state.getEntity())));
-                entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
-                ThrallUtils.notifyPlayer(state.getOwner(),
-                        String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selection.size(),
-                                Settings.FOLLOW_NAME + " " + state.getEntity().getName()));
-            }
         }
     }
 
