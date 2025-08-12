@@ -70,7 +70,6 @@ public class FollowBehavior extends Behavior {
                     String.format(Settings.BEHAVIOR_CHANGED_MSG, entity.getName(),
                             Settings.IDLE_VERB));
         }
-
         super.onBehaviorInteract(material);
     }
 
