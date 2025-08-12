@@ -149,8 +149,9 @@ public class ThrallState implements Serializable {
     }
 
     public void setBehavior(Behavior m_Behavior) {
-
-        this.behavior.onBehaviorEnd();
+        if (this.behavior != null) {
+            this.behavior.onBehaviorEnd();
+        }
 
         this.behavior = m_Behavior;
         this.behavior.onBehaviorStart();
