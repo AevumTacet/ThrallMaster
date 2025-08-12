@@ -26,6 +26,10 @@ public final class ThrallUtils {
         return (entity instanceof AbstractSkeleton) && isEntityTracked(entity);
     }
 
+    public static ThrallState getThrall(UUID entityID) {
+        return manager.getThrall(entityID);
+    }
+
     public static boolean isEntityTracked(final Entity entity) {
         return manager.isEntityTracked(entity.getUniqueId());
     }
@@ -132,7 +136,6 @@ public final class ThrallUtils {
     // Warning; Slow operation!
     public static Stream<ThrallState> getFollowers(ThrallState state) {
         return manager.getThralls(state.getOwnerID())
-                .filter(x -> x.isValidEntity())
                 .filter(x -> x.getBehavior() instanceof FollowBehavior)
                 .filter(x -> ((FollowBehavior) x.getBehavior()).target.getUniqueId() == state.getEntityID());
     }

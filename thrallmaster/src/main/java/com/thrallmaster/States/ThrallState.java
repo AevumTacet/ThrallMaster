@@ -7,6 +7,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.joml.Random;
+
+import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +47,20 @@ public class ThrallState implements Serializable {
 
     public boolean isSelected() {
         return selected;
+    }
+
+    private HashSet<ThrallState> followers;
+
+    public Stream<ThrallState> getFollowers() {
+        return followers.stream();
+    }
+
+    public void addFollower(ThrallState state) {
+        followers.add(state);
+    }
+
+    public void removeFollower(ThrallState state) {
+        followers.remove(state);
     }
 
     public void setSelected(boolean selected) {
@@ -99,6 +116,7 @@ public class ThrallState implements Serializable {
 
         this.selectionBias = (random.nextFloat() - 0.5f) * 2 * Settings.SELECTION_BIAS;
         this.phaseOffset = random.nextInt(5);
+        this.followers = new HashSet<>(ThrallUtils.getFollowers(this).collect(Collectors.toSet()));
     }
 
     @Override
@@ -133,6 +151,8 @@ public class ThrallState implements Serializable {
 
     public void setBehavior(Behavior m_Behavior) {
 
+        this.behavior.onBehaviorEnd();
+
         this.behavior = m_Behavior;
         this.behavior.onBehaviorStart();
     }
@@ -146,10 +166,10 @@ public class ThrallState implements Serializable {
             this.target = (LivingEntity) target;
             setBehavior(new HostileBehavior(entityID, this, behavior));
 
-            var followers = ThrallUtils.getFollowers(this).collect(Collectors.toList());
             if (followers != null && followers.size() != 0) {
                 followers.forEach(x -> {
                     var x_behavior = x.getBehavior();
+                    x.target = this.target;
                     x.setBehavior(new HostileBehavior(x.getEntityID(), x, x_behavior));
                 });
             }

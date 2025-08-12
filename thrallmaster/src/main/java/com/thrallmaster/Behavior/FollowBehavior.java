@@ -18,6 +18,7 @@ import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 public class FollowBehavior extends Behavior {
     public Entity target;
     private int elapsedTicks;
+    private boolean notFollowingPlayer;
 
     public FollowBehavior(UUID entityID, ThrallState state, @NotNull Entity target) {
         super(entityID, state);
@@ -26,6 +27,8 @@ public class FollowBehavior extends Behavior {
         } else {
             this.target = state.getOwner();
         }
+
+        this.notFollowingPlayer = target != state.getOwner();
     }
 
     public FollowBehavior(UUID entityID, ThrallState state) {
@@ -38,6 +41,10 @@ public class FollowBehavior extends Behavior {
 
         if (entity != null) {
             entity.setTarget(null);
+        }
+        if (notFollowingPlayer && ThrallUtils.isThrall(target)) {
+            ThrallState leader = ThrallUtils.getThrall(target.getUniqueId());
+            leader.addFollower(this.state);
         }
     }
 
@@ -93,8 +100,16 @@ public class FollowBehavior extends Behavior {
     }
 
     @Override
+    public void onBehaviorEnd() {
+        if (notFollowingPlayer && ThrallUtils.isThrall(target)) {
+            ThrallState leader = ThrallUtils.getThrall(target.getUniqueId());
+            leader.removeFollower(this.state);
+        }
+    }
+
+    @Override
     public String getBehaviorName() {
-        if (target != null && target != state.getOwner()) {
+        if (target != null && notFollowingPlayer) {
             return Settings.FOLLOW_NAME + " " + target.getName();
         }
 

@@ -34,6 +34,9 @@ public abstract class Behavior implements Serializable {
 
     public abstract void onBehaviorTick();
 
+    public void onBehaviorEnd() {
+    }
+
     public void onBehaviorStuck() {
     }
 
