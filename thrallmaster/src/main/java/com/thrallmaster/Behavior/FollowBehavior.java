@@ -1,11 +1,12 @@
 package com.thrallmaster.Behavior;
 
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
@@ -15,30 +16,22 @@ import com.thrallmaster.Utils.ThrallUtils;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class FollowBehavior extends Behavior {
-    private Entity target;
-
     public Entity getTarget() {
-        return target;
+        return Bukkit.getEntity(targetID);
     }
 
     private UUID targetID;
     private int elapsedTicks;
     private boolean notFollowingPlayer;
 
-    public FollowBehavior(UUID entityID, ThrallState state, @NotNull Entity target) {
+    public FollowBehavior(UUID entityID, ThrallState state, UUID targetID) {
         super(entityID, state);
-        if (target != null) {
-            this.target = target;
-        } else {
-            this.target = state.getOwner();
-        }
-
-        this.targetID = this.target.getUniqueId();
-        this.notFollowingPlayer = target != state.getOwner();
+        this.targetID = targetID;
+        this.notFollowingPlayer = targetID != state.getOwnerID();
     }
 
     public FollowBehavior(UUID entityID, ThrallState state) {
-        this(entityID, state, state.getOwner());
+        this(entityID, state, state.getOwnerID());
     }
 
     @Override
@@ -48,8 +41,8 @@ public class FollowBehavior extends Behavior {
         if (entity != null) {
             entity.setTarget(null);
         }
-        if (notFollowingPlayer && ThrallUtils.isThrall(target)) {
-            ThrallState leader = ThrallUtils.getThrall(target.getUniqueId());
+        if (notFollowingPlayer && ThrallUtils.isEntityTracked(targetID)) {
+            ThrallState leader = ThrallUtils.getThrall(targetID);
             if (leader == null) {
                 return;
             }
@@ -79,6 +72,7 @@ public class FollowBehavior extends Behavior {
         if (entity == null) {
             return;
         }
+        Entity target = this.getTarget();
         if (target != null) {
             double distance = BehaviorUtils.distance(entity, target.getLocation());
             double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
@@ -110,8 +104,8 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public void onBehaviorEnd() {
-        if (notFollowingPlayer && ThrallUtils.isThrall(target)) {
-            ThrallState leader = ThrallUtils.getThrall(target.getUniqueId());
+        if (notFollowingPlayer && ThrallUtils.isEntityTracked(targetID)) {
+            ThrallState leader = ThrallUtils.getThrall(targetID);
             if (leader == null) {
                 return;
             }
@@ -121,6 +115,7 @@ public class FollowBehavior extends Behavior {
 
     @Override
     public String getBehaviorName() {
+        Entity target = this.getTarget();
         if (target != null && notFollowingPlayer) {
             return Settings.FOLLOW_NAME + " " + target.getName();
         }
@@ -131,6 +126,7 @@ public class FollowBehavior extends Behavior {
     @Override
     public void onBehaviorStuck() {
         AbstractSkeleton entity = this.getEntity();
+        Entity target = this.getTarget();
         if (entity == null || target == null) {
             return;
         }

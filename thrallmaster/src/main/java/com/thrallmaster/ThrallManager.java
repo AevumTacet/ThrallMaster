@@ -323,7 +323,7 @@ public class ThrallManager implements Listener {
                         .collect(Collectors.toList());
 
                 if (!selection.isEmpty()) {
-                    selection.forEach(x -> x.setBehavior(new FollowBehavior(x.getEntityID(), x, state.getEntity())));
+                    selection.forEach(x -> x.setBehavior(new FollowBehavior(x.getEntityID(), x, state.getEntityID())));
                     entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1, 0.9f);
                     ThrallUtils.notifyPlayer(state.getOwner(),
                             String.format(Settings.BEHAVIOR_CHANGED_MSG_MULTI, selection.size(),
@@ -514,6 +514,9 @@ public class ThrallManager implements Listener {
                 state.getOwner().sendMessage(String.format(Settings.DEATH_MESSAGE, entity.getName()));
             }
 
+            if (Settings.DEBUG_ENABLED) {
+                logger.info("Changing state for " + state.getFollowers().count() + " followers.");
+            }
             state.getFollowers().forEach(x -> x.setBehavior(new FollowBehavior(x.getEntityID(), x)));
 
             updateBoard(state.getOwnerID());

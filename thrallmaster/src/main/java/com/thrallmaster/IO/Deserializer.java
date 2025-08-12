@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;
 import com.thrallmaster.Behavior.Behavior;
@@ -82,11 +81,7 @@ public interface Deserializer {
                 }
 
             case "FOLLOW":
-                Entity followTarget = null;
-                if (comp.hasTag("FollowTarget")) {
-                    followTarget = Bukkit.getEntity(UUID.fromString(comp.getString("FollowTarget")));
-                }
-                yield new FollowBehavior(state.getEntityID(), state, followTarget);
+                yield new FollowBehavior(state.getEntityID(), state, UUID.fromString(comp.getString("FollowTarget")));
 
             default:
                 Main.plugin.getLogger().warning("Thrall state is unspecified, defaulting to follow");

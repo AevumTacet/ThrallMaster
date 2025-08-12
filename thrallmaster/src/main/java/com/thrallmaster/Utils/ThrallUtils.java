@@ -29,6 +29,10 @@ public final class ThrallUtils {
         return manager.getThrall(entityID);
     }
 
+    public static boolean isEntityTracked(final UUID entityID) {
+        return manager.isEntityTracked(entityID);
+    }
+
     public static boolean isEntityTracked(final Entity entity) {
         return manager.isEntityTracked(entity.getUniqueId());
     }
