@@ -164,13 +164,15 @@ public class ThrallState implements Serializable {
 
         else if (target instanceof LivingEntity) {
             this.target = (LivingEntity) target;
-            setBehavior(new HostileBehavior(entityID, this, behavior));
+            this.behavior = new HostileBehavior(entityID, this, behavior);
+            this.behavior.onBehaviorStart();
 
             if (followers != null && followers.size() != 0) {
                 this.getFollowers().forEach(x -> {
                     var x_behavior = x.getBehavior();
                     x.target = this.target;
-                    x.setBehavior(new HostileBehavior(x.getEntityID(), x, x_behavior));
+                    x.behavior = new HostileBehavior(x.getEntityID(), x, x_behavior);
+                    x.behavior.onBehaviorStart();
                 });
             }
         }

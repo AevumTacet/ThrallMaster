@@ -15,6 +15,7 @@ public class Main extends JavaPlugin {
    public static FileConfiguration config;
    public static ThrallManager manager;
    public static NBTExporter saver;
+   public static boolean hadError;
 
    @Override
    public void onLoad() {
@@ -29,16 +30,20 @@ public class Main extends JavaPlugin {
       config = getConfig();
       saveDefaultConfig();
 
-      Settings.loadConfig(plugin);
-      CommandAPI.onEnable();
+      try {
+         Settings.loadConfig(plugin);
+         CommandAPI.onEnable();
+         ThrallManager.logger = getLogger();
 
-      ThrallManager.logger = getLogger();
-      manager = new ThrallManager();
-      manager.restorePlayers();
+         manager = new ThrallManager();
+         manager.restorePlayers();
+         Commands.registerCommands(this);
+         this.getServer().getPluginManager().registerEvents(manager, this);
+      } catch (Exception e) {
+         hadError = true;
+         throw e;
+      }
 
-      Commands.registerCommands(this);
-
-      this.getServer().getPluginManager().registerEvents(manager, this);
       getLogger().info("Thrall Master plugin enabled.");
    }
 
@@ -47,10 +52,13 @@ public class Main extends JavaPlugin {
       super.onDisable();
       CommandAPI.onDisable();
 
-      getLogger().info("Saving Thrall NBT state.");
-      // getLogger().info(count + " Entitites saved.");
-
-      manager.savePlayers(true);
+      if (!hadError) {
+         getLogger().info("Saving Thrall NBT state.");
+         manager.savePlayers(true);
+      } else {
+         getLogger().warning("ThrallMaster had an error!");
+         getLogger().info("Skipping saving NBT state to disk.");
+      }
    }
 
    public static void reload() {
