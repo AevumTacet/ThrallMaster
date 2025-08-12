@@ -51,7 +51,7 @@ public class ThrallState implements Serializable {
     private HashSet<ThrallState> followers;
 
     public Stream<ThrallState> getFollowers() {
-        return followers.stream();
+        return new HashSet<>(followers).stream();
     }
 
     public void addFollower(ThrallState state) {
@@ -167,7 +167,7 @@ public class ThrallState implements Serializable {
             setBehavior(new HostileBehavior(entityID, this, behavior));
 
             if (followers != null && followers.size() != 0) {
-                followers.forEach(x -> {
+                this.getFollowers().forEach(x -> {
                     var x_behavior = x.getBehavior();
                     x.target = this.target;
                     x.setBehavior(new HostileBehavior(x.getEntityID(), x, x_behavior));
