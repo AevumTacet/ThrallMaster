@@ -514,6 +514,8 @@ public class ThrallManager implements Listener {
                 state.getOwner().sendMessage(String.format(Settings.DEATH_MESSAGE, entity.getName()));
             }
 
+            state.getFollowers().forEach(x -> x.setBehavior(new FollowBehavior(x.getEntityID(), x)));
+
             updateBoard(state.getOwnerID());
         }
     }

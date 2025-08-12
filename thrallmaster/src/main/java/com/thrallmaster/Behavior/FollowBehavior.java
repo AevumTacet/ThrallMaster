@@ -51,6 +51,9 @@ public class FollowBehavior extends Behavior {
         }
         if (notFollowingPlayer && ThrallUtils.isThrall(target)) {
             ThrallState leader = ThrallUtils.getThrall(target.getUniqueId());
+            if (leader == null) {
+                return;
+            }
             leader.addFollower(this.state);
         }
     }
@@ -110,6 +113,9 @@ public class FollowBehavior extends Behavior {
     public void onBehaviorEnd() {
         if (notFollowingPlayer && ThrallUtils.isThrall(target)) {
             ThrallState leader = ThrallUtils.getThrall(target.getUniqueId());
+            if (leader == null) {
+                return;
+            }
             leader.removeFollower(this.state);
         }
     }
