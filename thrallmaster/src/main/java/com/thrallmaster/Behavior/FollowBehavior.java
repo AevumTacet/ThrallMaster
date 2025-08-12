@@ -16,7 +16,13 @@ import com.thrallmaster.Utils.ThrallUtils;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class FollowBehavior extends Behavior {
-    public Entity target;
+    private Entity target;
+
+    public Entity getTarget() {
+        return target;
+    }
+
+    private UUID targetID;
     private int elapsedTicks;
     private boolean notFollowingPlayer;
 
@@ -28,6 +34,7 @@ public class FollowBehavior extends Behavior {
             this.target = state.getOwner();
         }
 
+        this.targetID = this.target.getUniqueId();
         this.notFollowingPlayer = target != state.getOwner();
     }
 
@@ -129,7 +136,7 @@ public class FollowBehavior extends Behavior {
     protected void onSetPersistentData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "FOLLOW");
         if (notFollowingPlayer) {
-            nbt.setString("FollowTarget", target.getUniqueId().toString());
+            nbt.setString("FollowTarget", targetID.toString());
         }
     }
 

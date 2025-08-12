@@ -137,7 +137,7 @@ public final class ThrallUtils {
     public static Stream<ThrallState> getFollowers(ThrallState state) {
         return manager.getThralls(state.getOwnerID())
                 .filter(x -> x.getBehavior() instanceof FollowBehavior)
-                .filter(x -> ((FollowBehavior) x.getBehavior()).target.getUniqueId() == state.getEntityID());
+                .filter(x -> ((FollowBehavior) x.getBehavior()).getTarget().getUniqueId() == state.getEntityID());
     }
 
 }
