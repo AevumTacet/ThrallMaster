@@ -2,7 +2,6 @@ package com.thrallmaster.Utils;
 
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import org.bukkit.GameMode;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Entity;

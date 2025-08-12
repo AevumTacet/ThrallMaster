@@ -12,7 +12,6 @@ import com.thrallmaster.Settings;
 import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.BehaviorUtils;
 import com.thrallmaster.Utils.ThrallUtils;
-
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class FollowBehavior extends Behavior {
