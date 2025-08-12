@@ -78,24 +78,25 @@ public class FollowBehavior extends Behavior {
     public void onBehaviorTick() {
         AbstractSkeleton entity = this.getEntity();
 
-        if (target == null || entity == null) {
+        if (entity == null) {
             return;
         }
+        if (target != null) {
+            double distance = BehaviorUtils.distance(entity, target.getLocation());
+            double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
 
-        double distance = BehaviorUtils.distance(entity, target.getLocation());
-        double speed = distance < Settings.THRALL_FOLLOW_MAX / 3 ? 1.0 : Settings.RUN_SPEED_MUL;
+            if (distance < Settings.THRALL_FOLLOW_MIN) {
+                entity.getPathfinder().stopPathfinding();
 
-        if (distance < Settings.THRALL_FOLLOW_MIN) {
-            entity.getPathfinder().stopPathfinding();
-
-        } else if (distance > Settings.THRALL_FOLLOW_MAX) {
-            if (!MaterialUtils.isAir(target.getLocation().getBlock().getType())) {
-                entity.teleport(target.getLocation());
-                return;
+            } else if (distance > Settings.THRALL_FOLLOW_MAX) {
+                if (!MaterialUtils.isAir(target.getLocation().getBlock().getType())) {
+                    entity.teleport(target.getLocation());
+                    return;
+                }
+            } else {
+                entity.lookAt(target);
+                entity.getPathfinder().moveTo(target.getLocation(), speed);
             }
-        } else {
-            entity.lookAt(target);
-            entity.getPathfinder().moveTo(target.getLocation(), speed);
         }
 
         if (elapsedTicks % 10 == 0) {
