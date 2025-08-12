@@ -65,8 +65,7 @@ public final class BehaviorUtils {
 				.orElse(null);
 
 		if (nearestEntity != null) {
-			state.target = nearestEntity;
-			state.setBehavior(new HostileBehavior(state.getEntityID(), state, behavior));
+			state.setAttackMode(nearestEntity);
 		}
 	}
 
