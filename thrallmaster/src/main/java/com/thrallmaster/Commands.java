@@ -28,7 +28,8 @@ public class Commands {
                 .withSubcommand(allyCommand())
                 .withSubcommand(transferCommand())
                 .withSubcommand(selectAllCommand())
-                .withSubcommand(listCommand());
+                .withSubcommand(listCommand())
+                .withSubcommand(inspectCommand());
 
         base.register();
     }
@@ -174,6 +175,25 @@ public class Commands {
                                 player.sendMessage("- " + distance + " m");
 
                             });
+                });
+    }
+
+    private static CommandAPICommand inspectCommand() {
+        return new CommandAPICommand("inspect")
+                .withPermission("thrall.inspect")
+                .withOptionalArguments(new PlayerArgument("player"))
+                .executes((sender, args) -> {
+                    Player player = (Player) args.get("player");
+                    if (player == null) {
+                        manager.getOwners().forEach(x -> {
+                            sender.sendMessage(Bukkit.getOfflinePlayer(x.getPlayerID()).getName() + ": " + x.getCount()
+                                    + " Thralls");
+                        });
+                    } else {
+                        manager.getThralls(player.getUniqueId()).forEach(x -> {
+                            sender.sendMessage("Thrall state: " + x.getBehavior().getBehaviorName());
+                        });
+                    }
                 });
     }
 }
