@@ -1,6 +1,5 @@
 package com.thrallmaster.Behavior;
 
-import java.util.Random;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,12 +19,10 @@ public abstract class Behavior implements Serializable {
     protected static ThrallManager manager = Main.manager;
     protected UUID entityID;
     protected ThrallState state;
-    protected Random random;
 
     public Behavior(UUID entityID, ThrallState state) {
         this.entityID = entityID;
         this.state = state;
-        this.random = new Random();
     }
 
     public abstract String getBehaviorName();

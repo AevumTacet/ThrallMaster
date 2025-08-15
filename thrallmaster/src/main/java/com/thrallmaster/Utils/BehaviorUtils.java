@@ -3,14 +3,19 @@ package com.thrallmaster.Utils;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Stream;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.AbstractSkeleton;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-
+import org.bukkit.entity.Mob;
 import com.thrallmaster.Main;
 import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
@@ -22,6 +27,14 @@ import com.thrallmaster.States.ThrallState;
 
 public final class BehaviorUtils {
 	private static ThrallManager manager = Main.manager;
+
+	private static final BlockFace[] DIRECTIONS = {
+			BlockFace.NORTH,
+			BlockFace.EAST,
+			BlockFace.SOUTH,
+			BlockFace.WEST,
+	};
+	private static Random random = new Random();
 
 	private BehaviorUtils() {
 	}
@@ -67,6 +80,49 @@ public final class BehaviorUtils {
 		if (nearestEntity != null) {
 			state.setAttackMode(nearestEntity);
 		}
+	}
+
+	public static void randomWalk(Mob entity, Location startLocation) {
+		Block block = startLocation.getBlock();
+
+		for (int i = 0; i < Settings.THRALL_WANDER_MAX; i++) {
+
+			BlockFace face = DIRECTIONS[random.nextInt(DIRECTIONS.length)];
+			Block relative = block.getRelative(face);
+
+			if (relative.getType() == Material.AIR) {
+				Block relativeDown = relative.getRelative(BlockFace.DOWN);
+				if (relativeDown.isSolid()) {
+					block = relativeDown;
+
+					if (Settings.DEBUG_ENABLED) {
+						entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+								block.getLocation().add(0.5, 1, 0.5),
+								1, 0, 0, 0, 0);
+					}
+				} else {
+					break;
+				}
+			} else if (!relative.isSolid()) {
+				break;
+			}
+
+			Block relativeUp = relative.getRelative(BlockFace.UP);
+			if (relativeUp.getType() == Material.AIR) {
+				block = relative;
+
+				if (Settings.DEBUG_ENABLED) {
+					entity.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+							block.getLocation().add(0.5, 1, 0.5), 0);
+				}
+			} else {
+				block = relativeUp;
+			}
+		}
+		if (Settings.DEBUG_ENABLED) {
+			entity.getWorld().spawnParticle(Particle.SOUL, block.getLocation().add(0.5, 1, 0.5), 1, 0, 0, 0, 0);
+		}
+		entity.getPathfinder().moveTo(block.getLocation().add(0, 1, 0), 1);
 	}
 
 }
