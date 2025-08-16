@@ -481,16 +481,15 @@ public class ThrallManager implements Listener {
         }
 
         else if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (MaterialUtils.isMelee(material)) {
-                ThrallCommander.CommandSelection(player);
-            }
-
-            else if (MaterialUtils.isHorn(material)) {
+            if (MaterialUtils.isHorn(material)) {
                 if (player.hasCooldown(Material.GOAT_HORN))
                     return;
                 ThrallCommander.HornCommand(player);
                 updateBoard(player.getUniqueId());
+                return;
             }
+
+            ThrallCommander.CommandSelection(player, material);
         }
 
     }

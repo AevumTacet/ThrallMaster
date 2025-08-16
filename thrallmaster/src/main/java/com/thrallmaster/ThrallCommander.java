@@ -46,7 +46,7 @@ public class ThrallCommander {
         }
     }
 
-    public static void CommandSelection(Player player) {
+    public static void CommandSelection(Player player, Material itemMaterial) {
         UUID playerID = player.getUniqueId();
         Location eyeLocation = player.getEyeLocation();
 
