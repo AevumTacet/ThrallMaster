@@ -9,6 +9,7 @@ import com.thrallmaster.Main;
 import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
+import com.thrallmaster.Behavior.PatrolBehavior;
 import com.thrallmaster.States.PlayerState;
 import com.thrallmaster.States.ThrallState;
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -77,6 +78,37 @@ public interface Deserializer {
                     yield new IdleBehavior(state.getEntityID(), state, startLocation);
                 } else {
                     Main.plugin.getLogger().warning("Warning: Idle state with no IdleLocation tag found.");
+                    yield new IdleBehavior(state.getEntityID(), state, null);
+                }
+
+            case "PATROL":
+                if (comp.hasTag("StartLocationW") && comp.hasTag("StartLocationX") &&
+                        comp.hasTag("StartLocationY") && comp.hasTag("StartLocationZ") &&
+                        comp.hasTag("EndLocationW") && comp.hasTag("EndLocationX") &&
+                        comp.hasTag("EndLocationY") && comp.hasTag("EndLocationZ") && comp.hasTag("TargetIndex")) {
+
+                    int index = comp.getInteger("TargetIndex");
+
+                    String startLocationW = comp.getString("StartLocationW");
+                    double startLocationX = comp.getDouble("StartLocationX");
+                    double startLocationY = comp.getDouble("StartLocationY");
+                    double startLocationZ = comp.getDouble("StartLocationZ");
+
+                    String endLocationW = comp.getString("EndLocationW");
+                    double endLocationX = comp.getDouble("EndLocationX");
+                    double endLocationY = comp.getDouble("EndLocationY");
+                    double endLocationZ = comp.getDouble("EndLocationZ");
+
+                    Location startLocation = new Location(Bukkit.getWorld(startLocationW), startLocationX,
+                            startLocationY, startLocationZ);
+                    Location endLocation = new Location(Bukkit.getWorld(endLocationW), endLocationX, endLocationY,
+                            endLocationZ);
+                    var new_behavior = new PatrolBehavior(state.getEntityID(), state, startLocation, endLocation);
+                    new_behavior.setTargetIndex(index);
+                    yield new_behavior;
+                } else {
+                    Main.plugin.getLogger()
+                            .warning("Warning: Patrol state with no StartLocation or EndLocation tag found.");
                     yield new IdleBehavior(state.getEntityID(), state, null);
                 }
 
