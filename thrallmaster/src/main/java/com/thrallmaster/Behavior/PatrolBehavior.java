@@ -38,7 +38,7 @@ public class PatrolBehavior extends Behavior {
 		if (entity != null) {
 			entity.setTarget(null);
 		}
-		startTime = System.currentTimeMillis();
+		this.startTime = 0;
 	}
 
 	@Override
@@ -57,6 +57,9 @@ public class PatrolBehavior extends Behavior {
 			if (elapsedTicks % 100 == 0) {
 				BehaviorUtils.randomWalk(entity, startLocation);
 			}
+			if (startTime == 0) {
+				startTime = System.currentTimeMillis();
+			}
 		}
 
 		if (elapsedTicks % 10 == 0) {
@@ -67,9 +70,9 @@ public class PatrolBehavior extends Behavior {
 			}
 		}
 
-		if (System.currentTimeMillis() - startTime > WAIT_TIME * 1000) {
-			index = index == 0 ? 1 : 0;
-			startTime = System.currentTimeMillis();
+		if (startTime > 0 && System.currentTimeMillis() - startTime > WAIT_TIME * 1000) {
+			this.index = this.index == 0 ? 1 : 0;
+			this.startTime = 0;
 		}
 
 		Player owner = state.getOwner();
