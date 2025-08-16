@@ -16,13 +16,13 @@ public class PatrolBehavior extends Behavior {
 	private int index;
 	private Location startLocation;
 	private Location endLocation;
-	private double startTime;
+	private long startTime;
 	private int elapsedTicks;
 
-	public PatrolBehavior(UUID entityID, ThrallState state, Location starLocation, Location endLocation) {
+	public PatrolBehavior(UUID entityID, ThrallState state, Location startLocation, Location endLocation) {
 		super(entityID, state);
 		this.index = 0;
-		this.startLocation = starLocation;
+		this.startLocation = startLocation;
 		this.endLocation = endLocation;
 	}
 
@@ -38,7 +38,7 @@ public class PatrolBehavior extends Behavior {
 		if (entity != null) {
 			entity.setTarget(null);
 		}
-		this.startTime = 0;
+		startTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -57,7 +57,6 @@ public class PatrolBehavior extends Behavior {
 			if (elapsedTicks % 100 == 0) {
 				BehaviorUtils.randomWalk(entity, startLocation);
 			}
-			startTime = System.currentTimeMillis();
 		}
 
 		if (elapsedTicks % 10 == 0) {
@@ -70,6 +69,7 @@ public class PatrolBehavior extends Behavior {
 
 		if (System.currentTimeMillis() - startTime > WAIT_TIME * 1000) {
 			index = index == 0 ? 1 : 0;
+			startTime = System.currentTimeMillis();
 		}
 
 		Player owner = state.getOwner();

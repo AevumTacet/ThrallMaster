@@ -16,10 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.util.RayTraceResult;
-
-import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
-import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
 import com.thrallmaster.Behavior.PatrolBehavior;
 import com.thrallmaster.States.ThrallState;
@@ -101,7 +98,7 @@ public class ThrallCommander {
             } else if (MaterialUtils.isStick(itemMaterial)) {
                 selected.forEach(state -> {
                     state.setBehavior(new PatrolBehavior(state.getEntityID(), state,
-                            state.getEntity().getLocation().add(0, 1, 0), block.getLocation().add(0, 1, 0)));
+                            state.getEntity().getLocation(), block.getLocation().add(0, 1, 0)));
                 });
             }
 
