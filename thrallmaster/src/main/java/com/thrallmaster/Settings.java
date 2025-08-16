@@ -22,6 +22,7 @@ public class Settings {
 	public static double THRALL_FOLLOW_MIN;
 	public static double THRALL_FOLLOW_MAX;
 	public static double THRALL_AGGRO_COOLDOWN;
+	public static double THRALL_PATROL_WAIT;
 	public static double RUN_SPEED_MUL;
 	public static int POTION_COUNT;
 	public static double SHIELD_BLOCK_CHANCE;
@@ -44,6 +45,7 @@ public class Settings {
 	public static String FOLLOW_NAME;
 	public static String ATTACK_NAME;
 	public static String HEAL_NAME;
+	public static String PATROL_NAME;
 
 	public static String IDLE_VERB;
 	public static String FOLLOW_VERB;
@@ -110,6 +112,7 @@ public class Settings {
 		THRALL_FOLLOW_MIN = section.getDouble("follow-min-distance", 3);
 		THRALL_FOLLOW_MAX = section.getDouble("follow-max-distance", 30);
 		THRALL_AGGRO_COOLDOWN = section.getDouble("attack-demiss-cooldown", 30);
+		THRALL_PATROL_WAIT = section.getDouble("patrol-wait-time", 10);
 		SHIELD_BLOCK_CHANCE = section.getDouble("shield-block-chance", 0.5);
 		ARROW_SPEED = section.getDouble("arrow-speed", 10);
 		SELECTION_BIAS = (float) section.getDouble("selection-bias", 4);
@@ -135,6 +138,7 @@ public class Settings {
 		FOLLOW_NAME = section.getString("follow", "Following");
 		ATTACK_NAME = section.getString("attack", "Attacking");
 		HEAL_NAME = section.getString("heal", "Healing");
+		PATROL_NAME = section.getString("patrol", "Patrolling");
 
 		IDLE_VERB = section.getString("idle-verb", "Idle");
 		FOLLOW_VERB = section.getString("follow-verb", "Following");

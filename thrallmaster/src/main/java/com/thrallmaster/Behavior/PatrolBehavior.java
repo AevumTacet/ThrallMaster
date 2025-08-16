@@ -12,7 +12,6 @@ import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.BehaviorUtils;
 
 public class PatrolBehavior extends Behavior {
-	public static int WAIT_TIME = 5;
 	private int index;
 	private Location startLocation;
 	private Location endLocation;
@@ -28,7 +27,7 @@ public class PatrolBehavior extends Behavior {
 
 	@Override
 	public String getBehaviorName() {
-		return "Patrolling";
+		return Settings.PATROL_NAME;
 	}
 
 	@Override
@@ -70,7 +69,7 @@ public class PatrolBehavior extends Behavior {
 			}
 		}
 
-		if (startTime > 0 && System.currentTimeMillis() - startTime > WAIT_TIME * 1000) {
+		if (startTime > 0 && System.currentTimeMillis() - startTime > Settings.THRALL_PATROL_WAIT * 1000) {
 			this.index = this.index == 0 ? 1 : 0;
 			this.startTime = 0;
 		}
