@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.MusicInstrument;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -20,6 +21,7 @@ import com.thrallmaster.Behavior.Behavior;
 import com.thrallmaster.Behavior.FollowBehavior;
 import com.thrallmaster.Behavior.HostileBehavior;
 import com.thrallmaster.Behavior.IdleBehavior;
+import com.thrallmaster.Behavior.PatrolBehavior;
 import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.ThrallUtils;
 
@@ -46,6 +48,13 @@ public class ThrallCommander {
         }
     }
 
+    private static void AcknowledgeCommand(Player player, List<ThrallState> selection) {
+        selection.forEach(state -> {
+            player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
+            state.setSelected(true);
+        });
+    }
+
     public static void CommandSelection(Player player, Material itemMaterial) {
         UUID playerID = player.getUniqueId();
         Location eyeLocation = player.getEyeLocation();
@@ -63,34 +72,44 @@ public class ThrallCommander {
                     return (e instanceof LivingEntity) && (e != player) && !ThrallUtils.isThrall(e);
                 });
 
-        if (rayTraceResult != null) {
-            Block block = rayTraceResult.getHitBlock();
-            Entity entity = rayTraceResult.getHitEntity();
+        if (rayTraceResult == null) {
+            return;
+        }
 
-            if (entity != null) {
+        Block block = rayTraceResult.getHitBlock();
+        Entity entity = rayTraceResult.getHitEntity();
+
+        if (entity != null) {
+            if (MaterialUtils.isMelee(itemMaterial)) {
                 selected.forEach(state -> {
-                    Behavior oldBehavior = state.getBehavior();
                     state.setAttackMode(entity);
-                    state.setBehavior(new HostileBehavior(state.getEntityID(), state, oldBehavior));
-                    player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                    state.setSelected(true);
                 });
 
+                AcknowledgeCommand(player, selected);
                 player.getWorld().spawnParticle(Particle.CRIT, entity.getLocation().add(0, 1, 0), 20, 0.1, 0.1, 0.1,
                         0.05);
-                return;
             }
 
-            else if (block != null) {
+            return;
+        }
+
+        if (block != null) {
+            if (MaterialUtils.isMelee(itemMaterial)) {
                 selected.forEach(state -> {
                     state.setBehavior(new IdleBehavior(state.getEntityID(), state, block.getLocation().add(0, 1, 0)));
-                    player.getWorld().playSound(state.getEntity().getLocation(), Sound.ENTITY_SKELETON_AMBIENT, 1, 1);
-                    state.setSelected(true);
                 });
-
-                player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, block.getLocation().add(0, 1, 0), 20, 0.1, 0.1,
-                        0.1, 0.1);
+            } else if (MaterialUtils.isStick(itemMaterial)) {
+                selected.forEach(state -> {
+                    state.setBehavior(new PatrolBehavior(state.getEntityID(), state,
+                            state.getEntity().getLocation().add(0, 1, 0), block.getLocation().add(0, 1, 0)));
+                });
             }
+
+            AcknowledgeCommand(player, selected);
+            player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, block.getLocation().add(0, 1, 0), 20, 0.1, 0.1,
+                    0.1, 0.1);
+
+            return;
         }
     }
 
