@@ -9,6 +9,8 @@ import com.thrallmaster.AggressionState;
 import com.thrallmaster.Settings;
 import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.BehaviorUtils;
+import com.thrallmaster.Utils.IOUtils;
+
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public class PatrolBehavior extends Behavior {
@@ -98,32 +100,16 @@ public class PatrolBehavior extends Behavior {
 
 		if (startLocation != null) {
 			nbt.setInteger("TargetIndex", index);
-
-			nbt.setString("StartLocationW", startLocation.getWorld().getName());
-			nbt.setDouble("StartLocationX", startLocation.getX());
-			nbt.setDouble("StartLocationY", startLocation.getY());
-			nbt.setDouble("StartLocationZ", startLocation.getZ());
-
-			nbt.setString("EndLocationW", endLocation.getWorld().getName());
-			nbt.setDouble("EndLocationX", endLocation.getX());
-			nbt.setDouble("EndLocationY", endLocation.getY());
-			nbt.setDouble("EndLocationZ", endLocation.getZ());
+			nbt.setString("StartLocation", IOUtils.writeLocation(startLocation));
+			nbt.setString("EndLocation", IOUtils.writeLocation(endLocation));
 		}
 	}
 
 	@Override
 	public void onRemovePersistentData(ReadWriteNBT nbt) {
 		nbt.removeKey("TargetIndex");
-
-		nbt.removeKey("StartLocationW");
-		nbt.removeKey("StartLocationX");
-		nbt.removeKey("StartLocationY");
-		nbt.removeKey("StartLocationZ");
-
-		nbt.removeKey("EndLocationW");
-		nbt.removeKey("EndLocationX");
-		nbt.removeKey("EndLocationY");
-		nbt.removeKey("EndLocationZ");
+		nbt.removeKey("StartLocation");
+		nbt.removeKey("EndLocation");
 	}
 
 }

@@ -136,9 +136,15 @@ public class FollowBehavior extends Behavior {
     @Override
     protected void onSetPersistentData(ReadWriteNBT nbt) {
         nbt.setString("CurrentBehavior", "FOLLOW");
+
         if (notFollowingPlayer) {
             nbt.setString("FollowTarget", targetID.toString());
         }
+    }
+
+    @Override
+    protected void onRemovePersistentData(ReadWriteNBT nbt) {
+        nbt.removeKey("FollowTarget");
     }
 
 }

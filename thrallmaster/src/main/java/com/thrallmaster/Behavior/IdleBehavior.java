@@ -11,6 +11,7 @@ import com.thrallmaster.MaterialUtils;
 import com.thrallmaster.Settings;
 import com.thrallmaster.States.ThrallState;
 import com.thrallmaster.Utils.BehaviorUtils;
+import com.thrallmaster.Utils.IOUtils;
 import com.thrallmaster.Utils.ThrallUtils;
 
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
@@ -122,19 +123,14 @@ public class IdleBehavior extends Behavior {
         nbt.setString("CurrentBehavior", "IDLE");
 
         if (startLocation != null) {
-            nbt.setString("IdleLocationW", startLocation.getWorld().getName());
-            nbt.setDouble("IdleLocationX", startLocation.getX());
-            nbt.setDouble("IdleLocationY", startLocation.getY());
-            nbt.setDouble("IdleLocationZ", startLocation.getZ());
+            nbt.setString("IdleLocation", IOUtils.writeLocation(startLocation));
+            System.err.println("Saved new IdleLocation");
         }
     }
 
     @Override
     public void onRemovePersistentData(ReadWriteNBT nbt) {
-        nbt.removeKey("IdleLocationW");
-        nbt.removeKey("IdleLocationX");
-        nbt.removeKey("IdleLocationY");
-        nbt.removeKey("IdleLocationZ");
+        nbt.removeKey("IdleLocation");
     }
 
 }

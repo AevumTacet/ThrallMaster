@@ -12,6 +12,8 @@ import com.thrallmaster.Behavior.IdleBehavior;
 import com.thrallmaster.Behavior.PatrolBehavior;
 import com.thrallmaster.States.PlayerState;
 import com.thrallmaster.States.ThrallState;
+import com.thrallmaster.Utils.IOUtils;
+
 import de.tr7zw.nbtapi.iface.ReadWriteNBT;
 
 public interface Deserializer {
@@ -68,13 +70,8 @@ public interface Deserializer {
         String mode = comp.getString("CurrentBehavior");
         Behavior behavior = switch (mode) {
             case "IDLE":
-                if (comp.hasTag("IdleLocationW") && comp.hasTag("IdleLocationX") &&
-                        comp.hasTag("IdleLocationY") && comp.hasTag("IdleLocationZ")) {
-                    String locationW = comp.getString("IdleLocationW");
-                    double locationX = comp.getDouble("IdleLocationX");
-                    double locationY = comp.getDouble("IdleLocationY");
-                    double locationZ = comp.getDouble("IdleLocationZ");
-                    Location startLocation = new Location(Bukkit.getWorld(locationW), locationX, locationY, locationZ);
+                if (comp.hasTag("IdleLocation")) {
+                    Location startLocation = IOUtils.readLocation(comp.getString("IdleLocationW"));
                     yield new IdleBehavior(state.getEntityID(), state, startLocation);
                 } else {
                     Main.plugin.getLogger().warning("Warning: Idle state with no IdleLocation tag found.");
@@ -82,27 +79,12 @@ public interface Deserializer {
                 }
 
             case "PATROL":
-                if (comp.hasTag("StartLocationW") && comp.hasTag("StartLocationX") &&
-                        comp.hasTag("StartLocationY") && comp.hasTag("StartLocationZ") &&
-                        comp.hasTag("EndLocationW") && comp.hasTag("EndLocationX") &&
-                        comp.hasTag("EndLocationY") && comp.hasTag("EndLocationZ") && comp.hasTag("TargetIndex")) {
+                if (comp.hasTag("StartLocation") && comp.hasTag("EndLocation") && comp.hasTag("TargetIndex")) {
 
                     int index = comp.getInteger("TargetIndex");
+                    Location startLocation = IOUtils.readLocation(comp.getString("StartLocation"));
+                    Location endLocation = IOUtils.readLocation(comp.getString("EndLocation"));
 
-                    String startLocationW = comp.getString("StartLocationW");
-                    double startLocationX = comp.getDouble("StartLocationX");
-                    double startLocationY = comp.getDouble("StartLocationY");
-                    double startLocationZ = comp.getDouble("StartLocationZ");
-
-                    String endLocationW = comp.getString("EndLocationW");
-                    double endLocationX = comp.getDouble("EndLocationX");
-                    double endLocationY = comp.getDouble("EndLocationY");
-                    double endLocationZ = comp.getDouble("EndLocationZ");
-
-                    Location startLocation = new Location(Bukkit.getWorld(startLocationW), startLocationX,
-                            startLocationY, startLocationZ);
-                    Location endLocation = new Location(Bukkit.getWorld(endLocationW), endLocationX, endLocationY,
-                            endLocationZ);
                     var new_behavior = new PatrolBehavior(state.getEntityID(), state, startLocation, endLocation);
                     new_behavior.setTargetIndex(index);
                     yield new_behavior;
