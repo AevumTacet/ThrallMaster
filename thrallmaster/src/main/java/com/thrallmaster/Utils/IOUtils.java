@@ -11,7 +11,7 @@ public final class IOUtils {
 	}
 
 	public static Location readLocation(String str) {
-		String[] parts = str.split(",\\s*");
+		String[] parts = str.split(",");
 		if (parts.length != 4) {
 			System.err.println("Location string need to have four components: world, x, y, z.");
 			return null;

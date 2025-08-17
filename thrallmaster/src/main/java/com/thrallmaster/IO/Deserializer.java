@@ -69,7 +69,7 @@ public interface Deserializer {
         Behavior behavior = switch (mode) {
             case "IDLE":
                 if (comp.hasTag("IdleLocation")) {
-                    Location startLocation = IOUtils.readLocation(comp.getString("IdleLocationW"));
+                    Location startLocation = IOUtils.readLocation(comp.getString("IdleLocation"));
                     yield new IdleBehavior(state.getEntityID(), state, startLocation);
                 } else {
                     Main.plugin.getLogger().warning("Warning: Idle state with no IdleLocation tag found.");
