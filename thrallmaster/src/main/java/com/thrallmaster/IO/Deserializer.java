@@ -1,8 +1,6 @@
 package com.thrallmaster.IO;
 
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import com.thrallmaster.AggressionState;
 import com.thrallmaster.Main;

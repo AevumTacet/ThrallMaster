@@ -7,7 +7,7 @@ import org.bukkit.World;
 public final class IOUtils {
 
 	public static String writeLocation(Location location) {
-		return location.getWorld() + ", " + location.getX() + ", " + location.getY() + ", " + location.getZ();
+		return location.getWorld().getName() + ", " + location.getX() + ", " + location.getY() + ", " + location.getZ();
 	}
 
 	public static Location readLocation(String str) {

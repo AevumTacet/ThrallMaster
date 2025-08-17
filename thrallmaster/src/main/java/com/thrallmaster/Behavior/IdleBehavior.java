@@ -124,7 +124,6 @@ public class IdleBehavior extends Behavior {
 
         if (startLocation != null) {
             nbt.setString("IdleLocation", IOUtils.writeLocation(startLocation));
-            System.err.println("Saved new IdleLocation");
         }
     }
 
